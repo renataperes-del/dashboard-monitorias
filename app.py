@@ -211,11 +211,8 @@ supervisao = st.selectbox(
 # ==========================================
 
 if supervisao == "Todas":
-
     dados = monitorias_google.copy()
-
 else:
-
     dados = monitorias_google[
         monitorias_google["Supervisão"] == supervisao
     ].copy()
@@ -245,84 +242,31 @@ percentual = (
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-
-    st.markdown(
-        f"""
-        <div class="card">
-            <div class="card-title">
-                COLABORADORES
-            </div>
-
-            <div class="card-value">
-                {total}
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "COLABORADORES",
+        total
     )
 
 with col2:
-
-    st.markdown(
-        f"""
-        <div class="card">
-
-            <div class="card-title"
-                 style="color:{VERDE};">
-                REALIZADAS
-            </div>
-
-            <div class="card-value">
-                {realizadas}
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "REALIZADAS",
+        realizadas
     )
 
 with col3:
-
-    st.markdown(
-        f"""
-        <div class="card">
-
-            <div class="card-title"
-                 style="color:{LARANJA};">
-                PENDENTES
-            </div>
-
-            <div class="card-value">
-                {pendentes}
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "PENDENTES",
+        pendentes
     )
 
 with col4:
-
-    st.markdown(
-        f"""
-        <div class="card">
-
-            <div class="card-title"
-                 style="color:{AZUL};">
-                CONCLUÍDO
-            </div>
-
-            <div class="card-value">
-                {percentual:.1f}%
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "CONCLUÍDO",
+        f"{percentual:.1f}%"
     )
 
 # ==========================================
-# ACOMPANHAMENTO
+# ACOMPANHAMENTO POR EQUIPE
 # ==========================================
 
 st.markdown(
@@ -334,7 +278,7 @@ st.markdown(
         margin-top:30px;
         margin-bottom:5px;
     ">
-        Acompanhamento
+        Acompanhamento por equipe
     </div>
 
     <div style="
@@ -342,55 +286,24 @@ st.markdown(
         font-size:13px;
         margin-bottom:15px;
     ">
-        {(
-            "Selecione uma supervisão para consultar os colaboradores."
-            if supervisao == "Todas"
-            else f"Colaboradores da supervisão {supervisao}."
-        )}
+        Consulte quem já realizou e quem ainda está pendente.
     </div>
     """,
     unsafe_allow_html=True
 )
 
 # ==========================================
-# TODAS AS SUPERVISÕES
+# VISÃO GERAL DE TODAS AS EQUIPES
 # ==========================================
 
 if supervisao == "Todas":
 
-    st.markdown(
-        f"""
-        <div class="card">
-
-            <div class="card-title">
-                VISÃO GERAL
-            </div>
-
-            <div style="
-                color:{TEXTO};
-                font-size:18px;
-                font-weight:600;
-                margin-top:10px;
-            ">
-                Selecione uma supervisão acima
-            </div>
-
-            <div style="
-                color:{TEXTO_SECUNDARIO};
-                font-size:13px;
-                margin-top:8px;
-            ">
-                O dashboard mostrará os colaboradores,
-                monitorias realizadas e pendentes da equipe selecionada.
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.info(
+        "Selecione uma supervisão acima para consultar os colaboradores."
     )
 
 # ==========================================
-# SUPERVISÃO ESPECÍFICA
+# LISTAS DA SUPERVISÃO SELECIONADA
 # ==========================================
 
 else:
@@ -422,16 +335,13 @@ else:
         st.markdown(
             f"""
             <div class="card">
-
-                <div class="card-title"
-                     style="color:{VERDE};">
+                <div class="card-title" style="color:{VERDE};">
                     ✓ MONITORIAS REALIZADAS
                 </div>
 
                 <div class="card-value">
                     {len(realizadas_lista)}
                 </div>
-
             </div>
             """,
             unsafe_allow_html=True
@@ -465,16 +375,13 @@ else:
         st.markdown(
             f"""
             <div class="card">
-
-                <div class="card-title"
-                     style="color:{LARANJA};">
+                <div class="card-title" style="color:{LARANJA};">
                     ⏳ MONITORIAS PENDENTES
                 </div>
 
                 <div class="card-value">
                     {len(pendentes_lista)}
                 </div>
-
             </div>
             """,
             unsafe_allow_html=True
