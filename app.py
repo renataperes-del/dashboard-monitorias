@@ -211,8 +211,11 @@ supervisao = st.selectbox(
 # ==========================================
 
 if supervisao == "Todas":
+
     dados = monitorias_google.copy()
+
 else:
+
     dados = monitorias_google[
         monitorias_google["Supervisão"] == supervisao
     ].copy()
@@ -242,57 +245,84 @@ percentual = (
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
+
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title">COLABORADORES</div>
-            <div class="card-value">{total}</div>
+            <div class="card-title">
+                COLABORADORES
+            </div>
+
+            <div class="card-value">
+                {total}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
 with col2:
+
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title" style="color:{VERDE};">
+
+            <div class="card-title"
+                 style="color:{VERDE};">
                 REALIZADAS
             </div>
-            <div class="card-value">{realizadas}</div>
+
+            <div class="card-value">
+                {realizadas}
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
 with col3:
+
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title" style="color:{LARANJA};">
+
+            <div class="card-title"
+                 style="color:{LARANJA};">
                 PENDENTES
             </div>
-            <div class="card-value">{pendentes}</div>
+
+            <div class="card-value">
+                {pendentes}
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
 with col4:
+
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title" style="color:{AZUL};">
+
+            <div class="card-title"
+                 style="color:{AZUL};">
                 CONCLUÍDO
             </div>
-            <div class="card-value">{percentual:.1f}%</div>
+
+            <div class="card-value">
+                {percentual:.1f}%
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
 # ==========================================
-# ACOMPANHAMENTO POR EQUIPE
+# ACOMPANHAMENTO
 # ==========================================
 
 st.markdown(
@@ -304,7 +334,7 @@ st.markdown(
         margin-top:30px;
         margin-bottom:5px;
     ">
-        Acompanhamento por equipe
+        Acompanhamento
     </div>
 
     <div style="
@@ -312,113 +342,55 @@ st.markdown(
         font-size:13px;
         margin-bottom:15px;
     ">
-        Consulte quem já realizou e quem ainda está pendente.
+        {(
+            "Selecione uma supervisão para consultar os colaboradores."
+            if supervisao == "Todas"
+            else f"Colaboradores da supervisão {supervisao}."
+        )}
     </div>
     """,
     unsafe_allow_html=True
 )
 
 # ==========================================
-# VISÃO GERAL DE TODAS AS EQUIPES
+# TODAS AS SUPERVISÕES
 # ==========================================
 
 if supervisao == "Todas":
 
-    supervisoes_lista = sorted(
-        monitorias_google["Supervisão"]
-        .dropna()
-        .unique()
-        .tolist()
+    st.markdown(
+        f"""
+        <div class="card">
+
+            <div class="card-title">
+                VISÃO GERAL
+            </div>
+
+            <div style="
+                color:{TEXTO};
+                font-size:18px;
+                font-weight:600;
+                margin-top:10px;
+            ">
+                Selecione uma supervisão acima
+            </div>
+
+            <div style="
+                color:{TEXTO_SECUNDARIO};
+                font-size:13px;
+                margin-top:8px;
+            ">
+                O dashboard mostrará os colaboradores,
+                monitorias realizadas e pendentes da equipe selecionada.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    for nome_supervisao in supervisoes_lista:
-
-        dados_equipe = monitorias_google[
-            monitorias_google["Supervisão"] == nome_supervisao
-        ].copy()
-
-        realizadas_lista = (
-            dados_equipe[
-                dados_equipe["Data Monitoria"].notna()
-            ]
-            .sort_values("Colaborador")["Colaborador"]
-            .tolist()
-        )
-
-        pendentes_lista = (
-            dados_equipe[
-                dados_equipe["Data Monitoria"].isna()
-            ]
-            .sort_values("Colaborador")["Colaborador"]
-            .tolist()
-        )
-
-        total_equipe = len(dados_equipe)
-
-        with st.expander(
-            f"{nome_supervisao}  •  {total_equipe} colaboradores  •  "
-            f"🟢 {len(realizadas_lista)} realizadas  •  "
-            f"🟠 {len(pendentes_lista)} pendentes"
-        ):
-
-            col_realizadas, col_pendentes = st.columns(2)
-
-            # ======================================
-            # REALIZADAS
-            # ======================================
-
-            with col_realizadas:
-
-                st.markdown("### 🟢 Realizadas")
-
-                if realizadas_lista:
-
-                    for nome in realizadas_lista:
-
-                        st.markdown(
-                            f"""
-                            <div class="nome-realizado">
-                                ✓ {nome}
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-
-                else:
-
-                    st.info(
-                        "Nenhuma monitoria realizada."
-                    )
-
-            # ======================================
-            # PENDENTES
-            # ======================================
-
-            with col_pendentes:
-
-                st.markdown("### 🟠 Pendentes")
-
-                if pendentes_lista:
-
-                    for nome in pendentes_lista:
-
-                        st.markdown(
-                            f"""
-                            <div class="nome-pendente">
-                                ⏳ {nome}
-                            </div>
-                            """,
-                            unsafe_allow_html=True
-                        )
-
-                else:
-
-                    st.success(
-                        "Nenhuma monitoria pendente."
-                    )
-
 # ==========================================
-# LISTAS DA SUPERVISÃO SELECIONADA
+# SUPERVISÃO ESPECÍFICA
 # ==========================================
 
 else:
@@ -450,13 +422,16 @@ else:
         st.markdown(
             f"""
             <div class="card">
-                <div class="card-title" style="color:{VERDE};">
+
+                <div class="card-title"
+                     style="color:{VERDE};">
                     ✓ MONITORIAS REALIZADAS
                 </div>
 
                 <div class="card-value">
                     {len(realizadas_lista)}
                 </div>
+
             </div>
             """,
             unsafe_allow_html=True
@@ -490,13 +465,16 @@ else:
         st.markdown(
             f"""
             <div class="card">
-                <div class="card-title" style="color:{LARANJA};">
+
+                <div class="card-title"
+                     style="color:{LARANJA};">
                     ⏳ MONITORIAS PENDENTES
                 </div>
 
                 <div class="card-value">
                     {len(pendentes_lista)}
                 </div>
+
             </div>
             """,
             unsafe_allow_html=True
