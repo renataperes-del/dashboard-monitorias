@@ -1,9 +1,8 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import gspread
-from google.auth import default
+from google.oauth2.service_account import Credentials
 
 # ==========================================
 # CONFIGURAÇÃO
@@ -76,7 +75,14 @@ st.markdown(
 # CONEXÃO COM GOOGLE SHEETS
 # ==========================================
 
-credenciais, _ = default()
+credenciais = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=[
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+)
+
 gc = gspread.authorize(credenciais)
 
 planilha = gc.open_by_key(
@@ -148,6 +154,7 @@ monitorias_google["Data Monitoria Offline"] = pd.to_datetime(
 st.markdown(
     f"""
     <div style="margin-bottom:25px;">
+
         <div style="
             color:{AZUL};
             font-size:13px;
@@ -172,6 +179,7 @@ st.markdown(
         ">
             Acompanhamento das aplicações de monitoria
         </div>
+
     </div>
     """,
     unsafe_allow_html=True
