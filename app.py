@@ -4,9 +4,10 @@ import plotly.graph_objects as go
 import gspread
 from google.oauth2.service_account import Credentials
 
-# ==========================================
+
+# ============================================================
 # CONFIGURAÇÃO
-# ==========================================
+# ============================================================
 
 st.set_page_config(
     page_title="Dashboard de Monitorias",
@@ -14,9 +15,10 @@ st.set_page_config(
     layout="wide"
 )
 
-# ==========================================
-# PALETA DE CORES
-# ==========================================
+
+# ============================================================
+# PALETA
+# ============================================================
 
 FUNDO = "#F7F8FC"
 CARD = "#FFFFFF"
@@ -31,9 +33,10 @@ VERDE = "#55B99D"
 LARANJA = "#F2A66F"
 ROSA = "#E58FA3"
 
-# ==========================================
-# ESTILO
-# ==========================================
+
+# ============================================================
+# CSS
+# ============================================================
 
 st.markdown(
     f"""
@@ -87,8 +90,8 @@ st.markdown(
         background-color: {CARD};
         border: 1px solid {BORDA};
         border-radius: 16px;
-        padding: 25px;
-        min-height: 135px;
+        padding: 24px;
+        min-height: 125px;
         margin-bottom: 10px;
         box-shadow: 0 4px 16px rgba(41, 50, 65, 0.05);
     }}
@@ -147,9 +150,10 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ==========================================
-# CONEXÃO COM GOOGLE SHEETS
-# ==========================================
+
+# ============================================================
+# GOOGLE SHEETS
+# ============================================================
 
 credenciais = Credentials.from_service_account_info(
     st.secrets["gcp_service_account"],
@@ -169,9 +173,10 @@ aba_aplicacao = planilha.worksheet("Aplicação")
 
 dados_aplicacao = aba_aplicacao.get_all_values()
 
-# ==========================================
-# PREPARAÇÃO DOS DADOS
-# ==========================================
+
+# ============================================================
+# PREPARAÇÃO DOS DADOS DA PLANILHA
+# ============================================================
 
 monitorias_google = pd.DataFrame(dados_aplicacao)
 
@@ -223,9 +228,10 @@ monitorias_google["Data Monitoria Offline"] = pd.to_datetime(
     errors="coerce"
 )
 
-# ==========================================
+
+# ============================================================
 # FUNÇÕES DOS COLABORADORES
-# ==========================================
+# ============================================================
 
 execs = {
     "Gabriela Cardoso de Sousa",
@@ -364,75 +370,147 @@ apoio_adm = {
     "Stella Angela da Silva"
 }
 
+
 def identificar_funcao(nome):
+
     if nome in execs:
         return "Exec"
+
     if nome in apoio_adm:
         return "Apoio ADM"
+
     return ""
+
 
 monitorias_google["Função"] = (
     monitorias_google["Colaborador"]
     .apply(identificar_funcao)
 )
 
-# ==========================================
-# CONVERSÃO DAS NOTAS
-# ==========================================
 
-def converter_percentual(valor):
+# ============================================================
+# NOTAS DAS MONITORIAS
+#
+# Fonte: tabela de notas enviada pela Renata.
+#
+# Cada pessoa possui:
+# [nota ligação 1, nota ligação 2]
+#
+# Se existir somente uma nota, ela será usada.
+# ============================================================
 
-    if pd.isna(valor):
+notas_monitoria = {
+
+    "Pedro Llanos Iampietro": [75.26, 76.46],
+    "Matheus Lacerda Lima": [94.00, 77.66],
+    "Gabriel Soares Gonçalves": [80.73, 80.66],
+    "Laura Marques da Silva": [75.86, 81.93],
+    "Felipe Santos Nery": [77.66, 75.86],
+    "Evellyn Silva dos Santos": [86.20, 81.22],
+    "Maria Eduarda Rodrigues Gama": [60.00, 63.60],
+    "Isabella da Silva Neves": [50.00, 66.60],
+    "Douglas de Souza Oliveira": [67.40, 62.60],
+    "Keren Jamille Coutinho Albrechete": [82.60, 65.80],
+    "Jessica Carol Alves de Aguiar": [51.80, 60.20],
+    "Ana Beatriz de Queiroz": [57.20, 51.20],
+    "Amanda Ferreira da Silva": [73.46, 72.86],
+    "Eduarda Paes Leme Maldonado": [85.00, 49.20],
+    "Isabella Santana Felix dos Santos": [58.80, 54.80],
+    "Emanuele Maria Carvalho Silva": [61.20, 54.60],
+    "Angel Almeida Braga": [65.20, 62.60],
+    "Pedro Paulo Clemente Torres": [66.04, 75.50],
+    "Raquel Lima Santos": [58.56, 46.64],
+    "Cassiele Chare Roberto": [55.80, 56.40],
+    "Lorena da Silva Souza": [71.40, 61.20],
+    "Beatriz Fusari Martins Moreira": [74.60, 69.86],
+    "Sabrina Rodrigues da Silva": [68.52, 66.00],
+    "Sabrina Kahati Cardoso": [60.00, 68.60],
+    "Guilherme Tarragô Mendonça da Silva": [63.20, 51.20],
+    "Karine Kethely Soares": [67.40, 61.80],
+    "Ingrid Nunes da Cruz": [67.20, 51.20],
+    "Luanna Soares dos Santos Siqueira": [51.20, 52.02],
+    "Sérgio Vinícius Souza Silva da Hora": [71.60, 63.86],
+    "Emile Cristine Brito da Silva": [77.52, 52.63],
+    "Aline Trindade Moreira": [69.60, 39.80],
+    "Cauã Petrella de Sousa": [66.00, 57.52],
+    "Giulia Rodrigues Pimentel": [64.80, 42.80],
+    "Elissama Laís Cuscan Alves": [56.60, 65.00],
+    "Ana Luiza Cavalcante Silva": [69.26, 65.00],
+    "Ana Beatriz De Oliveira Jovino": [91.18, 83.40],
+    "Erik Xavier Gonçalves": [77.80, 51.20],
+    "Gabriella Farias de Melo": [63.00, 67.08],
+    "Lucas Rodrigues dos Santos Baltazar": [56.00, 63.60],
+    "Gabriely da Rocha Ferreira Silva": [57.48, 56.68],
+    "Henzo Silva Oliveira": [88.00],
+    "Stefany Miriam Marçal": [62.00, 41.00],
+    "Lucas Scalambrini Caetano": [82.00, 65.80],
+    "Juliette Mendes Lima": [58.80, 74.40],
+    "Isabela Cason": [61.20, 67.60],
+    "Mateus Custódio Dias da Conceição": [75.60, 69.60],
+    "Gabriela Salvi Sbardelotto": [56.00, 63.00],
+    "Juliana Santos de Freitas": [84.33, 76.46],
+    "Davi de Araujo Lima": [60.80, 54.20],
+    "Nataly Freitas Souza Santos": [73.46, 75.90],
+    "Gabriel Bulhões Vieira": [52.40, 65.00],
+    "Bruna Clementino Graça": [74.73, 83.80],
+    "Ian Monteiro Hernandez": [57.00, 53.80],
+    "Cristina de Deus Aguiar Stoski": [69.90, 95.20],
+    "Ana Beatriz Rodrigues Proença": [68.66, 91.00],
+    "Emilly Oliveira França": [77.06, 79.46],
+    "Mirella Pereira de Oliveira": [69.98, 77.52],
+    "Danilo Batista de Freitas Silva": [86.20, 74.40],
+    "Amanda Ribeiro Carvalho": [70.20, 65.20],
+    "Ana Carolina Gabriel Amador": [85.53, 87.40],
+    "Rebeca Beatriz Amaral Lopes": [79.20, 81.00],
+    "Monique de Souza Marques": [64.60, 74.40],
+    "Marcelly Paiva da Silva": [66.00, 69.00],
+    "Jefferson Amaral Silva Junior": [66.80, 73.00],
+    "Yasmim Francisca dos Santos": [62.00, 49.40],
+    "Eduarda de Araujo Rodrigues": [76.60, 58.40],
+    "Rayssa Sobral Araújo": [72.00, 70.00],
+    "Amanda Lima Pereira": [69.60, 71.80],
+    "Gustavo Bertholino Cardoso": [82.00, 74.80],
+    "Hosana de Souza Soares": [79.60, 75.40],
+    "Naiara Borcatt Porto": [70.20, 73.80],
+    "Matheus Marucci Hudzinski": [67.20, 70.20],
+    "Letícia Lima Souza": [70.80, 64.60],
+    "Robson Souto Campos da Silva": [87.40, 89.98]
+}
+
+
+def calcular_media_notas(nome):
+
+    notas = notas_monitoria.get(nome)
+
+    if not notas:
         return pd.NA
 
-    texto = str(valor).strip()
+    notas_validas = []
 
-    if texto == "":
+    for nota in notas:
+
+        if nota is not None:
+
+            try:
+                notas_validas.append(float(nota))
+            except:
+                pass
+
+    if not notas_validas:
         return pd.NA
 
-    texto = (
-        texto
-        .replace("%", "")
-        .replace(" ", "")
-        .replace(",", ".")
-    )
+    return sum(notas_validas) / len(notas_validas)
 
-    numero = pd.to_numeric(
-        texto,
-        errors="coerce"
-    )
-
-    if pd.isna(numero):
-        return pd.NA
-
-    # Caso o Google Sheets entregue 0,75 em vez de 75%
-    if numero <= 1:
-        numero = numero * 100
-
-    return numero
-
-
-monitorias_google["Nota Ligação 1"] = (
-    monitorias_google["Ligação 1"]
-    .apply(converter_percentual)
-)
-
-monitorias_google["Nota Ligação 2"] = (
-    monitorias_google["Ligação 2"]
-    .apply(converter_percentual)
-)
 
 monitorias_google["Nota Média"] = (
-    monitorias_google[
-        ["Nota Ligação 1", "Nota Ligação 2"]
-    ]
-    .astype(float)
-    .mean(axis=1, skipna=True)
+    monitorias_google["Colaborador"]
+    .apply(calcular_media_notas)
 )
 
-# ==========================================
+
+# ============================================================
 # CABEÇALHO
-# ==========================================
+# ============================================================
 
 st.markdown(
     f"""
@@ -455,9 +533,10 @@ st.caption(
     "Acompanhamento das aplicações de monitoria"
 )
 
-# ==========================================
-# FILTRO
-# ==========================================
+
+# ============================================================
+# FILTRO DE SUPERVISÃO
+# ============================================================
 
 supervisoes = ["Todas"] + sorted(
     monitorias_google["Supervisão"]
@@ -471,9 +550,10 @@ supervisao = st.selectbox(
     supervisoes
 )
 
-# ==========================================
-# FILTRO DOS DADOS
-# ==========================================
+
+# ============================================================
+# DADOS FILTRADOS
+# ============================================================
 
 if supervisao == "Todas":
 
@@ -485,9 +565,10 @@ else:
         monitorias_google["Supervisão"] == supervisao
     ].copy()
 
-# ==========================================
+
+# ============================================================
 # MÉTRICAS
-# ==========================================
+# ============================================================
 
 total = len(dados)
 
@@ -503,13 +584,15 @@ percentual = (
     else 0
 )
 
-# ==========================================
-# MÉDIA GERAL DAS NOTAS
-# ==========================================
 
-notas_validas = dados[
-    dados["Nota Média"].notna()
-]["Nota Média"]
+# ============================================================
+# MÉDIA DAS NOTAS
+# ============================================================
+
+notas_validas = pd.to_numeric(
+    dados["Nota Média"],
+    errors="coerce"
+).dropna()
 
 media_notas = (
     notas_validas.mean()
@@ -517,17 +600,19 @@ media_notas = (
     else 0
 )
 
-# ==========================================
-# CÍRCULO DE DESEMPENHO
-# ==========================================
+
+# ============================================================
+# DESEMPENHO GERAL
+# ============================================================
 
 st.markdown(
     f"""
     <div style="
         text-align:center;
-        margin-top:20px;
+        margin-top:15px;
         margin-bottom:-10px;
     ">
+
         <div style="
             color:{TEXTO};
             font-size:22px;
@@ -543,10 +628,12 @@ st.markdown(
         ">
             Média das notas das monitorias
         </div>
+
     </div>
     """,
     unsafe_allow_html=True
 )
+
 
 fig_circulo = go.Figure(
     go.Pie(
@@ -572,9 +659,7 @@ fig_circulo = go.Figure(
 )
 
 fig_circulo.add_annotation(
-    text=f"""
-        <b style="font-size:34px;">{media_notas:.1f}%</b>
-    """,
+    text=f"<b>{media_notas:.1f}%</b>",
     x=0.5,
     y=0.5,
     showarrow=False,
@@ -597,6 +682,7 @@ fig_circulo.update_layout(
     showlegend=False
 )
 
+
 col_circulo1, col_circulo2, col_circulo3 = st.columns(
     [1, 1.2, 1]
 )
@@ -610,6 +696,7 @@ with col_circulo2:
             "displayModeBar": False
         }
     )
+
 
 st.markdown(
     f"""
@@ -626,17 +713,20 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ==========================================
+
+# ============================================================
 # CARDS PRINCIPAIS
-# ==========================================
+# ============================================================
 
 col1, col2, col3, col4 = st.columns(4)
+
 
 with col1:
 
     st.markdown(
         f"""
         <div class="card">
+
             <div class="card-title">
                 COLABORADORES
             </div>
@@ -644,65 +734,79 @@ with col1:
             <div class="card-value">
                 {total}
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with col2:
 
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title" style="color:{VERDE};">
+
+            <div class="card-title"
+                 style="color:{VERDE};">
                 REALIZADAS
             </div>
 
             <div class="card-value">
                 {realizadas}
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with col3:
 
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title" style="color:{LARANJA};">
+
+            <div class="card-title"
+                 style="color:{LARANJA};">
                 PENDENTES
             </div>
 
             <div class="card-value">
                 {pendentes}
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with col4:
 
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title" style="color:{ROXO};">
+
+            <div class="card-title"
+                 style="color:{ROXO};">
                 CONCLUÍDO
             </div>
 
             <div class="card-value">
                 {percentual:.1f}%
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
-# ==========================================
-# PRAÇAS E EQUIPES
-# ==========================================
+
+# ============================================================
+# PRAÇAS
+# ============================================================
 
 st.markdown(
     f"""
@@ -727,9 +831,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ==========================================
-# DADOS DAS PRAÇAS
-# ==========================================
 
 pracas = {
 
@@ -771,15 +872,15 @@ pracas = {
     }
 }
 
-# ==========================================
-# SELEÇÃO DA PRAÇA
-# ==========================================
 
 if "praca_selecionada" not in st.session_state:
+
     st.session_state.praca_selecionada = None
+
 
 col_praca1, col_praca2 = st.columns(2)
 col_praca3, col_praca4 = st.columns(2)
+
 
 botoes_pracas = [
     (col_praca1, "São Paulo"),
@@ -788,27 +889,28 @@ botoes_pracas = [
     (col_praca4, "Sudeste")
 ]
 
+
 for coluna, nome_praca in botoes_pracas:
 
     dados_praca = pracas[nome_praca]
 
     with coluna:
 
-        html_praca = f"""
-        <div class="praca-card">
+        st.html(
+            f"""
+            <div class="praca-card">
 
-            <div class="praca-nome">
-                {nome_praca}
+                <div class="praca-nome">
+                    {nome_praca}
+                </div>
+
+                <div class="praca-info">
+                    {len(dados_praca["supervisores"])} supervisores
+                </div>
+
             </div>
-
-            <div class="praca-info">
-                {len(dados_praca["supervisores"])} supervisores
-            </div>
-
-        </div>
-        """
-
-        st.html(html_praca)
+            """
+        )
 
         if st.button(
             f"Consultar {nome_praca}",
@@ -818,9 +920,10 @@ for coluna, nome_praca in botoes_pracas:
 
             st.session_state.praca_selecionada = nome_praca
 
-# ==========================================
+
+# ============================================================
 # DETALHAMENTO DA PRAÇA
-# ==========================================
+# ============================================================
 
 if st.session_state.praca_selecionada:
 
@@ -901,11 +1004,13 @@ if st.session_state.praca_selecionada:
     ):
 
         st.session_state.praca_selecionada = None
+
         st.rerun()
 
-# ==========================================
+
+# ============================================================
 # ACOMPANHAMENTO POR EQUIPE
-# ==========================================
+# ============================================================
 
 st.markdown(
     f"""
@@ -930,9 +1035,10 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ==========================================
-# VISÃO GERAL DE TODAS AS EQUIPES
-# ==========================================
+
+# ============================================================
+# TODAS AS EQUIPES
+# ============================================================
 
 if supervisao == "Todas":
 
@@ -1023,9 +1129,10 @@ if supervisao == "Todas":
 
             st.html(html_card)
 
-# ==========================================
-# LISTAS DA SUPERVISÃO SELECIONADA
-# ==========================================
+
+# ============================================================
+# SUPERVISÃO SELECIONADA
+# ============================================================
 
 else:
 
@@ -1047,44 +1154,45 @@ else:
 
     col_realizadas, col_pendentes = st.columns(2)
 
-    # --------------------------------------
+
+    # ========================================================
     # REALIZADAS
-    # --------------------------------------
+    # ========================================================
 
     with col_realizadas:
 
-        html_realizadas = f"""
-        <div style="
-            background-color:{CARD};
-            border:1px solid {BORDA};
-            border-radius:14px;
-            padding:20px;
-            text-align:center;
-            margin-bottom:20px;
-            box-shadow:0 4px 14px rgba(41,50,65,0.04);
-        ">
-
+        st.html(
+            f"""
             <div style="
-                color:{VERDE};
-                font-size:13px;
-                font-weight:700;
+                background-color:{CARD};
+                border:1px solid {BORDA};
+                border-radius:14px;
+                padding:20px;
+                text-align:center;
+                margin-bottom:20px;
+                box-shadow:0 4px 14px rgba(41,50,65,0.04);
             ">
-                MONITORIAS REALIZADAS
+
+                <div style="
+                    color:{VERDE};
+                    font-size:13px;
+                    font-weight:700;
+                ">
+                    MONITORIAS REALIZADAS
+                </div>
+
+                <div style="
+                    color:{TEXTO};
+                    font-size:32px;
+                    font-weight:700;
+                    margin-top:5px;
+                ">
+                    {len(realizadas_lista)}
+                </div>
+
             </div>
-
-            <div style="
-                color:{TEXTO};
-                font-size:32px;
-                font-weight:700;
-                margin-top:5px;
-            ">
-                {len(realizadas_lista)}
-            </div>
-
-        </div>
-        """
-
-        st.html(html_realizadas)
+            """
+        )
 
         if realizadas_lista:
 
@@ -1114,21 +1222,21 @@ else:
                     </div>
                     """
 
-                html_nome = f"""
-                <div class="nome-realizado">
+                st.html(
+                    f"""
+                    <div class="nome-realizado">
 
-                    <div>
-                        ✓ {nome}
+                        <div>
+                            ✓ {nome}
+                        </div>
+
+                        {funcao_html}
+
+                        {nota_html}
+
                     </div>
-
-                    {funcao_html}
-
-                    {nota_html}
-
-                </div>
-                """
-
-                st.html(html_nome)
+                    """
+                )
 
         else:
 
@@ -1136,44 +1244,45 @@ else:
                 "Nenhuma monitoria realizada."
             )
 
-    # --------------------------------------
+
+    # ========================================================
     # PENDENTES
-    # --------------------------------------
+    # ========================================================
 
     with col_pendentes:
 
-        html_pendentes = f"""
-        <div style="
-            background-color:{CARD};
-            border:1px solid {BORDA};
-            border-radius:14px;
-            padding:20px;
-            text-align:center;
-            margin-bottom:20px;
-            box-shadow:0 4px 14px rgba(41,50,65,0.04);
-        ">
-
+        st.html(
+            f"""
             <div style="
-                color:{LARANJA};
-                font-size:13px;
-                font-weight:700;
+                background-color:{CARD};
+                border:1px solid {BORDA};
+                border-radius:14px;
+                padding:20px;
+                text-align:center;
+                margin-bottom:20px;
+                box-shadow:0 4px 14px rgba(41,50,65,0.04);
             ">
-                MONITORIAS PENDENTES
+
+                <div style="
+                    color:{LARANJA};
+                    font-size:13px;
+                    font-weight:700;
+                ">
+                    MONITORIAS PENDENTES
+                </div>
+
+                <div style="
+                    color:{TEXTO};
+                    font-size:32px;
+                    font-weight:700;
+                    margin-top:5px;
+                ">
+                    {len(pendentes_lista)}
+                </div>
+
             </div>
-
-            <div style="
-                color:{TEXTO};
-                font-size:32px;
-                font-weight:700;
-                margin-top:5px;
-            ">
-                {len(pendentes_lista)}
-            </div>
-
-        </div>
-        """
-
-        st.html(html_pendentes)
+            """
+        )
 
         if pendentes_lista:
 
@@ -1192,19 +1301,19 @@ else:
                     </div>
                     """
 
-                html_nome = f"""
-                <div class="nome-pendente">
+                st.html(
+                    f"""
+                    <div class="nome-pendente">
 
-                    <div>
-                        {nome}
+                        <div>
+                            {nome}
+                        </div>
+
+                        {funcao_html}
+
                     </div>
-
-                    {funcao_html}
-
-                </div>
-                """
-
-                st.html(html_nome)
+                    """
+                )
 
         else:
 
@@ -1212,9 +1321,10 @@ else:
                 "Todas as monitorias foram realizadas."
             )
 
-# ==========================================
-# GRÁFICO MENSAL
-# ==========================================
+
+# ============================================================
+# EVOLUÇÃO MENSAL
+# ============================================================
 
 st.markdown(
     f"""
@@ -1239,9 +1349,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 dados_com_data = dados[
     dados["Data Monitoria"].notna()
 ].copy()
+
 
 contagem_mensal = (
     dados_com_data
@@ -1251,6 +1363,7 @@ contagem_mensal = (
     .size()
 )
 
+
 periodos = [
     pd.Period("2026-05", freq="M"),
     pd.Period("2026-06", freq="M"),
@@ -1258,6 +1371,7 @@ periodos = [
     pd.Period("2026-08", freq="M"),
     pd.Period("2026-09", freq="M")
 ]
+
 
 meses = [
     "Maio",
@@ -1267,10 +1381,12 @@ meses = [
     "Setembro"
 ]
 
+
 valores = [
     contagem_mensal.get(periodo, 0)
     for periodo in periodos
 ]
+
 
 fig = go.Figure()
 
@@ -1293,6 +1409,7 @@ fig.add_trace(
     )
 )
 
+
 fig.update_layout(
     paper_bgcolor=FUNDO,
     plot_bgcolor=FUNDO,
@@ -1310,10 +1427,12 @@ fig.update_layout(
     showlegend=False
 )
 
+
 fig.update_xaxes(
     showgrid=False,
     color=TEXTO_SECUNDARIO
 )
+
 
 fig.update_yaxes(
     showgrid=True,
@@ -1323,6 +1442,7 @@ fig.update_yaxes(
     range=[0, 32],
     dtick=5
 )
+
 
 st.plotly_chart(
     fig,
