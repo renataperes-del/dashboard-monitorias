@@ -33,6 +33,10 @@ ORANGE = "#F2A66F"
 PINK = "#E58FA3"
 
 
+# ============================================================
+# ESTILO
+# ============================================================
+
 st.markdown(
     f"""
     <style>
@@ -43,11 +47,25 @@ st.markdown(
     }}
 
     .block-container {{
-        padding-top: 2rem;
+        padding-top: 4rem;
         padding-bottom: 3rem;
         max-width: 1400px;
     }}
 
+    /* Corrige o cabeçalho padrão do Streamlit */
+    [data-testid="stHeader"] {{
+        background: transparent !important;
+    }}
+
+    header[data-testid="stHeader"] {{
+        background: transparent !important;
+    }}
+
+    [data-testid="stToolbar"] {{
+        right: 1rem;
+    }}
+
+    /* Textos gerais */
     h1, h2, h3, h4, p {{
         color: {TEXT};
     }}
@@ -88,6 +106,7 @@ st.markdown(
         margin-bottom: 18px;
     }}
 
+    /* Cards principais */
     .metric-card {{
         background: {CARD};
         border: 1px solid {BORDER};
@@ -112,6 +131,7 @@ st.markdown(
         line-height: 1;
     }}
 
+    /* Praças */
     .plaza-card {{
         background: {CARD};
         border: 1px solid {BORDER};
@@ -133,6 +153,7 @@ st.markdown(
         font-size: 13px;
     }}
 
+    /* Equipes */
     .team-card {{
         background: {CARD};
         border: 1px solid {BORDER};
@@ -167,40 +188,6 @@ st.markdown(
         color: {ORANGE};
         font-size: 13px;
         font-weight: 650;
-    }}
-
-    .score-box {{
-        background: {CARD};
-        border: 1px solid {BORDER};
-        border-radius: 20px;
-        padding: 22px;
-        box-shadow: 0 4px 14px rgba(41,50,65,0.04);
-        text-align: center;
-    }}
-
-    .score-title {{
-        color: {TEXT};
-        font-size: 22px;
-        font-weight: 700;
-        margin-bottom: 3px;
-    }}
-
-    .score-subtitle {{
-        color: {SECONDARY};
-        font-size: 13px;
-        margin-bottom: 5px;
-    }}
-
-    .score-number {{
-        color: {TEXT};
-        font-size: 34px;
-        font-weight: 750;
-    }}
-
-    .score-caption {{
-        color: {SECONDARY};
-        font-size: 12px;
-        margin-top: 3px;
     }}
 
     </style>
@@ -503,7 +490,6 @@ execs = [
     "Keren Jamille Coutinho Albrechete"
 ]
 
-
 apoio_adm = [
     "Felipe Santos Nery",
     "Pedro Llanos Iampietro",
@@ -538,7 +524,6 @@ apoio_adm = [
     "Stella Angela da Silva"
 ]
 
-
 funcao_por_nome = {}
 
 for nome in execs:
@@ -546,7 +531,6 @@ for nome in execs:
 
 for nome in apoio_adm:
     funcao_por_nome[nome] = "Apoio ADM"
-
 
 monitorias_google["Função"] = (
     monitorias_google["Colaborador"]
@@ -602,12 +586,14 @@ pracas = {
 # STATUS OFICIAL
 # ============================================================
 
-monitorias_google["Status Monitoria"] = monitorias_google[
-    "Data Monitoria"
-].notna().map({
-    True: "Realizada",
-    False: "Pendente"
-})
+monitorias_google["Status Monitoria"] = (
+    monitorias_google["Data Monitoria"]
+    .notna()
+    .map({
+        True: "Realizada",
+        False: "Pendente"
+    })
+)
 
 
 # ============================================================
@@ -647,7 +633,6 @@ supervisao_selecionada = st.selectbox(
     "Supervisão",
     opcoes_supervisao
 )
-
 
 if supervisao_selecionada == "Todas":
     dados = monitorias_google.copy()
@@ -696,18 +681,29 @@ with col_score:
 
     fig_score = go.Figure(
         go.Pie(
-            values=[media_geral, max(100 - media_geral, 0)],
+            values=[
+                media_geral,
+                max(100 - media_geral, 0)
+            ],
             hole=0.78,
             textinfo="none",
             marker=dict(
-                colors=[BLUE, "#EEF0F7"]
+                colors=[
+                    BLUE,
+                    "#EEF0F7"
+                ]
             )
         )
     )
 
     fig_score.update_layout(
         showlegend=False,
-        margin=dict(l=10, r=10, t=10, b=10),
+        margin=dict(
+            l=10,
+            r=10,
+            t=10,
+            b=10
+        ),
         height=220,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -728,8 +724,11 @@ with col_score:
     st.plotly_chart(
         fig_score,
         use_container_width=True,
-        config={"displayModeBar": False}
+        config={
+            "displayModeBar": False
+        }
     )
+
 
 with col_space:
 
@@ -761,7 +760,9 @@ with col_space:
             font-size:13px;
             margin-top:18px;
         ">
-            <b style="color:#293241;">{len(notas_validas)}</b>
+            <b style="color:#293241;">
+                {len(notas_validas)}
+            </b>
             colaboradores com nota registrada
         </div>
         """,
@@ -778,50 +779,82 @@ st.markdown("<br>", unsafe_allow_html=True)
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
+
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="card-title">COLABORADORES</div>
-            <div class="card-value">{total_colaboradores}</div>
+
+            <div class="card-title">
+                COLABORADORES
+            </div>
+
+            <div class="card-value">
+                {total_colaboradores}
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with c2:
+
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="card-title" style="color:{GREEN};">
+
+            <div class="card-title"
+                 style="color:{GREEN};">
                 REALIZADAS
             </div>
-            <div class="card-value">{realizadas}</div>
+
+            <div class="card-value">
+                {realizadas}
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with c3:
+
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="card-title" style="color:{ORANGE};">
+
+            <div class="card-title"
+                 style="color:{ORANGE};">
                 PENDENTES
             </div>
-            <div class="card-value">{pendentes}</div>
+
+            <div class="card-value">
+                {pendentes}
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
 
+
 with c4:
+
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="card-title" style="color:{PURPLE};">
+
+            <div class="card-title"
+                 style="color:{PURPLE};">
                 % CONCLUÍDO
             </div>
-            <div class="card-value">{percentual_concluido:.1f}%</div>
+
+            <div class="card-value">
+                {percentual_concluido:.1f}%
+            </div>
+
         </div>
         """,
         unsafe_allow_html=True
@@ -838,10 +871,11 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="section-subtitle">Selecione uma praça para consultar a distribuição das equipes.</div>',
+    '<div class="section-subtitle">'
+    'Selecione uma praça para consultar a distribuição das equipes.'
+    '</div>',
     unsafe_allow_html=True
 )
-
 
 cols_pracas = st.columns(4)
 
@@ -852,10 +886,15 @@ for i, (nome_praca, dados_praca) in enumerate(pracas.items()):
         st.markdown(
             f"""
             <div class="plaza-card">
-                <div class="plaza-name">{nome_praca}</div>
+
+                <div class="plaza-name">
+                    {nome_praca}
+                </div>
+
                 <div class="plaza-info">
                     {len(dados_praca["supervisores"])} supervisores
                 </div>
+
             </div>
             """,
             unsafe_allow_html=True
@@ -886,6 +925,7 @@ if praca_selecionada != "Todas":
             padding:20px;
             margin-top:10px;
         ">
+
             <div style="
                 color:{TEXT};
                 font-size:20px;
@@ -907,8 +947,10 @@ if praca_selecionada != "Todas":
                 font-size:13px;
                 margin-top:10px;
             ">
-                Supervisores: {", ".join(dados_praca["supervisores"])}
+                Supervisores:
+                {", ".join(dados_praca["supervisores"])}
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
@@ -925,7 +967,9 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="section-subtitle">Consulte quem já realizou e quem ainda está pendente.</div>',
+    '<div class="section-subtitle">'
+    'Consulte quem já realizou e quem ainda está pendente.'
+    '</div>',
     unsafe_allow_html=True
 )
 
@@ -935,10 +979,16 @@ st.markdown(
 # ============================================================
 
 resumo_supervisao = (
-    dados.groupby("Supervisão", dropna=False)
+    dados.groupby(
+        "Supervisão",
+        dropna=False
+    )
     .agg(
         Colaboradores=("Colaborador", "count"),
-        Realizadas=("Data Monitoria", lambda x: x.notna().sum())
+        Realizadas=(
+            "Data Monitoria",
+            lambda x: x.notna().sum()
+        )
     )
     .reset_index()
 )
@@ -978,11 +1028,13 @@ if supervisao_selecionada == "Todas":
                     </div>
 
                     <div class="team-realizada">
-                        ✓ Realizadas: {int(row["Realizadas"])}
+                        ✓ Realizadas:
+                        {int(row["Realizadas"])}
                     </div>
 
                     <div class="team-pendente">
-                        Pendentes: {int(row["Pendentes"])}
+                        Pendentes:
+                        {int(row["Pendentes"])}
                     </div>
 
                 </div>
@@ -1021,6 +1073,7 @@ else:
         if realizados_nomes:
 
             for nome in realizados_nomes:
+
                 st.markdown(
                     f"""
                     <div style="
@@ -1040,7 +1093,9 @@ else:
 
         else:
 
-            st.info("Nenhuma monitoria realizada.")
+            st.info(
+                "Nenhuma monitoria realizada."
+            )
 
 
     with col_pendentes:
@@ -1062,6 +1117,7 @@ else:
         if pendentes_nomes:
 
             for nome in pendentes_nomes:
+
                 st.markdown(
                     f"""
                     <div style="
@@ -1081,7 +1137,9 @@ else:
 
         else:
 
-            st.success("Nenhuma monitoria pendente.")
+            st.success(
+                "Nenhuma monitoria pendente."
+            )
 
 
 # ============================================================
@@ -1094,7 +1152,9 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="section-subtitle">Monitorias realizadas por mês</div>',
+    '<div class="section-subtitle">'
+    'Monitorias realizadas por mês'
+    '</div>',
     unsafe_allow_html=True
 )
 
@@ -1126,7 +1186,9 @@ if not dados_mensais.empty:
         dados_mensais
         .groupby("Mês")
         .size()
-        .reset_index(name="Monitorias")
+        .reset_index(
+            name="Monitorias"
+        )
     )
 
     contagem_mensal = meses_base.merge(
@@ -1163,26 +1225,41 @@ if not dados_mensais.empty:
             marker_color=BLUE,
             text=contagem_mensal["Monitorias"],
             textposition="outside",
-            hovertemplate="<b>%{x}</b><br>Monitorias: %{y}<extra></extra>"
+            hovertemplate=(
+                "<b>%{x}</b>"
+                "<br>Monitorias: %{y}"
+                "<extra></extra>"
+            )
         )
     )
 
     fig.update_layout(
         height=360,
-        margin=dict(l=20, r=20, t=25, b=20),
+        margin=dict(
+            l=20,
+            r=20,
+            t=25,
+            b=20
+        ),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         showlegend=False,
+
         xaxis=dict(
             title=None,
             showgrid=False,
-            tickfont=dict(color=SECONDARY)
+            tickfont=dict(
+                color=SECONDARY
+            )
         ),
+
         yaxis=dict(
             title=None,
             showgrid=True,
             gridcolor=BORDER,
-            tickfont=dict(color=SECONDARY),
+            tickfont=dict(
+                color=SECONDARY
+            ),
             rangemode="tozero"
         )
     )
@@ -1190,12 +1267,16 @@ if not dados_mensais.empty:
     st.plotly_chart(
         fig,
         use_container_width=True,
-        config={"displayModeBar": False}
+        config={
+            "displayModeBar": False
+        }
     )
 
 else:
 
-    st.info("Ainda não há monitorias realizadas para exibir.")
+    st.info(
+        "Ainda não há monitorias realizadas para exibir."
+    )
 
 
 # ============================================================
@@ -1208,7 +1289,9 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="section-subtitle">Acompanhamento das próximas etapas do processo.</div>',
+    '<div class="section-subtitle">'
+    'Acompanhamento das próximas etapas do processo.'
+    '</div>',
     unsafe_allow_html=True
 )
 
@@ -1224,12 +1307,15 @@ offline_realizadas = dados[
 
 c5, c6 = st.columns(2)
 
+
 with c5:
 
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="card-title" style="color:{PURPLE};">
+
+            <div class="card-title"
+                 style="color:{PURPLE};">
                 LADO A LADO
             </div>
 
@@ -1244,17 +1330,21 @@ with c5:
             ">
                 Ainda não iniciado
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
     )
+
 
 with c6:
 
     st.markdown(
         f"""
         <div class="metric-card">
-            <div class="card-title" style="color:{PINK};">
+
+            <div class="card-title"
+                 style="color:{PINK};">
                 MONITORIA OFFLINE
             </div>
 
@@ -1269,6 +1359,7 @@ with c6:
             ">
                 Ainda não iniciado
             </div>
+
         </div>
         """,
         unsafe_allow_html=True
