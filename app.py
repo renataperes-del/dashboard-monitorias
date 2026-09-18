@@ -53,10 +53,6 @@ st.markdown(
     f"""
     <style>
 
-    /* =====================================================
-       BASE
-       ===================================================== */
-
     @import url(
         'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
     );
@@ -69,20 +65,14 @@ st.markdown(
     }}
 
     .stApp {{
-        background:
-            radial-gradient(
-                circle at 92% 0%,
-                rgba(67, 97, 238, 0.055),
-                transparent 28%
-            ),
-            {BG};
+        background: {BG};
         color: {TEXT};
     }}
 
     .block-container {{
-        max-width: 1440px;
-        padding-top: 1.8rem;
-        padding-bottom: 5rem;
+        max-width: 1400px;
+        padding-top: 1.5rem;
+        padding-bottom: 4rem;
     }}
 
     #MainMenu,
@@ -94,182 +84,171 @@ st.markdown(
         background: transparent !important;
     }}
 
-    /* =====================================================
-       TIPOGRAFIA
-       ===================================================== */
-
     h1 {{
         color: {TEXT} !important;
         font-size: 2rem !important;
         font-weight: 800 !important;
-        letter-spacing: -0.045em;
+        letter-spacing: -0.04em;
         margin-bottom: 3px !important;
     }}
 
-    h2 {{
+    h2,
+    h3 {{
         color: {TEXT} !important;
-        font-size: 1.25rem !important;
         font-weight: 700 !important;
-        letter-spacing: -0.025em;
-        margin-top: 2.2rem !important;
-        margin-bottom: 5px !important;
+        letter-spacing: -0.02em;
+    }}
+
+    h2 {{
+        font-size: 1.2rem !important;
+        margin-top: 30px !important;
     }}
 
     h3 {{
-        color: {TEXT} !important;
         font-size: 1rem !important;
-        font-weight: 600 !important;
     }}
 
     p {{
         color: {TEXT};
     }}
 
-    .stCaption {{
-        color: {SECONDARY} !important;
-    }}
-
     .subtitle {{
         color: {SECONDARY};
         font-size: 14px;
-        font-weight: 400;
-        margin-top: 0;
-        margin-bottom: 28px;
+        margin-top: -3px;
+        margin-bottom: 24px;
     }}
 
     .section-caption {{
         color: {SECONDARY};
         font-size: 13px;
-        margin-top: -2px;
-        margin-bottom: 17px;
+        margin-top: -8px;
+        margin-bottom: 16px;
     }}
 
     /* =====================================================
-       SELECTBOX / FILTROS
+       SELECTBOX
        ===================================================== */
 
-    div[data-baseweb="select"] {{
-        width: 100%;
-    }}
-
     div[data-baseweb="select"] > div {{
-        background: {CARD} !important;
-        border: 1px solid {BORDER} !important;
-        border-radius: 12px !important;
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
         min-height: 44px;
-        box-shadow:
-            0 1px 2px rgba(31, 41, 55, 0.025);
-        transition:
-            border-color 0.18s ease,
-            box-shadow 0.18s ease;
+        box-shadow: none;
+        transition: all .15s ease;
     }}
 
     div[data-baseweb="select"] > div:hover {{
-        border-color: rgba(67, 97, 238, 0.45) !important;
-        box-shadow:
-            0 3px 10px rgba(67, 97, 238, 0.07);
-    }}
-
-    div[data-baseweb="select"] [data-baseweb="icon"] {{
-        color: {PRIMARY};
-    }}
-
-    label[data-testid="stWidgetLabel"] p {{
-        color: {TEXT} !important;
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        margin-bottom: 6px !important;
+        border-color: {PRIMARY};
+        box-shadow: 0 0 0 3px {PRIMARY_SOFT};
     }}
 
     /* =====================================================
-       BOTÃO
+       BOTÕES
        ===================================================== */
 
     .stButton > button {{
-        background: {CARD} !important;
-        color: {TEXT} !important;
-        border: 1px solid {BORDER} !important;
-        border-radius: 11px !important;
-        min-height: 42px;
-        padding: 0 17px;
+        background: {CARD};
+        color: {TEXT};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        min-height: 44px;
         font-weight: 600;
-        font-size: 13px;
-        box-shadow:
-            0 1px 2px rgba(31, 41, 55, 0.03);
-        transition:
-            all 0.18s ease;
+        box-shadow: none;
+        transition: all .15s ease;
     }}
 
     .stButton > button:hover {{
-        background: {PRIMARY_SOFT} !important;
-        border-color: rgba(67, 97, 238, 0.35) !important;
-        color: {PRIMARY} !important;
-        transform: translateY(-1px);
-        box-shadow:
-            0 5px 14px rgba(67, 97, 238, 0.10);
+        border-color: {PRIMARY};
+        color: {PRIMARY};
+        background: {PRIMARY_SOFT};
     }}
 
     /* =====================================================
-       CARD BASE
+       CARDS
        ===================================================== */
 
     .custom-card {{
-        position: relative;
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 16px;
-        padding: 22px;
-        min-height: 132px;
-        overflow: hidden;
-        box-shadow:
-            0 2px 5px rgba(31, 41, 55, 0.025),
-            0 8px 24px rgba(31, 41, 55, 0.025);
-        transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease,
-            border-color 0.18s ease;
-    }}
-
-    .custom-card::before {{
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 4px;
-        height: 100%;
-        background: {PRIMARY};
-        opacity: 0.9;
+        padding: 21px;
+        min-height: 126px;
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
+        transition: all .15s ease;
     }}
 
     .custom-card:hover {{
-        transform: translateY(-2px);
-        border-color: #D9DEEB;
-        box-shadow:
-            0 5px 12px rgba(31, 41, 55, 0.035),
-            0 14px 30px rgba(31, 41, 55, 0.035);
+        border-color: #D8DEEF;
+        box-shadow: 0 7px 20px rgba(31, 41, 55, .055);
+        transform: translateY(-1px);
     }}
 
     .custom-card-title {{
         color: {SECONDARY};
         font-size: 10px;
         font-weight: 700;
-        letter-spacing: 0.09em;
-        margin-bottom: 13px;
+        letter-spacing: .08em;
+        margin-bottom: 12px;
     }}
 
     .custom-card-value {{
         color: {TEXT};
-        font-size: 32px;
+        font-size: 30px;
         font-weight: 800;
         line-height: 1;
-        letter-spacing: -0.035em;
         font-variant-numeric: tabular-nums;
     }}
 
     .custom-card-subtitle {{
         color: {SECONDARY};
         font-size: 12px;
-        margin-top: 10px;
+        margin-top: 9px;
+    }}
+
+    /* =====================================================
+       CABEÇALHO
+       ===================================================== */
+
+    .dashboard-brand {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }}
+
+    .brand-icon {{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: {PRIMARY_SOFT};
+        color: {PRIMARY};
+        font-size: 14px;
+        font-weight: 800;
+    }}
+
+    .brand-text {{
+        color: {PRIMARY};
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+    }}
+
+    .dashboard-header {{
+        background: linear-gradient(
+            135deg,
+            #FFFFFF 0%,
+            #F9FAFF 100%
+        );
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 24px 26px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 18px rgba(31, 41, 55, .035);
     }}
 
     /* =====================================================
@@ -277,57 +256,41 @@ st.markdown(
        ===================================================== */
 
     .praca-card {{
-        position: relative;
-        background: linear-gradient(
-            145deg,
-            {CARD} 0%,
-            #FAFBFF 100%
-        );
+        background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 16px;
-        padding: 21px;
-        min-height: 125px;
-        overflow: hidden;
-        box-shadow:
-            0 2px 5px rgba(31, 41, 55, 0.025),
-            0 8px 22px rgba(31, 41, 55, 0.025);
-        transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease;
-    }}
-
-    .praca-card::after {{
-        content: "";
-        position: absolute;
-        width: 70px;
-        height: 70px;
-        right: -24px;
-        top: -24px;
-        border-radius: 50%;
-        background: {PRIMARY_SOFT};
+        padding: 20px;
+        min-height: 120px;
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
+        transition: all .15s ease;
     }}
 
     .praca-card:hover {{
-        transform: translateY(-2px);
-        box-shadow:
-            0 8px 22px rgba(31, 41, 55, 0.06);
+        border-color: #D8DEEF;
+        transform: translateY(-1px);
+        box-shadow: 0 7px 20px rgba(31, 41, 55, .055);
     }}
 
     .praca-name {{
-        position: relative;
-        z-index: 1;
         color: {TEXT};
-        font-size: 20px;
-        font-weight: 750;
-        margin-bottom: 12px;
-        letter-spacing: -0.025em;
+        font-size: 19px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        letter-spacing: -.025em;
     }}
 
     .praca-info {{
-        position: relative;
-        z-index: 1;
         color: {SECONDARY};
         font-size: 12px;
+    }}
+
+    .praca-dot {{
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: {PRIMARY};
+        margin-right: 6px;
     }}
 
     /* =====================================================
@@ -335,66 +298,38 @@ st.markdown(
        ===================================================== */
 
     .score-card {{
-        position: relative;
-        background:
-            linear-gradient(
-                145deg,
-                #FFFFFF 0%,
-                #F8F9FF 100%
-            );
-        border: 1px solid #DDE3F4;
-        border-radius: 18px;
-        padding: 30px;
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 16px;
+        padding: 28px;
         min-height: 250px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        overflow: hidden;
-        box-shadow:
-            0 4px 10px rgba(67, 97, 238, 0.035),
-            0 16px 32px rgba(31, 41, 55, 0.035);
-    }}
-
-    .score-card::before {{
-        content: "";
-        position: absolute;
-        width: 150px;
-        height: 150px;
-        right: -55px;
-        top: -55px;
-        border-radius: 50%;
-        background: {PRIMARY_SOFT};
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
     }}
 
     .score-label {{
-        position: relative;
-        z-index: 1;
         color: {SECONDARY};
         font-size: 10px;
         font-weight: 700;
-        letter-spacing: 0.09em;
-        margin-bottom: 13px;
+        letter-spacing: .08em;
+        margin-bottom: 12px;
     }}
 
     .score-value {{
-        position: relative;
-        z-index: 1;
         color: {TEXT};
-        font-size: 46px;
+        font-size: 42px;
         font-weight: 800;
         line-height: 1;
-        letter-spacing: -0.04em;
         font-variant-numeric: tabular-nums;
     }}
 
     .score-description {{
-        position: relative;
-        z-index: 1;
         color: {SECONDARY};
         font-size: 12px;
-        margin-top: 13px;
-        line-height: 1.55;
-        max-width: 280px;
+        margin-top: 12px;
+        line-height: 1.5;
     }}
 
     /* =====================================================
@@ -402,56 +337,48 @@ st.markdown(
        ===================================================== */
 
     .team-card {{
-        position: relative;
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 16px;
         padding: 20px;
-        min-height: 180px;
-        overflow: hidden;
-        box-shadow:
-            0 2px 5px rgba(31, 41, 55, 0.025),
-            0 8px 22px rgba(31, 41, 55, 0.025);
-        transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease;
+        min-height: 174px;
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
+        transition: all .15s ease;
     }}
 
     .team-card:hover {{
-        transform: translateY(-2px);
-        box-shadow:
-            0 8px 24px rgba(31, 41, 55, 0.055);
+        border-color: #D8DEEF;
+        transform: translateY(-1px);
+        box-shadow: 0 7px 20px rgba(31, 41, 55, .055);
     }}
 
     .team-name {{
         color: {TEXT};
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 700;
-        margin-bottom: 15px;
-        letter-spacing: -0.01em;
+        margin-bottom: 14px;
     }}
 
     .team-number {{
         color: {TEXT};
-        font-size: 30px;
+        font-size: 28px;
         font-weight: 800;
         line-height: 1;
-        letter-spacing: -0.035em;
         font-variant-numeric: tabular-nums;
     }}
 
     .team-label {{
         color: {SECONDARY};
         font-size: 11px;
-        margin-top: 5px;
+        margin-top: 4px;
     }}
 
     .team-progress {{
         width: 100%;
         height: 7px;
-        background: #E9ECF3;
+        background: #EEF1F6;
         border-radius: 99px;
-        margin-top: 18px;
+        margin-top: 17px;
         overflow: hidden;
     }}
 
@@ -460,17 +387,15 @@ st.markdown(
         background: linear-gradient(
             90deg,
             {PRIMARY},
-            #5C75EE
+            #6680F2
         );
         border-radius: 99px;
-        transition: width 0.4s ease;
     }}
 
     .team-status {{
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-top: 10px;
+        margin-top: 9px;
         font-size: 11px;
     }}
 
@@ -492,24 +417,21 @@ st.markdown(
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 16px;
-        padding: 21px;
+        padding: 20px;
         min-height: 160px;
-        box-shadow:
-            0 2px 5px rgba(31, 41, 55, 0.025),
-            0 8px 22px rgba(31, 41, 55, 0.025);
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
     }}
 
     .list-title {{
         color: {TEXT};
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 700;
-        margin-bottom: 13px;
-        letter-spacing: -0.01em;
+        margin-bottom: 14px;
     }}
 
     .list-item {{
-        border-bottom: 1px solid #EEF0F4;
-        padding: 11px 0;
+        border-bottom: 1px solid {BORDER};
+        padding: 10px 0;
     }}
 
     .list-item:last-child {{
@@ -529,14 +451,10 @@ st.markdown(
     }}
 
     .list-score {{
-        display: inline-block;
         color: {PRIMARY};
-        background: {PRIMARY_SOFT};
-        border-radius: 6px;
-        padding: 3px 7px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
-        margin-top: 5px;
+        margin-top: 4px;
         font-variant-numeric: tabular-nums;
     }}
 
@@ -547,7 +465,7 @@ st.markdown(
     }}
 
     /* =====================================================
-       STATUS
+       BADGES
        ===================================================== */
 
     .badge {{
@@ -578,77 +496,28 @@ st.markdown(
        ===================================================== */
 
     .filter-summary {{
-        background: linear-gradient(
-            90deg,
-            {PRIMARY_SOFT},
-            #F8F9FF
-        );
+        background: {PRIMARY_SOFT};
         border: 1px solid #DCE4FF;
         border-radius: 12px;
         padding: 12px 16px;
         margin-top: 8px;
-        margin-bottom: 25px;
+        margin-bottom: 24px;
         color: {TEXT};
         font-size: 12px;
-        box-shadow:
-            0 3px 10px rgba(67, 97, 238, 0.035);
     }}
 
     .filter-summary strong {{
         color: {PRIMARY};
-        font-weight: 700;
     }}
 
     /* =====================================================
-       GRÁFICOS PLOTLY
+       SEPARADOR
        ===================================================== */
 
-    .js-plotly-plot {{
-        border-radius: 16px;
-    }}
-
-    /* =====================================================
-       ESPAÇAMENTO
-       ===================================================== */
-
-    [data-testid="column"] {{
-        padding-left: 6px !important;
-        padding-right: 6px !important;
-    }}
-
-    /* =====================================================
-       EXPANDER
-       ===================================================== */
-
-    [data-testid="stExpander"] {{
-        border: 1px solid {BORDER} !important;
-        border-radius: 12px !important;
-        background: {CARD} !important;
-    }}
-
-    /* =====================================================
-       RESPONSIVIDADE
-       ===================================================== */
-
-    @media (max-width: 900px) {{
-
-        .block-container {{
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }}
-
-        h1 {{
-            font-size: 1.65rem !important;
-        }}
-
-        .custom-card-value {{
-            font-size: 27px;
-        }}
-
-        .score-value {{
-            font-size: 40px;
-        }}
-
+    .section-divider {{
+        height: 1px;
+        background: {BORDER};
+        margin: 30px 0;
     }}
 
     </style>
@@ -695,23 +564,22 @@ def carregar_dados():
 
 col_data, col_botao = st.columns([6, 1])
 
+with col_data:
+
+    data_consulta = datetime.now().strftime(
+        "%d/%m/%Y às %H:%M"
+    )
+
+    st.caption(
+        f"Última atualização dos dados: {data_consulta}"
+    )
+
 with col_botao:
 
     if st.button("↻ Atualizar"):
 
         st.cache_data.clear()
         st.rerun()
-
-
-data_consulta = datetime.now().strftime(
-    "%d/%m/%Y às %H:%M"
-)
-
-with col_data:
-
-    st.caption(
-        f"Última atualização dos dados: {data_consulta}"
-    )
 
 
 # =========================================================
@@ -1133,9 +1001,6 @@ monitorias_google["Média"] = (
 # STATUS
 # =========================================================
 
-# REGRA OFICIAL:
-# Data Monitoria preenchida = realizada
-
 monitorias_google["Realizada"] = (
     monitorias_google["Data Monitoria"].notna()
 )
@@ -1186,8 +1051,7 @@ pracas = {
 
 
 # =========================================================
-# MAPEAMENTO REAL:
-# PRAÇA -> NOME DA SUPERVISÃO NA PLANILHA
+# MAPEAMENTO PRAÇA -> SUPERVISÃO
 # =========================================================
 
 supervisao_por_praca = {
@@ -1218,18 +1082,13 @@ supervisao_por_praca = {
 }
 
 
-# Inverte o dicionário para descobrir
-# a praça a partir da supervisão
-
 praca_por_supervisao = {}
 
 for praca, supervisoes in supervisao_por_praca.items():
 
     for supervisao in supervisoes:
 
-        praca_por_supervisao[
-            supervisao
-        ] = praca
+        praca_por_supervisao[supervisao] = praca
 
 
 monitorias_google["Praça"] = (
@@ -1243,11 +1102,7 @@ monitorias_google["Praça"] = (
 # FUNÇÕES VISUAIS
 # =========================================================
 
-def html_card(
-    titulo,
-    valor,
-    subtitulo=""
-):
+def html_card(titulo, valor, subtitulo=""):
 
     titulo = html.escape(str(titulo))
     valor = html.escape(str(valor))
@@ -1272,10 +1127,7 @@ def html_card(
     """
 
 
-def html_praca(
-    nome,
-    quantidade
-):
+def html_praca(nome, quantidade):
 
     nome = html.escape(str(nome))
 
@@ -1283,7 +1135,7 @@ def html_praca(
     <div class="praca-card">
 
         <div class="praca-name">
-            {nome}
+            <span class="praca-dot"></span>{nome}
         </div>
 
         <div class="praca-info">
@@ -1294,12 +1146,7 @@ def html_praca(
     """
 
 
-def html_team(
-    nome,
-    total,
-    realizadas,
-    pendentes
-):
+def html_team(nome, total, realizadas, pendentes):
 
     nome = html.escape(str(nome))
 
@@ -1325,12 +1172,10 @@ def html_team(
         </div>
 
         <div class="team-progress">
-
             <div
                 class="team-progress-fill"
                 style="width: {percentual:.1f}%"
             ></div>
-
         </div>
 
         <div class="team-status">
@@ -1349,11 +1194,7 @@ def html_team(
     """
 
 
-def html_lista(
-    titulo,
-    dataframe,
-    mostrar_nota=True
-):
+def html_lista(titulo, dataframe, mostrar_nota=True):
 
     titulo = html.escape(str(titulo))
 
@@ -1389,10 +1230,7 @@ def html_lista(
 
         media = row["Média"]
 
-        if (
-            mostrar_nota
-            and pd.notna(media)
-        ):
+        if mostrar_nota and pd.notna(media):
 
             nota_html = f"""
             <div class="list-score">
@@ -1430,56 +1268,46 @@ def html_lista(
 
 
 # =========================================================
-# CABEÇALHO
+# CABEÇALHO MODERNO
 # =========================================================
 
-st.markdown(
+st.html(
     f"""
-    <div style="
-        display:flex;
-        align-items:center;
-        gap:10px;
-        margin-bottom:7px;
-    ">
+    <div class="dashboard-header">
 
-        <span style="
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            width:29px;
-            height:29px;
-            border-radius:9px;
-            background:{PRIMARY_SOFT};
-            color:{PRIMARY};
-            font-size:13px;
+        <div class="dashboard-brand">
+
+            <span class="brand-icon">
+                N
+            </span>
+
+            <span class="brand-text">
+                NUBE • TREINAMENTO COMERCIAL
+            </span>
+
+        </div>
+
+        <div style="
+            color:{TEXT};
+            font-size:32px;
             font-weight:800;
+            letter-spacing:-.04em;
+            line-height:1.1;
+            margin-top:8px;
         ">
-            N
-        </span>
+            Dashboard de Monitorias
+        </div>
 
-        <span style="
-            color:{PRIMARY};
-            font-size:11px;
-            font-weight:700;
-            letter-spacing:.09em;
+        <div style="
+            color:{SECONDARY};
+            font-size:14px;
+            margin-top:8px;
         ">
-            NUBE • TREINAMENTO COMERCIAL
-        </span>
+            Acompanhamento das aplicações de monitoria
+        </div>
 
     </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.title(
-    "Dashboard de Monitorias"
-)
-
-st.markdown(
-    '<div class="subtitle">'
-    'Acompanhamento das aplicações de monitoria'
-    '</div>',
-    unsafe_allow_html=True
+    """
 )
 
 
@@ -1495,10 +1323,6 @@ col_filtro_praca, col_filtro_supervisao, col_filtro_status = (
 )
 
 
-# ---------------------------------------------------------
-# PRAÇA
-# ---------------------------------------------------------
-
 opcoes_praca = [
     "Todas"
 ] + list(pracas.keys())
@@ -1511,10 +1335,6 @@ with col_filtro_praca:
         opcoes_praca
     )
 
-
-# ---------------------------------------------------------
-# SUPERVISÃO
-# ---------------------------------------------------------
 
 if praca_selecionada == "Todas":
 
@@ -1547,10 +1367,8 @@ else:
     supervisoes_disponiveis = sorted(
         [
             supervisao
-            for supervisao
-            in supervisoes_da_praca
-            if supervisao
-            in supervisoes_existentes
+            for supervisao in supervisoes_da_praca
+            if supervisao in supervisoes_existentes
         ]
     )
 
@@ -1567,10 +1385,6 @@ with col_filtro_supervisao:
         opcoes_supervisao
     )
 
-
-# ---------------------------------------------------------
-# STATUS
-# ---------------------------------------------------------
 
 with col_filtro_status:
 
@@ -1594,8 +1408,7 @@ df_filtrado = monitorias_google.copy()
 if praca_selecionada != "Todas":
 
     df_filtrado = df_filtrado[
-        df_filtrado["Praça"]
-        == praca_selecionada
+        df_filtrado["Praça"] == praca_selecionada
     ].copy()
 
 
@@ -1622,24 +1435,27 @@ elif status_selecionado == "Pendentes":
 
 
 # =========================================================
-# RESUMO DO FILTRO
+# RESUMO DOS FILTROS
 # =========================================================
 
 filtros_ativos = []
 
 if praca_selecionada != "Todas":
+
     filtros_ativos.append(
         f"<strong>Praça:</strong> "
         f"{html.escape(praca_selecionada)}"
     )
 
 if supervisao_selecionada != "Todas":
+
     filtros_ativos.append(
         f"<strong>Supervisão:</strong> "
         f"{html.escape(supervisao_selecionada)}"
     )
 
 if status_selecionado != "Todos":
+
     filtros_ativos.append(
         f"<strong>Status:</strong> "
         f"{html.escape(status_selecionado)}"
@@ -1648,11 +1464,10 @@ if status_selecionado != "Todos":
 
 if filtros_ativos:
 
-    st.markdown(
+    st.html(
         '<div class="filter-summary">'
         + " &nbsp; • &nbsp; ".join(filtros_ativos)
-        + "</div>",
-        unsafe_allow_html=True
+        + "</div>"
     )
 
 
@@ -1670,9 +1485,7 @@ st.markdown(
 )
 
 
-col_grafico, col_score = st.columns(
-    [1, 1]
-)
+col_grafico, col_score = st.columns([1, 1])
 
 
 notas_validas = (
@@ -1714,12 +1527,8 @@ with col_grafico:
                 marker=dict(
                     colors=[
                         PRIMARY,
-                        "#E8EBF3"
-                    ],
-                    line=dict(
-                        color="#FFFFFF",
-                        width=3
-                    )
+                        "#E9EDF5"
+                    ]
                 ),
                 textinfo="none",
                 hoverinfo="skip"
@@ -1737,17 +1546,13 @@ with col_grafico:
             height=250,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(
-                family="Inter, sans-serif",
-                color=TEXT
-            ),
             annotations=[
                 dict(
                     text=f"<b>{media_geral:.1f}%</b>",
                     x=0.5,
                     y=0.5,
                     font=dict(
-                        size=28,
+                        size=27,
                         color=TEXT,
                         family="Inter, sans-serif"
                     ),
@@ -1771,10 +1576,6 @@ with col_grafico:
             height=250,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(
-                family="Inter, sans-serif",
-                color=TEXT
-            ),
             annotations=[
                 dict(
                     text="<b>—</b>",
@@ -1961,7 +1762,6 @@ if supervisao_selecionada == "Todas":
         .tolist()
     )
 
-
     if not nomes_supervisoes:
 
         st.html(
@@ -1977,7 +1777,6 @@ if supervisao_selecionada == "Todas":
             """
         )
 
-
     for inicio in range(
         0,
         len(nomes_supervisoes),
@@ -1988,9 +1787,7 @@ if supervisao_selecionada == "Todas":
             inicio:inicio + 4
         ]
 
-
         colunas = st.columns(4)
-
 
         for coluna, supervisao in zip(
             colunas,
@@ -2004,11 +1801,9 @@ if supervisao_selecionada == "Todas":
                 ]
             )
 
-
             total = len(
                 df_supervisao
             )
-
 
             realizadas = int(
                 df_supervisao[
@@ -2016,12 +1811,10 @@ if supervisao_selecionada == "Todas":
                 ].sum()
             )
 
-
             pendentes = (
                 total
                 - realizadas
             )
-
 
             with coluna:
 
@@ -2034,7 +1827,6 @@ if supervisao_selecionada == "Todas":
                     )
                 )
 
-
 else:
 
     df_supervisao = (
@@ -2043,7 +1835,6 @@ else:
             == supervisao_selecionada
         ].copy()
     )
-
 
     if status_selecionado == "Realizadas":
 
@@ -2057,7 +1848,6 @@ else:
             columns=df_supervisao.columns
         )
 
-
     elif status_selecionado == "Pendentes":
 
         realizadas_df = pd.DataFrame(
@@ -2069,7 +1859,6 @@ else:
                 ~df_supervisao["Realizada"]
             ].copy()
         )
-
 
     else:
 
@@ -2085,30 +1874,25 @@ else:
             ].copy()
         )
 
-
     col_realizadas, col_pendentes = (
         st.columns(2)
     )
-
 
     with col_realizadas:
 
         st.html(
             html_lista(
-                f"Realizadas · "
-                f"{len(realizadas_df)}",
+                f"Realizadas · {len(realizadas_df)}",
                 realizadas_df,
                 mostrar_nota=True
             )
         )
 
-
     with col_pendentes:
 
         st.html(
             html_lista(
-                f"Pendentes · "
-                f"{len(pendentes_df)}",
+                f"Pendentes · {len(pendentes_df)}",
                 pendentes_df,
                 mostrar_nota=False
             )
@@ -2155,18 +1939,15 @@ if pendencias.empty:
         """
     )
 
-
 else:
 
     col_pend_1, col_pend_2 = (
         st.columns(2)
     )
 
-
     metade = (
         len(pendencias) + 1
     ) // 2
-
 
     pendencias_1 = (
         pendencias.iloc[:metade]
@@ -2176,18 +1957,15 @@ else:
         pendencias.iloc[metade:]
     )
 
-
     with col_pend_1:
 
         st.html(
             html_lista(
-                f"Colaboradores pendentes · "
-                f"{len(pendencias)}",
+                f"Colaboradores pendentes · {len(pendencias)}",
                 pendencias_1,
                 mostrar_nota=False
             )
         )
-
 
     with col_pend_2:
 
@@ -2255,14 +2033,8 @@ nomes_meses = []
 
 for periodo in meses:
 
-    inicio_mes = (
-        periodo.start_time
-    )
-
-    fim_mes = (
-        periodo.end_time
-    )
-
+    inicio_mes = periodo.start_time
+    fim_mes = periodo.end_time
 
     quantidade = (
         df_filtrado[
@@ -2281,11 +2053,9 @@ for periodo in meses:
         .shape[0]
     )
 
-
     quantidades.append(
         quantidade
     )
-
 
     nomes_meses.append(
         periodo
@@ -2301,18 +2071,9 @@ fig_evolucao.add_trace(
     go.Bar(
         x=nomes_meses,
         y=quantidades,
-        marker=dict(
-            color=PRIMARY,
-            line=dict(
-                width=0
-            )
-        ),
+        marker_color=PRIMARY,
         text=quantidades,
         textposition="outside",
-        textfont=dict(
-            color=TEXT,
-            size=11
-        ),
         hovertemplate=(
             "%{x}: %{y} monitorias"
             "<extra></extra>"
@@ -2337,24 +2098,14 @@ fig_evolucao.update_layout(
     ),
     xaxis=dict(
         title=None,
-        showgrid=False,
-        linecolor=BORDER,
-        tickfont=dict(
-            size=11,
-            color=SECONDARY
-        )
+        showgrid=False
     ),
     yaxis=dict(
         title=None,
         showgrid=True,
-        gridcolor="#EDF0F5",
-        zeroline=False,
-        tickfont=dict(
-            size=11,
-            color=SECONDARY
-        )
+        gridcolor=BORDER,
+        zeroline=False
     ),
-    bargap=0.32,
     showlegend=False
 )
 
@@ -2404,7 +2155,6 @@ with col_lado:
         else "Ainda não iniciado"
     )
 
-
     st.html(
         f"""
         <div class="custom-card">
@@ -2433,7 +2183,6 @@ with col_offline:
         if total_offline > 0
         else "Ainda não iniciado"
     )
-
 
     st.html(
         f"""
