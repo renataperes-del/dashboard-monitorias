@@ -3,8 +3,10 @@ import pandas as pd
 import plotly.graph_objects as go
 import gspread
 import html
+import unicodedata
 
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from google.oauth2.service_account import Credentials
 
 
@@ -57,10 +59,15 @@ st.markdown(
         'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
     );
 
-    html,
-    body,
     .stApp,
-    [class*="st-"] {{
+    .stApp p,
+    .stApp label,
+    .stApp button,
+    .stApp input,
+    .stApp h1,
+    .stApp h2,
+    .stApp h3,
+    .stApp li {{
         font-family: 'Inter', sans-serif;
     }}
 
@@ -112,19 +119,13 @@ st.markdown(
         color: {TEXT};
     }}
 
-    .subtitle {{
-        color: {SECONDARY};
-        font-size: 14px;
-        margin-top: -3px;
-        margin-bottom: 24px;
-    }}
-
     .section-caption {{
         color: {SECONDARY};
         font-size: 13px;
         margin-top: -8px;
         margin-bottom: 16px;
     }}
+
 
     /* =====================================================
        SELECTBOX
@@ -143,6 +144,7 @@ st.markdown(
         border-color: {PRIMARY};
         box-shadow: 0 0 0 3px {PRIMARY_SOFT};
     }}
+
 
     /* =====================================================
        BOTÕES
@@ -164,6 +166,7 @@ st.markdown(
         color: {PRIMARY};
         background: {PRIMARY_SOFT};
     }}
+
 
     /* =====================================================
        CARDS
@@ -187,9 +190,9 @@ st.markdown(
 
     .custom-card-title {{
         color: {SECONDARY};
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 700;
-        letter-spacing: .08em;
+        letter-spacing: .07em;
         margin-bottom: 12px;
     }}
 
@@ -206,6 +209,7 @@ st.markdown(
         font-size: 12px;
         margin-top: 9px;
     }}
+
 
     /* =====================================================
        CABEÇALHO
@@ -251,6 +255,7 @@ st.markdown(
         box-shadow: 0 4px 18px rgba(31, 41, 55, .035);
     }}
 
+
     /* =====================================================
        PRAÇAS
        ===================================================== */
@@ -260,7 +265,7 @@ st.markdown(
         border: 1px solid {BORDER};
         border-radius: 16px;
         padding: 20px;
-        min-height: 120px;
+        min-height: 135px;
         box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
         transition: all .15s ease;
     }}
@@ -275,13 +280,14 @@ st.markdown(
         color: {TEXT};
         font-size: 19px;
         font-weight: 800;
-        margin-bottom: 10px;
+        margin-bottom: 9px;
         letter-spacing: -.025em;
     }}
 
     .praca-info {{
         color: {SECONDARY};
         font-size: 12px;
+        line-height: 1.55;
     }}
 
     .praca-dot {{
@@ -292,6 +298,7 @@ st.markdown(
         background: {PRIMARY};
         margin-right: 6px;
     }}
+
 
     /* =====================================================
        SCORE
@@ -311,9 +318,9 @@ st.markdown(
 
     .score-label {{
         color: {SECONDARY};
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 700;
-        letter-spacing: .08em;
+        letter-spacing: .07em;
         margin-bottom: 12px;
     }}
 
@@ -331,6 +338,7 @@ st.markdown(
         margin-top: 12px;
         line-height: 1.5;
     }}
+
 
     /* =====================================================
        EQUIPE
@@ -369,7 +377,7 @@ st.markdown(
 
     .team-label {{
         color: {SECONDARY};
-        font-size: 11px;
+        font-size: 12px;
         margin-top: 4px;
     }}
 
@@ -396,7 +404,7 @@ st.markdown(
         display: flex;
         justify-content: space-between;
         margin-top: 9px;
-        font-size: 11px;
+        font-size: 12px;
     }}
 
     .team-realizada {{
@@ -408,6 +416,7 @@ st.markdown(
         color: {WARNING};
         font-weight: 600;
     }}
+
 
     /* =====================================================
        LISTAS
@@ -446,13 +455,13 @@ st.markdown(
 
     .list-function {{
         color: {SECONDARY};
-        font-size: 11px;
+        font-size: 12px;
         margin-top: 3px;
     }}
 
     .list-score {{
         color: {PRIMARY};
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
         margin-top: 4px;
         font-variant-numeric: tabular-nums;
@@ -464,32 +473,6 @@ st.markdown(
         padding: 12px 0;
     }}
 
-    /* =====================================================
-       BADGES
-       ===================================================== */
-
-    .badge {{
-        display: inline-block;
-        padding: 5px 9px;
-        border-radius: 7px;
-        font-size: 10px;
-        font-weight: 700;
-    }}
-
-    .badge-success {{
-        color: {SUCCESS};
-        background: {SUCCESS_SOFT};
-    }}
-
-    .badge-warning {{
-        color: {WARNING};
-        background: {WARNING_SOFT};
-    }}
-
-    .badge-critical {{
-        color: {CRITICAL};
-        background: {CRITICAL_SOFT};
-    }}
 
     /* =====================================================
        FILTRO ATIVO
@@ -510,14 +493,19 @@ st.markdown(
         color: {PRIMARY};
     }}
 
+
     /* =====================================================
-       SEPARADOR
+       AVISOS
        ===================================================== */
 
-    .section-divider {{
-        height: 1px;
-        background: {BORDER};
-        margin: 30px 0;
+    .data-warning {{
+        background: {WARNING_SOFT};
+        border: 1px solid #F6D7A7;
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: {TEXT};
+        font-size: 12px;
+        margin-bottom: 18px;
     }}
 
     </style>
@@ -550,12 +538,28 @@ def get_client():
 @st.cache_data(ttl=300)
 def carregar_dados():
 
-    gc = get_client()
+    try:
 
-    planilha = gc.open_by_key(SHEET_ID)
-    aba_aplicacao = planilha.worksheet(ABA)
+        gc = get_client()
 
-    return aba_aplicacao.get_all_values()
+        planilha = gc.open_by_key(SHEET_ID)
+        aba_aplicacao = planilha.worksheet(ABA)
+
+        valores = aba_aplicacao.get_all_values()
+
+        horario_atualizacao = datetime.now(
+            ZoneInfo("America/Sao_Paulo")
+        ).strftime("%d/%m/%Y às %H:%M")
+
+        return valores, horario_atualizacao
+
+    except Exception as erro:
+
+        raise RuntimeError(
+            "Não foi possível carregar os dados da planilha. "
+            "Verifique a conexão com o Google Sheets, as permissões "
+            "da conta de serviço ou tente atualizar novamente."
+        ) from erro
 
 
 # =========================================================
@@ -563,16 +567,6 @@ def carregar_dados():
 # =========================================================
 
 col_data, col_botao = st.columns([6, 1])
-
-with col_data:
-
-    data_consulta = datetime.now().strftime(
-        "%d/%m/%Y às %H:%M"
-    )
-
-    st.caption(
-        f"Última atualização dos dados: {data_consulta}"
-    )
 
 with col_botao:
 
@@ -586,8 +580,26 @@ with col_botao:
 # CARREGAMENTO
 # =========================================================
 
-dados_aplicacao = carregar_dados()
+try:
 
+    dados_aplicacao, data_consulta = carregar_dados()
+
+except RuntimeError as erro:
+
+    st.error(str(erro))
+    st.stop()
+
+
+with col_data:
+
+    st.caption(
+        f"Última atualização dos dados: {data_consulta}"
+    )
+
+
+# =========================================================
+# VALIDAÇÃO INICIAL
+# =========================================================
 
 if len(dados_aplicacao) <= 3:
 
@@ -620,17 +632,26 @@ COLUNAS_ESPERADAS = [
 ]
 
 
-linhas_dados = dados_aplicacao[3:]
+linhas_dados = []
+
+for linha in dados_aplicacao[3:]:
+
+    if len(linha) < len(COLUNAS_ESPERADAS):
+        linha = linha + (
+            [""] *
+            (len(COLUNAS_ESPERADAS) - len(linha))
+        )
+
+    linhas_dados.append(
+        linha[:len(COLUNAS_ESPERADAS)]
+    )
 
 
-if not all(
-    len(linha) == len(COLUNAS_ESPERADAS)
-    for linha in linhas_dados
-):
+if not linhas_dados:
 
     st.error(
-        "A estrutura da aba 'Aplicação' foi alterada. "
-        "Verifique se as colunas continuam na estrutura esperada."
+        "Não foram encontradas linhas de colaboradores "
+        "na aba 'Aplicação'."
     )
 
     st.stop()
@@ -640,6 +661,45 @@ monitorias_google = pd.DataFrame(
     linhas_dados,
     columns=COLUNAS_ESPERADAS
 )
+
+
+# =========================================================
+# FUNÇÃO DE NORMALIZAÇÃO
+# =========================================================
+
+def normalizar_texto(valor):
+
+    if pd.isna(valor):
+        return ""
+
+    texto = str(valor).strip()
+
+    texto = " ".join(
+        texto.split()
+    )
+
+    texto = unicodedata.normalize(
+        "NFKD",
+        texto
+    )
+
+    texto = "".join(
+        caractere
+        for caractere in texto
+        if not unicodedata.combining(caractere)
+    )
+
+    return texto.casefold()
+
+
+def primeiro_nome(valor):
+
+    texto = normalizar_texto(valor)
+
+    if not texto:
+        return ""
+
+    return texto.split()[0]
 
 
 # =========================================================
@@ -680,31 +740,86 @@ monitorias_google["Supervisão"] = (
 )
 
 
-monitorias_google["Supervisão"] = (
-    monitorias_google["Supervisão"]
-    .replace(
-        {
-            "Júlio": "Julio"
-        }
-    )
-)
-
-
 # =========================================================
 # DATAS
 # =========================================================
 
-for coluna in [
+COLUNAS_DATA = [
     "Data Monitoria",
     "Data Lado a Lado",
     "Data Monitoria Offline"
-]:
+]
 
-    monitorias_google[coluna] = pd.to_datetime(
-        monitorias_google[coluna],
-        dayfirst=True,
+
+datas_invalidas = {}
+
+
+for coluna in COLUNAS_DATA:
+
+    texto_original = (
+        monitorias_google[coluna]
+        .astype("string")
+        .str.strip()
+    )
+
+    preenchidas = (
+        texto_original.notna()
+        &
+        (texto_original != "")
+    )
+
+    convertida = pd.to_datetime(
+        texto_original,
+        format="%d/%m/%Y",
         errors="coerce"
     )
+
+    falhas = (
+        preenchidas
+        &
+        convertida.isna()
+    )
+
+    if falhas.any():
+
+        datas_invalidas[coluna] = (
+            monitorias_google.loc[
+                falhas,
+                "Colaborador"
+            ]
+            .astype(str)
+            .tolist()
+        )
+
+    monitorias_google[coluna] = convertida
+
+
+if datas_invalidas:
+
+    quantidade_datas_invalidas = sum(
+        len(nomes)
+        for nomes in datas_invalidas.values()
+    )
+
+    st.warning(
+        f"⚠️ Foram encontradas {quantidade_datas_invalidas} "
+        "data(s) fora do formato esperado (dd/mm/aaaa). "
+        "Essas datas não foram consideradas como monitorias realizadas."
+    )
+
+    with st.expander("Ver colaboradores com data inválida"):
+
+        for coluna, nomes in datas_invalidas.items():
+
+            st.markdown(
+                f"**{coluna}:**"
+            )
+
+            for nome in nomes:
+
+                st.write(
+                    f"- {nome}"
+                )
 
 
 # =========================================================
@@ -883,18 +998,31 @@ apoio_adm = [
 ]
 
 
-funcao_por_nome = {}
+funcao_por_nome_normalizada = {}
 
 for nome in execs:
-    funcao_por_nome[nome] = "Exec"
+
+    funcao_por_nome_normalizada[
+        normalizar_texto(nome)
+    ] = "Exec"
+
 
 for nome in apoio_adm:
-    funcao_por_nome[nome] = "Apoio ADM"
+
+    funcao_por_nome_normalizada[
+        normalizar_texto(nome)
+    ] = "Apoio ADM"
+
+
+monitorias_google["Nome Normalizado"] = (
+    monitorias_google["Colaborador"]
+    .apply(normalizar_texto)
+)
 
 
 monitorias_google["Função"] = (
-    monitorias_google["Colaborador"]
-    .map(funcao_por_nome)
+    monitorias_google["Nome Normalizado"]
+    .map(funcao_por_nome_normalizada)
     .fillna("Não identificado")
 )
 
@@ -981,9 +1109,18 @@ notas_monitoria = {
 }
 
 
+notas_monitoria_normalizadas = {
+    normalizar_texto(nome): notas
+    for nome, notas in notas_monitoria.items()
+}
+
+
 def calcular_media_notas(nome):
 
-    notas = notas_monitoria.get(nome, [])
+    notas = notas_monitoria_normalizadas.get(
+        normalizar_texto(nome),
+        []
+    )
 
     if not notas:
         return None
@@ -998,7 +1135,7 @@ monitorias_google["Média"] = (
 
 
 # =========================================================
-# STATUS
+# STATUS OFICIAL
 # =========================================================
 
 monitorias_google["Realizada"] = (
@@ -1010,7 +1147,11 @@ monitorias_google["Realizada"] = (
 # PRAÇAS
 # =========================================================
 
+# Aline Ramalho Pimentel NÃO entra aqui porque
+# a equipe dela não faz parte das monitorias acompanhadas.
+
 pracas = {
+
     "São Paulo": {
         "responsavel": "Danielly Palaro",
         "supervisores": [
@@ -1018,7 +1159,6 @@ pracas = {
             "Kelly Gonzaga Querido",
             "Jean Cássio Negri dos Santos",
             "Julio César Castro",
-            "Aline Ramalho Pimentel",
             "Murilo Henrique Xavier"
         ]
     },
@@ -1054,48 +1194,80 @@ pracas = {
 # MAPEAMENTO PRAÇA -> SUPERVISÃO
 # =========================================================
 
-supervisao_por_praca = {
-
-    "São Paulo": [
-        "Wesley",
-        "Kelly",
-        "Jean",
-        "Julio",
-        "Murilo"
-    ],
-
-    "GMSP": [
-        "Camila",
-        "Laila",
-        "Alexssander"
-    ],
-
-    "Conne-Sul": [
-        "Angélica",
-        "Karine"
-    ],
-
-    "Sudeste": [
-        "Maiara",
-        "Leticia"
-    ]
-}
+praca_por_primeiro_nome_supervisao = {}
 
 
-praca_por_supervisao = {}
+for nome_praca, dados_praca in pracas.items():
 
-for praca, supervisoes in supervisao_por_praca.items():
+    for supervisor in dados_praca["supervisores"]:
 
-    for supervisao in supervisoes:
+        primeiro = primeiro_nome(
+            supervisor
+        )
 
-        praca_por_supervisao[supervisao] = praca
+        praca_por_primeiro_nome_supervisao[
+            primeiro
+        ] = nome_praca
+
+
+def identificar_praca(supervisao):
+
+    primeiro = primeiro_nome(
+        supervisao
+    )
+
+    return (
+        praca_por_primeiro_nome_supervisao
+        .get(primeiro)
+    )
 
 
 monitorias_google["Praça"] = (
     monitorias_google["Supervisão"]
-    .map(praca_por_supervisao)
-    .fillna("Não identificada")
+    .apply(identificar_praca)
 )
+
+
+# =========================================================
+# VALIDAÇÃO DE SUPERVISÕES
+# =========================================================
+
+supervisoes_planilha = set(
+    monitorias_google["Supervisão"]
+    .dropna()
+    .astype(str)
+    .map(normalizar_texto)
+    .unique()
+)
+
+
+supervisoes_mapeadas = set(
+    praca_por_primeiro_nome_supervisao.keys()
+)
+
+
+supervisoes_nao_mapeadas = sorted(
+    [
+        supervisao
+        for supervisao in (
+            monitorias_google["Supervisão"]
+            .dropna()
+            .astype(str)
+            .unique()
+        )
+        if primeiro_nome(supervisao)
+        not in supervisoes_mapeadas
+    ]
+)
+
+
+if supervisoes_nao_mapeadas:
+
+    st.warning(
+        "⚠️ Há supervisão(ões) na planilha que não estão "
+        "mapeadas para uma praça: "
+        + ", ".join(supervisoes_nao_mapeadas)
+    )
 
 
 # =========================================================
@@ -1127,9 +1299,10 @@ def html_card(titulo, valor, subtitulo=""):
     """
 
 
-def html_praca(nome, quantidade):
+def html_praca(nome, quantidade, responsavel):
 
     nome = html.escape(str(nome))
+    responsavel = html.escape(str(responsavel))
 
     return f"""
     <div class="praca-card">
@@ -1140,6 +1313,8 @@ def html_praca(nome, quantidade):
 
         <div class="praca-info">
             {quantidade} supervisões
+            <br>
+            Responsável: {responsavel}
         </div>
 
     </div>
@@ -1268,7 +1443,7 @@ def html_lista(titulo, dataframe, mostrar_nota=True):
 
 
 # =========================================================
-# CABEÇALHO MODERNO
+# CABEÇALHO
 # =========================================================
 
 st.html(
@@ -1343,32 +1518,34 @@ if praca_selecionada == "Todas":
             "Supervisão"
         ]
         .dropna()
+        .astype(str)
         .unique()
         .tolist()
     )
 
 else:
 
-    supervisoes_da_praca = (
-        supervisao_por_praca[
+    supervisoes_da_praca = [
+        primeiro_nome(nome)
+        for nome in pracas[
             praca_selecionada
-        ]
-    )
-
-    supervisoes_existentes = (
-        monitorias_google[
-            "Supervisão"
-        ]
-        .dropna()
-        .unique()
-        .tolist()
-    )
+        ]["supervisores"]
+    ]
 
     supervisoes_disponiveis = sorted(
         [
             supervisao
-            for supervisao in supervisoes_da_praca
-            if supervisao in supervisoes_existentes
+            for supervisao in (
+                monitorias_google[
+                    "Supervisão"
+                ]
+                .dropna()
+                .astype(str)
+                .unique()
+                .tolist()
+            )
+            if primeiro_nome(supervisao)
+            in supervisoes_da_praca
         ]
     )
 
@@ -1399,7 +1576,8 @@ with col_filtro_status:
 
 
 # =========================================================
-# APLICA FILTROS
+# FILTROS PRINCIPAIS
+# STATUS NÃO ENTRA AQUI
 # =========================================================
 
 df_filtrado = monitorias_google.copy()
@@ -1408,7 +1586,8 @@ df_filtrado = monitorias_google.copy()
 if praca_selecionada != "Todas":
 
     df_filtrado = df_filtrado[
-        df_filtrado["Praça"] == praca_selecionada
+        df_filtrado["Praça"]
+        == praca_selecionada
     ].copy()
 
 
@@ -1416,22 +1595,34 @@ if supervisao_selecionada != "Todas":
 
     df_filtrado = df_filtrado[
         df_filtrado["Supervisão"]
-        == supervisao_selecionada
+        .astype(str)
+        .map(normalizar_texto)
+        ==
+        normalizar_texto(
+            supervisao_selecionada
+        )
     ].copy()
 
+
+# =========================================================
+# LISTA COM FILTRO DE STATUS
+# =========================================================
 
 if status_selecionado == "Realizadas":
 
-    df_filtrado = df_filtrado[
+    df_lista = df_filtrado[
         df_filtrado["Realizada"]
     ].copy()
 
-
 elif status_selecionado == "Pendentes":
 
-    df_filtrado = df_filtrado[
+    df_lista = df_filtrado[
         ~df_filtrado["Realizada"]
     ].copy()
+
+else:
+
+    df_lista = df_filtrado.copy()
 
 
 # =========================================================
@@ -1440,12 +1631,14 @@ elif status_selecionado == "Pendentes":
 
 filtros_ativos = []
 
+
 if praca_selecionada != "Todas":
 
     filtros_ativos.append(
         f"<strong>Praça:</strong> "
         f"{html.escape(praca_selecionada)}"
     )
+
 
 if supervisao_selecionada != "Todas":
 
@@ -1454,10 +1647,11 @@ if supervisao_selecionada != "Todas":
         f"{html.escape(supervisao_selecionada)}"
     )
 
+
 if status_selecionado != "Todos":
 
     filtros_ativos.append(
-        f"<strong>Status:</strong> "
+        f"<strong>Status das listas:</strong> "
         f"{html.escape(status_selecionado)}"
     )
 
@@ -1473,9 +1667,11 @@ if filtros_ativos:
 
 # =========================================================
 # DESEMPENHO GERAL
+# USA df_filtrado, NÃO df_lista
 # =========================================================
 
 st.subheader("Desempenho geral")
+
 
 st.markdown(
     '<div class="section-caption">'
@@ -1631,6 +1827,7 @@ with col_score:
 
 # =========================================================
 # RESUMO
+# USA df_filtrado, NÃO df_lista
 # =========================================================
 
 st.subheader("Resumo")
@@ -1729,21 +1926,21 @@ for coluna, (
     with coluna:
 
         quantidade_supervisoes = len(
-            supervisao_por_praca[
-                nome_praca
-            ]
+            dados_praca["supervisores"]
         )
 
         st.html(
             html_praca(
                 nome_praca,
-                quantidade_supervisoes
+                quantidade_supervisoes,
+                dados_praca["responsavel"]
             )
         )
 
 
 # =========================================================
 # ACOMPANHAMENTO POR EQUIPE
+# USA df_filtrado
 # =========================================================
 
 st.subheader(
@@ -1758,9 +1955,11 @@ if supervisao_selecionada == "Todas":
             "Supervisão"
         ]
         .dropna()
+        .astype(str)
         .unique()
         .tolist()
     )
+
 
     if not nomes_supervisoes:
 
@@ -1777,6 +1976,7 @@ if supervisao_selecionada == "Todas":
             """
         )
 
+
     for inicio in range(
         0,
         len(nomes_supervisoes),
@@ -1788,6 +1988,7 @@ if supervisao_selecionada == "Todas":
         ]
 
         colunas = st.columns(4)
+
 
         for coluna, supervisao in zip(
             colunas,
@@ -1816,6 +2017,7 @@ if supervisao_selecionada == "Todas":
                 - realizadas
             )
 
+
             with coluna:
 
                 st.html(
@@ -1827,80 +2029,119 @@ if supervisao_selecionada == "Todas":
                     )
                 )
 
+
 else:
 
     df_supervisao = (
         df_filtrado[
             df_filtrado["Supervisão"]
-            == supervisao_selecionada
+            .astype(str)
+            .map(normalizar_texto)
+            ==
+            normalizar_texto(
+                supervisao_selecionada
+            )
         ].copy()
     )
 
-    if status_selecionado == "Realizadas":
 
-        realizadas_df = (
-            df_supervisao[
-                df_supervisao["Realizada"]
-            ].copy()
-        )
-
-        pendentes_df = pd.DataFrame(
-            columns=df_supervisao.columns
-        )
-
-    elif status_selecionado == "Pendentes":
-
-        realizadas_df = pd.DataFrame(
-            columns=df_supervisao.columns
-        )
-
-        pendentes_df = (
-            df_supervisao[
-                ~df_supervisao["Realizada"]
-            ].copy()
-        )
-
-    else:
-
-        realizadas_df = (
-            df_supervisao[
-                df_supervisao["Realizada"]
-            ].copy()
-        )
-
-        pendentes_df = (
-            df_supervisao[
-                ~df_supervisao["Realizada"]
-            ].copy()
-        )
-
-    col_realizadas, col_pendentes = (
-        st.columns(2)
+    realizadas_df = (
+        df_supervisao[
+            df_supervisao["Realizada"]
+        ].copy()
     )
 
-    with col_realizadas:
+
+    pendentes_df = (
+        df_supervisao[
+            ~df_supervisao["Realizada"]
+        ].copy()
+    )
+
+
+    total_supervisao = len(
+        df_supervisao
+    )
+
+
+    total_realizadas_supervisao = int(
+        df_supervisao["Realizada"].sum()
+    )
+
+
+    total_pendentes_supervisao = (
+        total_supervisao
+        - total_realizadas_supervisao
+    )
+
+
+    col_team, col_info = st.columns([1, 2])
+
+
+    with col_team:
 
         st.html(
-            html_lista(
-                f"Realizadas · {len(realizadas_df)}",
-                realizadas_df,
-                mostrar_nota=True
+            html_team(
+                supervisao_selecionada,
+                total_supervisao,
+                total_realizadas_supervisao,
+                total_pendentes_supervisao
             )
         )
 
-    with col_pendentes:
 
-        st.html(
-            html_lista(
-                f"Pendentes · {len(pendentes_df)}",
-                pendentes_df,
-                mostrar_nota=False
+    with col_info:
+
+        if status_selecionado == "Realizadas":
+
+            st.html(
+                html_lista(
+                    f"Realizadas · {len(realizadas_df)}",
+                    realizadas_df,
+                    mostrar_nota=True
+                )
             )
-        )
+
+        elif status_selecionado == "Pendentes":
+
+            st.html(
+                html_lista(
+                    f"Pendentes · {len(pendentes_df)}",
+                    pendentes_df,
+                    mostrar_nota=False
+                )
+            )
+
+        else:
+
+            col_realizadas, col_pendentes = (
+                st.columns(2)
+            )
+
+            with col_realizadas:
+
+                st.html(
+                    html_lista(
+                        f"Realizadas · {len(realizadas_df)}",
+                        realizadas_df,
+                        mostrar_nota=True
+                    )
+                )
+
+            with col_pendentes:
+
+                st.html(
+                    html_lista(
+                        f"Pendentes · {len(pendentes_df)}",
+                        pendentes_df,
+                        mostrar_nota=False
+                    )
+                )
 
 
 # =========================================================
 # PENDÊNCIAS
+# LISTA ÚNICA + DOWNLOAD
 # =========================================================
 
 st.subheader("Pendências")
@@ -1941,45 +2182,52 @@ if pendencias.empty:
 
 else:
 
-    col_pend_1, col_pend_2 = (
-        st.columns(2)
-    )
-
-    metade = (
-        len(pendencias) + 1
-    ) // 2
-
-    pendencias_1 = (
-        pendencias.iloc[:metade]
-    )
-
-    pendencias_2 = (
-        pendencias.iloc[metade:]
-    )
-
-    with col_pend_1:
-
-        st.html(
-            html_lista(
-                f"Colaboradores pendentes · {len(pendencias)}",
-                pendencias_1,
-                mostrar_nota=False
-            )
+    st.html(
+        html_lista(
+            f"Colaboradores pendentes · {len(pendencias)}",
+            pendencias,
+            mostrar_nota=False
         )
+    )
 
-    with col_pend_2:
 
-        st.html(
-            html_lista(
-                "",
-                pendencias_2,
-                mostrar_nota=False
-            )
-        )
+    pendencias_csv = pendencias[
+        [
+            "Colaborador",
+            "Função",
+            "Supervisão",
+            "Praça"
+        ]
+    ].copy()
+
+
+    pendencias_csv = pendencias_csv.rename(
+        columns={
+            "Colaborador": "Colaborador",
+            "Função": "Função",
+            "Supervisão": "Supervisão",
+            "Praça": "Praça"
+        }
+    )
+
+
+    csv = pendencias_csv.to_csv(
+        index=False,
+        encoding="utf-8-sig"
+    )
+
+
+    st.download_button(
+        label="Baixar pendências em CSV",
+        data=csv,
+        file_name="pendencias_monitorias.csv",
+        mime="text/csv"
+    )
 
 
 # =========================================================
 # EVOLUÇÃO
+# USA df_filtrado, NÃO df_lista
 # =========================================================
 
 st.subheader(
@@ -2006,7 +2254,7 @@ if not datas_validas.empty:
         datas_validas
         .max()
         .to_period("M"),
-        pd.Timestamp.today()
+        pd.Timestamp.now()
         .to_period("M")
     )
 
@@ -2019,12 +2267,28 @@ if not datas_validas.empty:
 else:
 
     meses = pd.period_range(
-        pd.Timestamp.today()
+        pd.Timestamp.now()
         .to_period("M"),
-        pd.Timestamp.today()
+        pd.Timestamp.now()
         .to_period("M"),
         freq="M"
     )
+
+
+MESES = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez"
+]
 
 
 quantidades = []
@@ -2058,9 +2322,8 @@ for periodo in meses:
     )
 
     nomes_meses.append(
-        periodo
-        .strftime("%b/%y")
-        .capitalize()
+        f"{MESES[periodo.month - 1]}/"
+        f"{str(periodo.year)[2:]}"
     )
 
 
@@ -2121,6 +2384,7 @@ st.plotly_chart(
 
 # =========================================================
 # OUTRAS ETAPAS
+# USA df_filtrado
 # =========================================================
 
 st.subheader(
