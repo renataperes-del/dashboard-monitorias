@@ -62,6 +62,54 @@ st.markdown(
         margin-top: 5px;
     }}
 
+    .praca-card {{
+        background-color: {CARD};
+        border: 1px solid {BORDA};
+        border-radius: 14px;
+        padding: 24px;
+        min-height: 145px;
+        margin-bottom: 15px;
+    }}
+
+    .praca-icone {{
+        font-size: 30px;
+        margin-bottom: 8px;
+    }}
+
+    .praca-nome {{
+        color: {TEXTO};
+        font-size: 19px;
+        font-weight: 700;
+    }}
+
+    .praca-info {{
+        color: {TEXTO_SECUNDARIO};
+        font-size: 13px;
+        margin-top: 7px;
+    }}
+
+    .nome-realizado {{
+        background-color: {CARD};
+        border: 1px solid {BORDA};
+        border-left: 4px solid {VERDE};
+        border-radius: 8px;
+        padding: 9px 14px;
+        margin-bottom: 6px;
+        color: {TEXTO};
+        font-size: 14px;
+    }}
+
+    .nome-pendente {{
+        background-color: {CARD};
+        border: 1px solid {BORDA};
+        border-left: 4px solid {LARANJA};
+        border-radius: 8px;
+        padding: 9px 14px;
+        margin-bottom: 6px;
+        color: {TEXTO};
+        font-size: 14px;
+    }}
+
     </style>
     """,
     unsafe_allow_html=True
@@ -268,6 +316,210 @@ with col4:
         """,
         unsafe_allow_html=True
     )
+
+# ==========================================
+# PRAÇAS E EQUIPES
+# ==========================================
+
+st.markdown(
+    f"""
+    <div style="
+        color:{TEXTO};
+        font-size:20px;
+        font-weight:600;
+        margin-top:30px;
+        margin-bottom:5px;
+    ">
+        Praças e equipes
+    </div>
+
+    <div style="
+        color:{TEXTO_SECUNDARIO};
+        font-size:13px;
+        margin-bottom:15px;
+    ">
+        Selecione uma praça para consultar a distribuição das equipes.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# ==========================================
+# DADOS DAS PRAÇAS
+# ==========================================
+
+pracas = {
+    "São Paulo": {
+        "icone": "📍",
+        "responsavel": "Danielly Palaro",
+        "supervisores": [
+            "Wesley Alves Martins",
+            "Kelly Gonzaga Querido",
+            "Jean Cássio Negri dos Santos",
+            "Julio César Castro",
+            "Aline Ramalho Pimentel",
+            "Murilo Henrique Xavier"
+        ]
+    },
+
+    "GMSP": {
+        "icone": "🌐",
+        "responsavel": "Caio Marques",
+        "supervisores": [
+            "Camila Dias Silva",
+            "Laila Cerqueira Rodrigues",
+            "Alexssander Affonso da Silva"
+        ]
+    },
+
+    "Conne-Sul": {
+        "icone": "🧭",
+        "responsavel": "Evelyn Viegas",
+        "supervisores": [
+            "Angelica Yumi Gaspar de Oliveira",
+            "Karine Conceição Rodrigues"
+        ]
+    },
+
+    "Sudeste": {
+        "icone": "📊",
+        "responsavel": "Darlene Carvalho",
+        "supervisores": [
+            "Maiara Bravo",
+            "Letícia da Silva Santos"
+        ]
+    }
+}
+
+# ==========================================
+# SELEÇÃO DA PRAÇA
+# ==========================================
+
+if "praca_selecionada" not in st.session_state:
+    st.session_state.praca_selecionada = None
+
+col_praca1, col_praca2 = st.columns(2)
+
+col_praca3, col_praca4 = st.columns(2)
+
+botoes_pracas = [
+    (col_praca1, "São Paulo"),
+    (col_praca2, "GMSP"),
+    (col_praca3, "Conne-Sul"),
+    (col_praca4, "Sudeste")
+]
+
+for coluna, nome_praca in botoes_pracas:
+
+    dados_praca = pracas[nome_praca]
+
+    with coluna:
+
+        html_praca = f"""
+        <div class="praca-card">
+
+            <div class="praca-icone">
+                {dados_praca["icone"]}
+            </div>
+
+            <div class="praca-nome">
+                {nome_praca}
+            </div>
+
+            <div class="praca-info">
+                {len(dados_praca["supervisores"])} supervisores
+            </div>
+
+        </div>
+        """
+
+        st.html(html_praca)
+
+        if st.button(
+            f"Consultar {nome_praca}",
+            key=f"btn_{nome_praca}",
+            use_container_width=True
+        ):
+            st.session_state.praca_selecionada = nome_praca
+
+# ==========================================
+# DETALHAMENTO DA PRAÇA
+# ==========================================
+
+if st.session_state.praca_selecionada:
+
+    nome_praca = st.session_state.praca_selecionada
+    dados_praca = pracas[nome_praca]
+
+    st.markdown("---")
+
+    st.markdown(
+        f"""
+        <div style="
+            color:{AZUL};
+            font-size:22px;
+            font-weight:700;
+            margin-top:10px;
+            margin-bottom:5px;
+        ">
+            {dados_praca["icone"]} {nome_praca}
+        </div>
+
+        <div style="
+            color:{TEXTO_SECUNDARIO};
+            font-size:14px;
+            margin-bottom:20px;
+        ">
+            Responsável pela praça: <strong>{dados_praca["responsavel"]}</strong>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f"""
+        <div style="
+            color:{TEXTO};
+            font-size:18px;
+            font-weight:600;
+            margin-bottom:15px;
+        ">
+            Supervisores da praça
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    col_sup1, col_sup2 = st.columns(2)
+
+    for i, nome in enumerate(dados_praca["supervisores"]):
+
+        with [col_sup1, col_sup2][i % 2]:
+
+            st.markdown(
+                f"""
+                <div style="
+                    background-color:{CARD};
+                    border:1px solid {BORDA};
+                    border-left:4px solid {AZUL};
+                    border-radius:10px;
+                    padding:14px 16px;
+                    margin-bottom:8px;
+                    color:{TEXTO};
+                    font-size:14px;
+                ">
+                    👤 {nome}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+    if st.button(
+        "← Voltar para praças",
+        key="voltar_pracas"
+    ):
+        st.session_state.praca_selecionada = None
+        st.rerun()
 
 # ==========================================
 # ACOMPANHAMENTO POR EQUIPE
