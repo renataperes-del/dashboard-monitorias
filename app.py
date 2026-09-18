@@ -136,8 +136,8 @@ monitorias_google.columns = [
 ]
 
 monitorias_google = monitorias_google[
-    monitorias_google["Colaborador"].notna() &
-    (monitorias_google["Colaborador"] != "")
+    monitorias_google["Colaborador"].notna()
+    & (monitorias_google["Colaborador"] != "")
 ].copy()
 
 monitorias_google = monitorias_google.replace("", pd.NA)
@@ -236,7 +236,7 @@ percentual = (
 )
 
 # ==========================================
-# CARDS
+# CARDS PRINCIPAIS
 # ==========================================
 
 col1, col2, col3, col4 = st.columns(4)
@@ -348,7 +348,9 @@ if supervisao == "Todas":
 
     colunas_resumo = st.columns(3)
 
-    for i, (_, linha) in enumerate(resumo_equipes.iterrows()):
+    for i, (_, linha) in enumerate(
+        resumo_equipes.iterrows()
+    ):
 
         with colunas_resumo[i % 3]:
 
@@ -545,11 +547,11 @@ contagem_mensal = (
 )
 
 periodos = [
-    "2026-05",
-    "2026-06",
-    "2026-07",
-    "2026-08",
-    "2026-09"
+    pd.Period("2026-05", freq="M"),
+    pd.Period("2026-06", freq="M"),
+    pd.Period("2026-07", freq="M"),
+    pd.Period("2026-08", freq="M"),
+    pd.Period("2026-09", freq="M")
 ]
 
 meses = [
