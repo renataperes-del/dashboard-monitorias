@@ -5,20 +5,15 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 
-# ============================================================
+# =========================================================
 # CONFIGURAÇÃO
-# ============================================================
+# =========================================================
 
 st.set_page_config(
     page_title="Dashboard de Monitorias",
     page_icon="N",
     layout="wide"
 )
-
-
-# ============================================================
-# CORES
-# ============================================================
 
 BG = "#F7F8FC"
 CARD = "#FFFFFF"
@@ -33,9 +28,9 @@ ORANGE = "#F2A66F"
 PINK = "#E58FA3"
 
 
-# ============================================================
-# ESTILO
-# ============================================================
+# =========================================================
+# CSS
+# =========================================================
 
 st.markdown(
     f"""
@@ -67,224 +62,242 @@ st.markdown(
         color: {SECONDARY} !important;
     }}
 
-    /* ========================================================
-       SELECTBOX
-       ======================================================== */
-
     div[data-baseweb="select"] > div {{
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 12px;
     }}
 
-    /* ========================================================
-       METRICS
-       ======================================================== */
-
-    div[data-testid="stMetric"] {{
-        background: {CARD};
-        border: 1px solid {BORDER};
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
-        min-height: 120px;
-    }}
-
-    div[data-testid="stMetricLabel"] {{
-        color: {SECONDARY} !important;
-        font-size: 0.78rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-    }}
-
-    div[data-testid="stMetricValue"] {{
-        color: {TEXT} !important;
-        font-size: 2rem;
-        font-weight: 700;
-    }}
-
-    div[data-testid="stMetricDelta"] {{
-        color: {SECONDARY} !important;
-    }}
-
-    /* ========================================================
-       CARDS PERSONALIZADOS
-       ======================================================== */
+    /* -------------------------------------------------- */
+    /* CARDS                                                */
+    /* -------------------------------------------------- */
 
     .custom-card {{
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 18px;
-        padding: 20px;
+        padding: 22px;
+        min-height: 128px;
         box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
-        margin-bottom: 12px;
     }}
 
     .custom-card-title {{
         color: {SECONDARY};
-        font-size: 0.76rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        margin-bottom: 7px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 10px;
     }}
 
     .custom-card-value {{
         color: {TEXT};
-        font-size: 1.8rem;
-        font-weight: 700;
-        line-height: 1.1;
+        font-size: 30px;
+        font-weight: 750;
+        line-height: 1;
     }}
 
     .custom-card-name {{
         color: {TEXT};
-        font-size: 1.35rem;
+        font-size: 18px;
         font-weight: 700;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
     }}
 
     .custom-card-subtitle {{
         color: {SECONDARY};
-        font-size: 0.9rem;
+        font-size: 13px;
     }}
 
-    .team-card {{
-        background: {CARD};
-        border: 1px solid {BORDER};
-        border-radius: 18px;
-        padding: 20px;
-        min-height: 145px;
-        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
-    }}
-
-    .team-name {{
-        color: {TEXT};
-        font-size: 1.15rem;
-        font-weight: 700;
-        margin-bottom: 12px;
-    }}
-
-    .team-number {{
-        color: {SECONDARY};
-        font-size: 0.9rem;
-        margin-bottom: 8px;
-    }}
-
-    .status-realizada {{
-        color: {GREEN};
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 5px;
-    }}
-
-    .status-pendente {{
-        color: {ORANGE};
-        font-size: 0.9rem;
-        font-weight: 600;
-    }}
+    /* -------------------------------------------------- */
+    /* PRAÇAS                                               */
+    /* -------------------------------------------------- */
 
     .praca-card {{
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 18px;
-        padding: 22px;
-        min-height: 125px;
+        padding: 24px;
+        min-height: 130px;
         box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
     }}
 
     .praca-name {{
         color: {TEXT};
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 8px;
+        font-size: 24px;
+        font-weight: 750;
+        margin-bottom: 12px;
     }}
 
     .praca-info {{
         color: {SECONDARY};
-        font-size: 0.88rem;
+        font-size: 13px;
     }}
+
+    /* -------------------------------------------------- */
+    /* INFORMAÇÕES                                          */
+    /* -------------------------------------------------- */
 
     .info-card {{
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 18px;
         padding: 22px;
+        margin-top: 12px;
         box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
     }}
 
     .info-label {{
         color: {SECONDARY};
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
+        font-size: 12px;
+        font-weight: 600;
         margin-bottom: 5px;
     }}
 
     .info-value {{
         color: {TEXT};
-        font-size: 1rem;
-        line-height: 1.5;
+        font-size: 16px;
+        font-weight: 650;
+        margin-bottom: 14px;
     }}
+
+    /* -------------------------------------------------- */
+    /* NOTA GERAL                                           */
+    /* -------------------------------------------------- */
 
     .score-card {{
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 18px;
-        padding: 18px 22px;
+        padding: 28px;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
     }}
 
     .score-label {{
         color: {SECONDARY};
-        font-size: 0.76rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 12px;
     }}
 
     .score-value {{
         color: {TEXT};
-        font-size: 1.9rem;
-        font-weight: 700;
-        margin-top: 5px;
+        font-size: 46px;
+        font-weight: 800;
+        line-height: 1;
     }}
 
     .score-description {{
         color: {SECONDARY};
-        font-size: 0.85rem;
-        margin-top: 4px;
+        font-size: 13px;
+        margin-top: 12px;
     }}
+
+    /* -------------------------------------------------- */
+    /* LISTAS                                               */
+    /* -------------------------------------------------- */
 
     .list-card {{
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 18px;
-        padding: 22px;
+        padding: 20px;
+        min-height: 180px;
         box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
     }}
 
     .list-title {{
         color: {TEXT};
-        font-size: 1.1rem;
-        font-weight: 700;
+        font-size: 17px;
+        font-weight: 750;
         margin-bottom: 14px;
     }}
 
     .list-item {{
-        color: {TEXT};
-        font-size: 0.9rem;
-        padding: 6px 0;
         border-bottom: 1px solid {BORDER};
+        padding: 11px 0;
     }}
 
     .list-item:last-child {{
         border-bottom: none;
     }}
 
+    .list-name {{
+        color: {TEXT};
+        font-size: 14px;
+        font-weight: 650;
+    }}
+
+    .list-function {{
+        color: {SECONDARY};
+        font-size: 12px;
+        margin-top: 3px;
+    }}
+
+    .list-score {{
+        color: {BLUE};
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 3px;
+    }}
+
     .empty-message {{
         color: {SECONDARY};
-        font-size: 0.9rem;
+        font-size: 13px;
+        padding: 12px 0;
+    }}
+
+    /* -------------------------------------------------- */
+    /* SUPERVISÃO                                           */
+    /* -------------------------------------------------- */
+
+    .team-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 20px;
+        min-height: 150px;
+        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+    }}
+
+    .team-name {{
+        color: {TEXT};
+        font-size: 16px;
+        font-weight: 750;
+        margin-bottom: 16px;
+    }}
+
+    .team-number {{
+        color: {TEXT};
+        font-size: 28px;
+        font-weight: 800;
+    }}
+
+    .team-label {{
+        color: {SECONDARY};
+        font-size: 12px;
+    }}
+
+    .status-realizada {{
+        color: {GREEN};
+        font-size: 13px;
+        font-weight: 650;
+    }}
+
+    .status-pendente {{
+        color: {ORANGE};
+        font-size: 13px;
+        font-weight: 650;
+    }}
+
+    /* -------------------------------------------------- */
+    /* SEPARADORES                                          */
+    /* -------------------------------------------------- */
+
+    .section-space {{
+        height: 12px;
     }}
 
     </style>
@@ -293,9 +306,9 @@ st.markdown(
 )
 
 
-# ============================================================
-# CONEXÃO COM GOOGLE SHEETS
-# ============================================================
+# =========================================================
+# GOOGLE SHEETS
+# =========================================================
 
 SHEET_ID = "1bSYqD9wLkpMxTIGN6kyFh6zuVTixM384oQr8cGskYcM"
 ABA = "Aplicação"
@@ -316,9 +329,9 @@ aba_aplicacao = planilha.worksheet(ABA)
 dados_aplicacao = aba_aplicacao.get_all_values()
 
 
-# ============================================================
-# TRATAMENTO DA PLANILHA
-# ============================================================
+# =========================================================
+# DATAFRAME
+# =========================================================
 
 monitorias_google = pd.DataFrame(dados_aplicacao)
 
@@ -371,117 +384,9 @@ monitorias_google["Data Monitoria Offline"] = pd.to_datetime(
 )
 
 
-# ============================================================
-# NOTAS DAS MONITORIAS
-# ============================================================
-
-notas_monitoria = {
-    "Pedro Llanos Iampietro": [75.26, 76.46],
-    "Matheus Lacerda Lima": [94.00, 77.66],
-    "Gabriel Soares Gonçalves": [80.73, 80.66],
-    "Laura Marques da Silva": [75.86, 81.93],
-    "Felipe Santos Nery": [77.66, 75.86],
-    "Evellyn Silva dos Santos": [86.20, 81.22],
-    "Maria Eduarda Rodrigues Gama": [60.00, 63.60],
-    "Isabella da Silva Neves": [50.00, 66.60],
-    "Douglas de Souza Oliveira": [67.40, 62.60],
-    "Keren Jamille Coutinho Albrechete": [82.60, 65.80],
-    "Jessica Carol Alves de Aguiar": [51.80, 60.20],
-    "Ana Beatriz de Queiroz": [57.20, 51.20],
-    "Amanda Ferreira da Silva": [73.46, 72.86],
-    "Eduarda Paes Leme Maldonado": [85.00, 49.20],
-    "Isabella Santana Felix dos Santos": [58.80, 54.80],
-    "Emanuele Maria Carvalho Silva": [61.20, 54.60],
-    "Angel Almeida Braga": [65.20, 62.60],
-    "Pedro Paulo Clemente Torres": [66.04, 75.50],
-    "Raquel Lima Santos": [58.56, 46.64],
-    "Cassiele Chare Roberto": [55.80, 56.40],
-    "Lorena da Silva Souza": [71.40, 61.20],
-    "Beatriz Fusari Martins Moreira": [74.60, 69.86],
-    "Sabrina Rodrigues da Silva": [68.52, 66.00],
-    "Sabrina Kahati Cardoso": [60.00, 68.60],
-    "Guilherme Tarragô Mendonça da Silva": [63.20, 51.20],
-    "Karine Kethely Soares": [67.40, 61.80],
-    "Ingrid Nunes da Cruz": [67.20, 51.20],
-    "Luanna Soares dos Santos Siqueira": [51.20, 52.02],
-    "Sérgio Vinícius Souza Silva da Hora": [71.60, 63.86],
-    "Emile Cristine Brito da Silva": [77.52, 52.63],
-    "Aline Trindade Moreira": [69.60, 39.80],
-    "Cauã Petrella de Sousa": [66.00, 57.52],
-    "Giulia Rodrigues Pimentel": [64.80, 42.80],
-    "Elissama Laís Cuscan Alves": [56.60, 65.00],
-    "Ana Luiza Cavalcante Silva": [69.26, 65.00],
-    "Ana Beatriz De Oliveira Jovino": [91.18, 83.40],
-    "Erik Xavier Gonçalves": [77.80, 51.20],
-    "Gabriella Farias de Melo": [63.00, 67.08],
-    "Lucas Rodrigues dos Santos Baltazar": [56.00, 63.60],
-    "Gabriely da Rocha Ferreira Silva": [57.48, 56.68],
-    "Henzo Silva Oliveira": [88.00],
-    "Stefany Miriam Marçal": [62.00, 41.00],
-    "Lucas Scalambrini Caetano": [82.00, 65.80],
-    "Juliette Mendes Lima": [58.80, 74.40],
-    "Isabela Cason": [61.20, 67.60],
-    "Mateus Custódio Dias da Conceição": [75.60, 69.60],
-    "Gabriela Salvi Sbardelotto": [56.00, 63.00],
-    "Juliana Santos de Freitas": [84.33, 76.46],
-    "Davi de Araujo Lima": [60.80, 54.20],
-    "Nataly Freitas Souza Santos": [73.46, 75.90],
-    "Gabriel Bulhões Vieira": [52.40, 65.00],
-    "Bruna Clementino Graça": [74.73, 83.80],
-    "Ian Monteiro Hernandez": [57.00, 53.80],
-    "Cristina de Deus Aguiar Stoski": [69.90, 95.20],
-    "Ana Beatriz Rodrigues Proença": [68.66, 91.00],
-    "Emilly Oliveira França": [77.06, 79.46],
-    "Mirella Pereira de Oliveira": [69.98, 77.52],
-    "Danilo Batista de Freitas Silva": [86.20, 74.40],
-    "Amanda Ribeiro Carvalho": [70.20, 65.20],
-    "Ana Carolina Gabriel Amador": [85.53, 87.40],
-    "Rebeca Beatriz Amaral Lopes": [79.20, 81.00],
-    "Monique de Souza Marques": [64.60, 74.40],
-    "Marcelly Paiva da Silva": [66.00, 69.00],
-    "Jefferson Amaral Silva Junior": [66.80, 73.00],
-    "Yasmim Francisca dos Santos": [62.00, 49.40],
-    "Eduarda de Araujo Rodrigues": [76.60, 58.40],
-    "Rayssa Sobral Araújo": [72.00, 70.00],
-    "Amanda Lima Pereira": [69.60, 71.80],
-    "Gustavo Bertholino Cardoso": [82.00, 74.80],
-    "Hosana de Souza Soares": [79.60, 75.40],
-    "Naiara Borcatt Porto": [70.20, 73.80],
-    "Matheus Marucci Hudzinski": [67.20, 70.20],
-    "Letícia Lima Souza": [70.80, 64.60],
-    "Robson Souto Campos da Silva": [87.40, 89.98]
-}
-
-
-def calcular_media_notas(nome):
-    notas = notas_monitoria.get(nome)
-
-    if not notas:
-        return pd.NA
-
-    notas_validas = []
-
-    for nota in notas:
-        try:
-            notas_validas.append(float(nota))
-        except:
-            pass
-
-    if not notas_validas:
-        return pd.NA
-
-    return sum(notas_validas) / len(notas_validas)
-
-
-monitorias_google["Nota Média"] = (
-    monitorias_google["Colaborador"]
-    .apply(calcular_media_notas)
-)
-
-
-# ============================================================
-# FUNÇÃO DOS COLABORADORES
-# ============================================================
+# =========================================================
+# FUNÇÕES
+# =========================================================
 
 execs = [
     "Gabriela Cardoso de Sousa",
@@ -631,12 +536,122 @@ for nome in apoio_adm:
 monitorias_google["Função"] = (
     monitorias_google["Colaborador"]
     .map(funcao_por_nome)
+    .fillna("Não identificado")
 )
 
 
-# ============================================================
+# =========================================================
+# NOTAS
+# =========================================================
+
+notas_monitoria = {
+    "Pedro Llanos Iampietro": [75.26, 76.46],
+    "Matheus Lacerda Lima": [94.00, 77.66],
+    "Gabriel Soares Gonçalves": [80.73, 80.66],
+    "Laura Marques da Silva": [75.86, 81.93],
+    "Felipe Santos Nery": [77.66, 75.86],
+    "Evellyn Silva dos Santos": [86.20, 81.22],
+    "Maria Eduarda Rodrigues Gama": [60.00, 63.60],
+    "Isabella da Silva Neves": [50.00, 66.60],
+    "Douglas de Souza Oliveira": [67.40, 62.60],
+    "Keren Jamille Coutinho Albrechete": [82.60, 65.80],
+    "Jessica Carol Alves de Aguiar": [51.80, 60.20],
+    "Ana Beatriz de Queiroz": [57.20, 51.20],
+    "Amanda Ferreira da Silva": [73.46, 72.86],
+    "Eduarda Paes Leme Maldonado": [85.00, 49.20],
+    "Isabella Santana Felix dos Santos": [58.80, 54.80],
+    "Emanuele Maria Carvalho Silva": [61.20, 54.60],
+    "Angel Almeida Braga": [65.20, 62.60],
+    "Pedro Paulo Clemente Torres": [66.04, 75.50],
+    "Raquel Lima Santos": [58.56, 46.64],
+    "Cassiele Chare Roberto": [55.80, 56.40],
+    "Lorena da Silva Souza": [71.40, 61.20],
+    "Beatriz Fusari Martins Moreira": [74.60, 69.86],
+    "Sabrina Rodrigues da Silva": [68.52, 66.00],
+    "Sabrina Kahati Cardoso": [60.00, 68.60],
+    "Guilherme Tarragô Mendonça da Silva": [63.20, 51.20],
+    "Karine Kethely Soares": [67.40, 61.80],
+    "Ingrid Nunes da Cruz": [67.20, 51.20],
+    "Luanna Soares dos Santos Siqueira": [51.20, 52.02],
+    "Sérgio Vinícius Souza Silva da Hora": [71.60, 63.86],
+    "Emile Cristine Brito da Silva": [77.52, 52.63],
+    "Aline Trindade Moreira": [69.60, 39.80],
+    "Cauã Petrella de Sousa": [66.00, 57.52],
+    "Giulia Rodrigues Pimentel": [64.80, 42.80],
+    "Elissama Laís Cuscan Alves": [56.60, 65.00],
+    "Ana Luiza Cavalcante Silva": [69.26, 65.00],
+    "Ana Beatriz De Oliveira Jovino": [91.18, 83.40],
+    "Erik Xavier Gonçalves": [77.80, 51.20],
+    "Gabriella Farias de Melo": [63.00, 67.08],
+    "Lucas Rodrigues dos Santos Baltazar": [56.00, 63.60],
+    "Gabriely da Rocha Ferreira Silva": [57.48, 56.68],
+    "Henzo Silva Oliveira": [88.00],
+    "Stefany Miriam Marçal": [62.00, 41.00],
+    "Lucas Scalambrini Caetano": [82.00, 65.80],
+    "Juliette Mendes Lima": [58.80, 74.40],
+    "Isabela Cason": [61.20, 67.60],
+    "Mateus Custódio Dias da Conceição": [75.60, 69.60],
+    "Gabriela Salvi Sbardelotto": [56.00, 63.00],
+    "Juliana Santos de Freitas": [84.33, 76.46],
+    "Davi de Araujo Lima": [60.80, 54.20],
+    "Nataly Freitas Souza Santos": [73.46, 75.90],
+    "Gabriel Bulhões Vieira": [52.40, 65.00],
+    "Bruna Clementino Graça": [74.73, 83.80],
+    "Ian Monteiro Hernandez": [57.00, 53.80],
+    "Cristina de Deus Aguiar Stoski": [69.90, 95.20],
+    "Ana Beatriz Rodrigues Proença": [68.66, 91.00],
+    "Emilly Oliveira França": [77.06, 79.46],
+    "Mirella Pereira de Oliveira": [69.98, 77.52],
+    "Danilo Batista de Freitas Silva": [86.20, 74.40],
+    "Amanda Ribeiro Carvalho": [70.20, 65.20],
+    "Ana Carolina Gabriel Amador": [85.53, 87.40],
+    "Rebeca Beatriz Amaral Lopes": [79.20, 81.00],
+    "Monique de Souza Marques": [64.60, 74.40],
+    "Marcelly Paiva da Silva": [66.00, 69.00],
+    "Jefferson Amaral Silva Junior": [66.80, 73.00],
+    "Yasmim Francisca dos Santos": [62.00, 49.40],
+    "Eduarda de Araujo Rodrigues": [76.60, 58.40],
+    "Rayssa Sobral Araújo": [72.00, 70.00],
+    "Amanda Lima Pereira": [69.60, 71.80],
+    "Gustavo Bertholino Cardoso": [82.00, 74.80],
+    "Hosana de Souza Soares": [79.60, 75.40],
+    "Naiara Borcatt Porto": [70.20, 73.80],
+    "Matheus Marucci Hudzinski": [67.20, 70.20],
+    "Letícia Lima Souza": [70.80, 64.60],
+    "Robson Souto Campos da Silva": [87.40, 89.98]
+}
+
+
+def calcular_media_notas(nome):
+    notas = notas_monitoria.get(nome, [])
+
+    if not notas:
+        return None
+
+    return sum(notas) / len(notas)
+
+
+monitorias_google["Média"] = (
+    monitorias_google["Colaborador"]
+    .apply(calcular_media_notas)
+)
+
+
+# =========================================================
+# STATUS
+# =========================================================
+
+# REGRA OFICIAL:
+# Monitoria realizada = Data Monitoria preenchida
+
+monitorias_google["Realizada"] = (
+    monitorias_google["Data Monitoria"].notna()
+)
+
+
+# =========================================================
 # PRAÇAS
-# ============================================================
+# =========================================================
 
 pracas = {
     "São Paulo": {
@@ -675,34 +690,127 @@ pracas = {
 }
 
 
-# ============================================================
-# STATUS
-# ============================================================
+# =========================================================
+# FUNÇÕES AUXILIARES
+# =========================================================
 
-monitorias_google["Status Monitoria"] = (
-    monitorias_google["Data Monitoria"]
-    .notna()
-    .map({
-        True: "Realizada",
-        False: "Pendente"
-    })
-)
+def html_card(titulo, valor, subtitulo=""):
+    return f"""
+    <div class="custom-card">
+        <div class="custom-card-title">{titulo}</div>
+        <div class="custom-card-value">{valor}</div>
+        <div class="custom-card-subtitle">{subtitulo}</div>
+    </div>
+    """
 
 
-# ============================================================
+def html_praca(nome, quantidade):
+    return f"""
+    <div class="praca-card">
+        <div class="praca-name">{nome}</div>
+        <div class="praca-info">
+            {quantidade} supervisões
+        </div>
+    </div>
+    """
+
+
+def html_team(nome, total, realizadas, pendentes):
+    return f"""
+    <div class="team-card">
+        <div class="team-name">{nome}</div>
+
+        <div class="team-number">{total}</div>
+        <div class="team-label">colaboradores</div>
+
+        <div style="margin-top:14px;">
+            <div class="status-realizada">
+                {realizadas} realizadas
+            </div>
+
+            <div class="status-pendente">
+                {pendentes} pendentes
+            </div>
+        </div>
+    </div>
+    """
+
+
+def html_lista(titulo, dataframe, mostrar_nota=True):
+
+    if dataframe.empty:
+        return f"""
+        <div class="list-card">
+            <div class="list-title">{titulo}</div>
+            <div class="empty-message">
+                Nenhum colaborador nesta categoria.
+            </div>
+        </div>
+        """
+
+    itens = ""
+
+    for _, row in dataframe.iterrows():
+
+        nome = row["Colaborador"]
+        funcao = row["Função"]
+
+        media = row["Média"]
+
+        nota_html = ""
+
+        if mostrar_nota and pd.notna(media):
+            nota_html = f"""
+            <div class="list-score">
+                Média: {media:.2f}%
+            </div>
+            """
+
+        itens += f"""
+        <div class="list-item">
+
+            <div class="list-name">
+                {nome}
+            </div>
+
+            <div class="list-function">
+                {funcao}
+            </div>
+
+            {nota_html}
+
+        </div>
+        """
+
+    return f"""
+    <div class="list-card">
+
+        <div class="list-title">
+            {titulo}
+        </div>
+
+        {itens}
+
+    </div>
+    """
+
+
+# =========================================================
 # CABEÇALHO
-# ============================================================
+# =========================================================
 
 st.caption("NUBE • TREINAMENTO COMERCIAL")
 
 st.title("Dashboard de Monitorias")
 
-st.write("Acompanhamento das aplicações de monitoria")
+st.write(
+    "Acompanhamento das aplicações de monitoria"
+)
 
 
-# ============================================================
+# =========================================================
 # FILTRO
-# ============================================================
+# =========================================================
 
 supervisoes = sorted(
     monitorias_google["Supervisão"]
@@ -711,80 +819,87 @@ supervisoes = sorted(
     .tolist()
 )
 
+opcoes_supervisao = ["Todas"] + supervisoes
+
 supervisao_selecionada = st.selectbox(
     "Supervisão",
-    ["Todas"] + supervisoes
+    opcoes_supervisao
 )
 
+
+# =========================================================
+# DATAFRAME FILTRADO
+# =========================================================
+
 if supervisao_selecionada == "Todas":
-    dados = monitorias_google.copy()
+
+    df_filtrado = monitorias_google.copy()
+
 else:
-    dados = monitorias_google[
-        monitorias_google["Supervisão"] == supervisao_selecionada
+
+    df_filtrado = monitorias_google[
+        monitorias_google["Supervisão"]
+        == supervisao_selecionada
     ].copy()
 
 
-# ============================================================
-# MÉTRICAS
-# ============================================================
-
-total_colaboradores = len(dados)
-
-realizadas = dados["Data Monitoria"].notna().sum()
-
-pendentes = total_colaboradores - realizadas
-
-percentual_concluido = (
-    realizadas / total_colaboradores * 100
-    if total_colaboradores > 0
-    else 0
-)
-
-notas_validas = pd.to_numeric(
-    dados["Nota Média"],
-    errors="coerce"
-).dropna()
-
-media_geral = (
-    notas_validas.mean()
-    if len(notas_validas) > 0
-    else 0
-)
-
-
-# ============================================================
+# =========================================================
 # DESEMPENHO GERAL
-# ============================================================
+# =========================================================
 
 st.subheader("Desempenho geral")
 
 st.caption("Média das notas das monitorias")
 
-col_score, col_info = st.columns([1, 2])
+col_grafico, col_score = st.columns([1, 1])
 
-with col_score:
 
-    fig_score = go.Figure(
+notas_validas = df_filtrado[
+    df_filtrado["Média"].notna()
+]["Média"]
+
+if len(notas_validas) > 0:
+
+    media_geral = notas_validas.mean()
+
+else:
+
+    media_geral = 0
+
+
+with col_grafico:
+
+    fig = go.Figure(
         go.Pie(
             values=[
                 media_geral,
-                max(100 - media_geral, 0)
+                max(0, 100 - media_geral)
             ],
-            hole=0.78,
-            textinfo="none",
+            labels=[
+                "Média",
+                "Restante"
+            ],
+            hole=0.72,
             marker=dict(
                 colors=[
                     BLUE,
                     "#EEF0F7"
                 ]
-            )
+            ),
+            textinfo="none",
+            hoverinfo="skip"
         )
     )
 
-    fig_score.update_layout(
+    fig.update_layout(
         showlegend=False,
-        margin=dict(l=10, r=10, t=10, b=10),
-        height=220,
+        margin=dict(
+            l=10,
+            r=10,
+            t=10,
+            b=10
+        ),
+        height=250,
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         annotations=[
@@ -793,7 +908,7 @@ with col_score:
                 x=0.5,
                 y=0.5,
                 font=dict(
-                    size=30,
+                    size=28,
                     color=TEXT
                 ),
                 showarrow=False
@@ -802,142 +917,163 @@ with col_score:
     )
 
     st.plotly_chart(
-        fig_score,
+        fig,
         use_container_width=True,
         config={"displayModeBar": False}
     )
 
-with col_info:
+
+with col_score:
+
+    quantidade_com_nota = df_filtrado[
+        df_filtrado["Média"].notna()
+    ].shape[0]
 
     st.html(
         f"""
         <div class="score-card">
+
             <div class="score-label">
-                Colaboradores com nota registrada
+                COLABORADORES COM NOTA REGISTRADA
             </div>
+
             <div class="score-value">
-                {len(notas_validas)}
+                {quantidade_com_nota}
             </div>
+
             <div class="score-description">
-                colaboradores com média disponível
+                Média calculada a partir das notas
+                disponíveis nas monitorias.
             </div>
+
         </div>
         """
     )
 
 
-# ============================================================
-# CARDS PRINCIPAIS
-# ============================================================
+# =========================================================
+# RESUMO
+# =========================================================
 
 st.subheader("Resumo")
 
-c1, c2, c3, c4 = st.columns(4)
+total_colaboradores = len(df_filtrado)
 
-with c1:
+total_realizadas = int(
+    df_filtrado["Realizada"].sum()
+)
+
+total_pendentes = (
+    total_colaboradores
+    - total_realizadas
+)
+
+percentual_concluido = (
+    total_realizadas / total_colaboradores * 100
+    if total_colaboradores > 0
+    else 0
+)
+
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
     st.html(
-        f"""
-        <div class="custom-card">
-            <div class="custom-card-title">Colaboradores</div>
-            <div class="custom-card-value">{total_colaboradores}</div>
-        </div>
-        """
+        html_card(
+            "COLABORADORES",
+            total_colaboradores,
+            "no acompanhamento"
+        )
     )
 
-with c2:
+with col2:
     st.html(
-        f"""
-        <div class="custom-card">
-            <div class="custom-card-title">Realizadas</div>
-            <div class="custom-card-value">{realizadas}</div>
-        </div>
-        """
+        html_card(
+            "REALIZADAS",
+            total_realizadas,
+            "monitorias concluídas"
+        )
     )
 
-with c3:
+with col3:
     st.html(
-        f"""
-        <div class="custom-card">
-            <div class="custom-card-title">Pendentes</div>
-            <div class="custom-card-value">{pendentes}</div>
-        </div>
-        """
+        html_card(
+            "PENDENTES",
+            total_pendentes,
+            "monitorias a realizar"
+        )
     )
 
-with c4:
+with col4:
     st.html(
-        f"""
-        <div class="custom-card">
-            <div class="custom-card-title">% Concluído</div>
-            <div class="custom-card-value">{percentual_concluido:.1f}%</div>
-        </div>
-        """
+        html_card(
+            "% CONCLUÍDO",
+            f"{percentual_concluido:.1f}%",
+            "do total"
+        )
     )
 
 
-# ============================================================
+# =========================================================
 # PRAÇAS
-# ============================================================
+# =========================================================
 
 st.subheader("Praças e equipes")
 
-st.caption(
-    "Selecione uma praça para consultar a distribuição das equipes."
-)
+colunas_pracas = st.columns(4)
 
-cols_pracas = st.columns(4)
+for coluna, (nome_praca, dados_praca) in zip(
+    colunas_pracas,
+    pracas.items()
+):
 
-for i, (nome_praca, dados_praca) in enumerate(pracas.items()):
-
-    with cols_pracas[i]:
+    with coluna:
 
         st.html(
-            f"""
-            <div class="praca-card">
-                <div class="praca-name">
-                    {nome_praca}
-                </div>
-                <div class="praca-info">
-                    {len(dados_praca["supervisores"])} supervisores
-                </div>
-            </div>
-            """
+            html_praca(
+                nome_praca,
+                len(dados_praca["supervisores"])
+            )
         )
 
 
-# ============================================================
-# SELEÇÃO DE PRAÇA
-# ============================================================
+# =========================================================
+# CONSULTAR PRAÇA
+# =========================================================
+
+st.subheader("Consultar praça")
 
 praca_selecionada = st.selectbox(
-    "Consultar praça",
-    ["Todas"] + list(pracas.keys())
+    "Selecione uma praça",
+    ["Selecione"] + list(pracas.keys())
 )
 
-if praca_selecionada != "Todas":
+if praca_selecionada != "Selecione":
 
     dados_praca = pracas[praca_selecionada]
+
+    supervisores_texto = "<br>".join(
+        dados_praca["supervisores"]
+    )
 
     st.html(
         f"""
         <div class="info-card">
 
             <div class="info-label">
-                Responsável
+                RESPONSÁVEL
             </div>
 
             <div class="info-value">
                 {dados_praca["responsavel"]}
             </div>
 
-            <div style="height:14px;"></div>
-
             <div class="info-label">
-                Supervisores
+                SUPERVISORES
             </div>
 
             <div class="info-value">
-                {" • ".join(dados_praca["supervisores"])}
+                {supervisores_texto}
             </div>
 
         </div>
@@ -945,361 +1081,260 @@ if praca_selecionada != "Todas":
     )
 
 
-# ============================================================
+# =========================================================
 # ACOMPANHAMENTO POR EQUIPE
-# ============================================================
+# =========================================================
 
 st.subheader("Acompanhamento por equipe")
-
-st.caption(
-    "Consulte quem já realizou e quem ainda está pendente."
-)
-
-
-# ============================================================
-# RESUMO POR SUPERVISÃO
-# ============================================================
-
-resumo_supervisao = (
-    dados.groupby(
-        "Supervisão",
-        dropna=False
-    )
-    .agg(
-        Colaboradores=("Colaborador", "count"),
-        Realizadas=(
-            "Data Monitoria",
-            lambda x: x.notna().sum()
-        )
-    )
-    .reset_index()
-)
-
-resumo_supervisao["Pendentes"] = (
-    resumo_supervisao["Colaboradores"]
-    - resumo_supervisao["Realizadas"]
-)
 
 
 if supervisao_selecionada == "Todas":
 
-    for inicio in range(0, len(resumo_supervisao), 4):
+    nomes_supervisoes = sorted(
+        monitorias_google["Supervisão"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
 
-        grupo = resumo_supervisao.iloc[
+    for inicio in range(
+        0,
+        len(nomes_supervisoes),
+        4
+    ):
+
+        grupo = nomes_supervisoes[
             inicio:inicio + 4
         ]
 
-        cols = st.columns(4)
+        colunas = st.columns(4)
 
-        for i, (_, row) in enumerate(grupo.iterrows()):
+        for coluna, supervisao in zip(
+            colunas,
+            grupo
+        ):
 
-            nome = row["Supervisão"]
+            df_supervisao = monitorias_google[
+                monitorias_google["Supervisão"]
+                == supervisao
+            ]
 
-            if pd.isna(nome):
-                nome = "Sem supervisão"
+            total = len(df_supervisao)
 
-            with cols[i]:
+            realizadas = int(
+                df_supervisao["Realizada"].sum()
+            )
+
+            pendentes = (
+                total - realizadas
+            )
+
+            with coluna:
 
                 st.html(
-                    f"""
-                    <div class="team-card">
-
-                        <div class="team-name">
-                            {nome}
-                        </div>
-
-                        <div class="team-number">
-                            Colaboradores: <b>{int(row["Colaboradores"])}</b>
-                        </div>
-
-                        <div class="status-realizada">
-                            ✓ Realizadas: {int(row["Realizadas"])}
-                        </div>
-
-                        <div class="status-pendente">
-                            Pendentes: {int(row["Pendentes"])}
-                        </div>
-
-                    </div>
-                    """
+                    html_team(
+                        supervisao,
+                        total,
+                        realizadas,
+                        pendentes
+                    )
                 )
 
 else:
 
-    realizados_nomes = dados[
-        dados["Data Monitoria"].notna()
-    ]["Colaborador"].tolist()
+    df_supervisao = monitorias_google[
+        monitorias_google["Supervisão"]
+        == supervisao_selecionada
+    ].copy()
 
-    pendentes_nomes = dados[
-        dados["Data Monitoria"].isna()
-    ]["Colaborador"].tolist()
+    realizadas_df = df_supervisao[
+        df_supervisao["Realizada"]
+    ].copy()
+
+    pendentes_df = df_supervisao[
+        ~df_supervisao["Realizada"]
+    ].copy()
 
     col_realizadas, col_pendentes = st.columns(2)
 
     with col_realizadas:
 
-        itens_realizados = "".join(
-            f'<div class="list-item">• {nome}</div>'
-            for nome in realizados_nomes
+        st.html(
+            html_lista(
+                f"Realizadas · {len(realizadas_df)}",
+                realizadas_df,
+                mostrar_nota=True
+            )
         )
-
-        if realizados_nomes:
-
-            st.html(
-                f"""
-                <div class="list-card">
-
-                    <div class="list-title">
-                        ✓ Realizadas ({len(realizados_nomes)})
-                    </div>
-
-                    {itens_realizados}
-
-                </div>
-                """
-            )
-
-        else:
-
-            st.html(
-                """
-                <div class="list-card">
-                    <div class="list-title">
-                        ✓ Realizadas
-                    </div>
-                    <div class="empty-message">
-                        Nenhuma monitoria realizada.
-                    </div>
-                </div>
-                """
-            )
 
     with col_pendentes:
 
-        itens_pendentes = "".join(
-            f'<div class="list-item">• {nome}</div>'
-            for nome in pendentes_nomes
+        st.html(
+            html_lista(
+                f"Pendentes · {len(pendentes_df)}",
+                pendentes_df,
+                mostrar_nota=False
+            )
         )
 
-        if pendentes_nomes:
 
-            st.html(
-                f"""
-                <div class="list-card">
-
-                    <div class="list-title">
-                        Pendentes ({len(pendentes_nomes)})
-                    </div>
-
-                    {itens_pendentes}
-
-                </div>
-                """
-            )
-
-        else:
-
-            st.html(
-                """
-                <div class="list-card">
-                    <div class="list-title">
-                        Pendentes
-                    </div>
-                    <div class="empty-message">
-                        Nenhuma monitoria pendente.
-                    </div>
-                </div>
-                """
-            )
-
-
-# ============================================================
-# EVOLUÇÃO MENSAL
-# ============================================================
+# =========================================================
+# EVOLUÇÃO DAS MONITORIAS
+# =========================================================
 
 st.subheader("Evolução das Monitorias")
 
-st.caption(
-    "Monitorias realizadas por mês"
+meses = pd.date_range(
+    "2026-05-01",
+    "2026-09-01",
+    freq="MS"
 )
 
+nomes_meses = [
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set"
+]
 
-dados_mensais = dados[
-    dados["Data Monitoria"].notna()
-].copy()
+quantidades = []
 
+for mes in meses:
 
-meses_base = pd.DataFrame({
-    "Mês": [
-        "2026-05",
-        "2026-06",
-        "2026-07",
-        "2026-08",
-        "2026-09"
-    ]
-})
+    proximo_mes = mes + pd.offsets.MonthBegin(1)
 
-nomes_meses = {
-    "2026-05": "Mai",
-    "2026-06": "Jun",
-    "2026-07": "Jul",
-    "2026-08": "Ago",
-    "2026-09": "Set"
-}
-
-
-if not dados_mensais.empty:
-
-    dados_mensais["Mês"] = (
-        dados_mensais["Data Monitoria"]
-        .dt.to_period("M")
-        .astype(str)
-    )
-
-    contagem_mensal = (
-        dados_mensais
-        .groupby("Mês")
-        .size()
-        .reset_index(name="Monitorias")
-    )
-
-else:
-
-    contagem_mensal = pd.DataFrame(
-        columns=["Mês", "Monitorias"]
-    )
-
-
-contagem_mensal = meses_base.merge(
-    contagem_mensal,
-    on="Mês",
-    how="left"
-)
-
-contagem_mensal["Monitorias"] = (
-    contagem_mensal["Monitorias"]
-    .fillna(0)
-    .astype(int)
-)
-
-contagem_mensal["Mês Exibição"] = (
-    contagem_mensal["Mês"]
-    .map(nomes_meses)
-)
-
-
-fig = go.Figure()
-
-fig.add_trace(
-    go.Bar(
-        x=contagem_mensal["Mês Exibição"],
-        y=contagem_mensal["Monitorias"],
-        marker_color=BLUE,
-        text=contagem_mensal["Monitorias"],
-        textposition="outside",
-        hovertemplate=(
-            "<b>%{x}</b>"
-            "<br>Monitorias: %{y}"
-            "<extra></extra>"
+    quantidade = monitorias_google[
+        (
+            monitorias_google["Data Monitoria"] >= mes
         )
+        &
+        (
+            monitorias_google["Data Monitoria"] < proximo_mes
+        )
+    ].shape[0]
+
+    quantidades.append(quantidade)
+
+
+fig_evolucao = go.Figure()
+
+fig_evolucao.add_trace(
+    go.Bar(
+        x=nomes_meses,
+        y=quantidades,
+        marker_color=BLUE,
+        text=quantidades,
+        textposition="outside",
+        hovertemplate="%{x}: %{y} monitorias<extra></extra>"
     )
 )
 
-fig.update_layout(
+fig_evolucao.update_layout(
     height=360,
     margin=dict(
-        l=20,
-        r=20,
+        l=10,
+        r=10,
         t=25,
-        b=20
+        b=10
     ),
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    showlegend=False,
     xaxis=dict(
         title=None,
-        showgrid=False,
-        tickfont=dict(
-            color=SECONDARY
-        )
+        showgrid=False
     ),
     yaxis=dict(
         title=None,
         showgrid=True,
-        gridcolor=BORDER,
-        tickfont=dict(
-            color=SECONDARY
-        ),
-        rangemode="tozero"
-    )
+        gridcolor="#E8EAF2",
+        zeroline=False
+    ),
+    showlegend=False
 )
 
 st.plotly_chart(
-    fig,
+    fig_evolucao,
     use_container_width=True,
     config={"displayModeBar": False}
 )
 
 
-# ============================================================
+# =========================================================
 # OUTRAS ETAPAS
-# ============================================================
+# =========================================================
 
 st.subheader("Outras etapas")
 
-st.caption(
-    "Acompanhamento das próximas etapas do processo."
+col_lado, col_offline = st.columns(2)
+
+
+total_lado_a_lado = int(
+    monitorias_google["Data Lado a Lado"]
+    .notna()
+    .sum()
+)
+
+total_offline = int(
+    monitorias_google["Data Monitoria Offline"]
+    .notna()
+    .sum()
 )
 
 
-lado_a_lado_realizadas = dados[
-    dados["Data Lado a Lado"].notna()
-].shape[0]
+with col_lado:
 
-offline_realizadas = dados[
-    dados["Data Monitoria Offline"].notna()
-].shape[0]
-
-
-c5, c6 = st.columns(2)
-
-with c5:
+    status_lado = (
+        f"{total_lado_a_lado} realizados"
+        if total_lado_a_lado > 0
+        else "Ainda não iniciado"
+    )
 
     st.html(
         f"""
         <div class="custom-card">
+
             <div class="custom-card-title">
-                Lado a Lado
+                LADO A LADO
             </div>
 
             <div class="custom-card-value">
-                {lado_a_lado_realizadas}
+                {total_lado_a_lado}
             </div>
 
             <div class="custom-card-subtitle">
-                {"Ainda não iniciado" if lado_a_lado_realizadas == 0 else "realizadas"}
+                {status_lado}
             </div>
+
         </div>
         """
     )
 
 
-with c6:
+with col_offline:
+
+    status_offline = (
+        f"{total_offline} realizados"
+        if total_offline > 0
+        else "Ainda não iniciado"
+    )
 
     st.html(
         f"""
         <div class="custom-card">
+
             <div class="custom-card-title">
-                Monitoria Offline
+                MONITORIA OFFLINE
             </div>
 
             <div class="custom-card-value">
-                {offline_realizadas}
+                {total_offline}
             </div>
 
             <div class="custom-card-subtitle">
-                {"Ainda não iniciado" if offline_realizadas == 0 else "realizadas"}
+                {status_offline}
             </div>
+
         </div>
         """
     )
