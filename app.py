@@ -352,56 +352,60 @@ if supervisao == "Todas":
         resumo_equipes.iterrows()
     ):
 
+        html_card = f"""
+        <div style="
+            background-color:{CARD};
+            border:1px solid {BORDA};
+            border-radius:12px;
+            padding:20px;
+            margin-bottom:20px;
+        ">
+
+            <div style="
+                color:{AZUL};
+                font-size:17px;
+                font-weight:700;
+                margin-bottom:12px;
+            ">
+                {linha["Supervisão"]}
+            </div>
+
+            <div style="
+                color:{TEXTO_SECUNDARIO};
+                font-size:13px;
+            ">
+                Colaboradores
+            </div>
+
+            <div style="
+                color:{TEXTO};
+                font-size:22px;
+                font-weight:700;
+            ">
+                {linha["Colaboradores"]}
+            </div>
+
+            <div style="
+                color:{VERDE};
+                font-size:13px;
+                margin-top:8px;
+            ">
+                ✓ Realizadas: {linha["Realizadas"]}
+            </div>
+
+            <div style="
+                color:{LARANJA};
+                font-size:13px;
+                margin-top:4px;
+            ">
+                ⏳ Pendentes: {linha["Pendentes"]}
+            </div>
+
+        </div>
+        """
+
         with colunas_resumo[i % 3]:
-
-            st.markdown(
-                f"""
-                <div class="card" style="text-align:left;">
-
-                    <div style="
-                        color:{AZUL};
-                        font-size:17px;
-                        font-weight:700;
-                        margin-bottom:12px;
-                    ">
-                        {linha["Supervisão"]}
-                    </div>
-
-                    <div style="
-                        color:{TEXTO_SECUNDARIO};
-                        font-size:13px;
-                    ">
-                        Colaboradores
-                    </div>
-
-                    <div style="
-                        color:{TEXTO};
-                        font-size:22px;
-                        font-weight:700;
-                    ">
-                        {linha["Colaboradores"]}
-                    </div>
-
-                    <div style="
-                        color:{VERDE};
-                        font-size:13px;
-                        margin-top:8px;
-                    ">
-                        ✓ Realizadas: {linha["Realizadas"]}
-                    </div>
-
-                    <div style="
-                        color:{LARANJA};
-                        font-size:13px;
-                        margin-top:4px;
-                    ">
-                        ⏳ Pendentes: {linha["Pendentes"]}
-                    </div>
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.html(html_card)
 
 # ==========================================
 # LISTAS DA SUPERVISÃO SELECIONADA
@@ -452,14 +456,22 @@ else:
 
             for nome in realizadas_lista:
 
-                st.markdown(
-                    f"""
-                    <div class="nome-realizado">
-                        ✓ {nome}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+                html_nome = f"""
+                <div style="
+                    background-color:{CARD};
+                    border:1px solid {BORDA};
+                    border-left:4px solid {VERDE};
+                    border-radius:8px;
+                    padding:9px 14px;
+                    margin-bottom:6px;
+                    color:{TEXTO};
+                    font-size:14px;
+                ">
+                    ✓ {nome}
+                </div>
+                """
+
+                st.html(html_nome)
 
         else:
 
@@ -492,14 +504,22 @@ else:
 
             for nome in pendentes_lista:
 
-                st.markdown(
-                    f"""
-                    <div class="nome-pendente">
-                        ⏳ {nome}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+                html_nome = f"""
+                <div style="
+                    background-color:{CARD};
+                    border:1px solid {BORDA};
+                    border-left:4px solid {LARANJA};
+                    border-radius:8px;
+                    padding:9px 14px;
+                    margin-bottom:6px;
+                    color:{TEXTO};
+                    font-size:14px;
+                ">
+                    ⏳ {nome}
+                </div>
+                """
+
+                st.html(html_nome)
 
         else:
 
