@@ -40,10 +40,6 @@ st.markdown(
         color: {TEXTO};
     }}
 
-    h1 {{
-        color: {TEXTO};
-    }}
-
     .card {{
         background-color: {CARD};
         border: 1px solid {BORDA};
@@ -153,36 +149,23 @@ monitorias_google["Data Monitoria Offline"] = pd.to_datetime(
 
 st.markdown(
     f"""
-    <div style="margin-bottom:25px;">
-
-        <div style="
-            color:{AZUL};
-            font-size:13px;
-            font-weight:600;
-            letter-spacing:1px;
-        ">
-            NUBE • TREINAMENTO COMERCIAL
-        </div>
-
-        <div style="
-            color:{TEXTO};
-            font-size:30px;
-            font-weight:700;
-        ">
-            Dashboard de Monitorias
-        </div>
-
-        <div style="
-            color:{TEXTO_SECUNDARIO};
-            font-size:15px;
-            margin-top:5px;
-        ">
-            Acompanhamento das aplicações de monitoria
-        </div>
-
+    <div style="
+        color:{AZUL};
+        font-size:13px;
+        font-weight:600;
+        letter-spacing:1px;
+        margin-bottom:4px;
+    ">
+        NUBE • TREINAMENTO COMERCIAL
     </div>
     """,
     unsafe_allow_html=True
+)
+
+st.title("Dashboard de Monitorias")
+
+st.caption(
+    "Acompanhamento das aplicações de monitoria"
 )
 
 # ==========================================
