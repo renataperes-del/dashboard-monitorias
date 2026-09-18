@@ -324,84 +324,98 @@ st.markdown(
 
 if supervisao == "Todas":
 
-    resumo_equipes = (
-        monitorias_google
-        .assign(
-            Status=monitorias_google["Data Monitoria"].notna()
+    supervisoes_lista = sorted(
+        monitorias_google["Supervisão"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    for nome_supervisao in supervisoes_lista:
+
+        dados_equipe = monitorias_google[
+            monitorias_google["Supervisão"] == nome_supervisao
+        ].copy()
+
+        realizadas_lista = (
+            dados_equipe[
+                dados_equipe["Data Monitoria"].notna()
+            ]
+            .sort_values("Colaborador")["Colaborador"]
+            .tolist()
         )
-        .groupby("Supervisão")
-        .agg(
-            Colaboradores=("Colaborador", "count"),
-            Realizadas=("Status", "sum")
+
+        pendentes_lista = (
+            dados_equipe[
+                dados_equipe["Data Monitoria"].isna()
+            ]
+            .sort_values("Colaborador")["Colaborador"]
+            .tolist()
         )
-        .reset_index()
-    )
 
-    resumo_equipes["Pendentes"] = (
-        resumo_equipes["Colaboradores"]
-        - resumo_equipes["Realizadas"]
-    )
+        total_equipe = len(dados_equipe)
 
-    resumo_equipes = resumo_equipes.sort_values(
-        "Supervisão"
-    )
+        with st.expander(
+            f"{nome_supervisao}  •  {total_equipe} colaboradores  •  "
+            f"🟢 {len(realizadas_lista)} realizadas  •  "
+            f"🟠 {len(pendentes_lista)} pendentes"
+        ):
 
-    colunas_resumo = st.columns(3)
+            col_realizadas, col_pendentes = st.columns(2)
 
-    for i, (_, linha) in enumerate(
-        resumo_equipes.iterrows()
-    ):
+            # ======================================
+            # REALIZADAS
+            # ======================================
 
-        with colunas_resumo[i % 3]:
+            with col_realizadas:
 
-            st.markdown(
-                f"""
-                <div class="card" style="text-align:left;">
+                st.markdown("### 🟢 Realizadas")
 
-                    <div style="
-                        color:{AZUL};
-                        font-size:17px;
-                        font-weight:700;
-                        margin-bottom:12px;
-                    ">
-                        {linha["Supervisão"]}
-                    </div>
+                if realizadas_lista:
 
-                    <div style="
-                        color:{TEXTO_SECUNDARIO};
-                        font-size:13px;
-                    ">
-                        Colaboradores
-                    </div>
+                    for nome in realizadas_lista:
 
-                    <div style="
-                        color:{TEXTO};
-                        font-size:22px;
-                        font-weight:700;
-                    ">
-                        {linha["Colaboradores"]}
-                    </div>
+                        st.markdown(
+                            f"""
+                            <div class="nome-realizado">
+                                ✓ {nome}
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
 
-                    <div style="
-                        color:{VERDE};
-                        font-size:13px;
-                        margin-top:8px;
-                    ">
-                        ✓ Realizadas: {linha["Realizadas"]}
-                    </div>
+                else:
 
-                    <div style="
-                        color:{LARANJA};
-                        font-size:13px;
-                        margin-top:4px;
-                    ">
-                        ⏳ Pendentes: {linha["Pendentes"]}
-                    </div>
+                    st.info(
+                        "Nenhuma monitoria realizada."
+                    )
 
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            # ======================================
+            # PENDENTES
+            # ======================================
+
+            with col_pendentes:
+
+                st.markdown("### 🟠 Pendentes")
+
+                if pendentes_lista:
+
+                    for nome in pendentes_lista:
+
+                        st.markdown(
+                            f"""
+                            <div class="nome-pendente">
+                                ⏳ {nome}
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+
+                else:
+
+                    st.success(
+                        "Nenhuma monitoria pendente."
+                    )
 
 # ==========================================
 # LISTAS DA SUPERVISÃO SELECIONADA
