@@ -15,17 +15,21 @@ st.set_page_config(
 )
 
 # ==========================================
-# CORES
+# PALETA DE CORES
 # ==========================================
 
-FUNDO = "#0B0F14"
-CARD = "#141A22"
-BORDA = "#232B36"
-TEXTO = "#F5F7FA"
-TEXTO_SECUNDARIO = "#8B96A5"
-AZUL = "#4DA3FF"
-VERDE = "#35D07F"
-LARANJA = "#FFB454"
+FUNDO = "#F7F8FC"
+CARD = "#FFFFFF"
+BORDA = "#E8EAF2"
+
+TEXTO = "#293241"
+TEXTO_SECUNDARIO = "#7B8496"
+
+AZUL = "#5B7CFA"
+ROXO = "#8B7CF6"
+VERDE = "#55B99D"
+LARANJA = "#F2A66F"
+ROSA = "#E58FA3"
 
 # ==========================================
 # ESTILO
@@ -40,19 +44,36 @@ st.markdown(
         color: {TEXTO};
     }}
 
+    .main .block-container {{
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        max-width: 1400px;
+    }}
+
+    h1, h2, h3 {{
+        color: {TEXTO} !important;
+    }}
+
+    .stSelectbox label {{
+        color: {TEXTO} !important;
+        font-weight: 600;
+    }}
+
     .card {{
         background-color: {CARD};
         border: 1px solid {BORDA};
-        border-radius: 12px;
+        border-radius: 16px;
         padding: 20px;
         text-align: center;
         margin-bottom: 20px;
+        box-shadow: 0 4px 16px rgba(41, 50, 65, 0.05);
     }}
 
     .card-title {{
         color: {TEXTO_SECUNDARIO};
-        font-size: 13px;
-        font-weight: 600;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }}
 
     .card-value {{
@@ -65,49 +86,60 @@ st.markdown(
     .praca-card {{
         background-color: {CARD};
         border: 1px solid {BORDA};
-        border-radius: 14px;
-        padding: 24px;
-        min-height: 145px;
-        margin-bottom: 15px;
-    }}
-
-    .praca-icone {{
-        font-size: 30px;
-        margin-bottom: 8px;
+        border-radius: 16px;
+        padding: 25px;
+        min-height: 135px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 16px rgba(41, 50, 65, 0.05);
     }}
 
     .praca-nome {{
         color: {TEXTO};
-        font-size: 19px;
+        font-size: 23px;
         font-weight: 700;
     }}
 
     .praca-info {{
         color: {TEXTO_SECUNDARIO};
         font-size: 13px;
-        margin-top: 7px;
+        margin-top: 8px;
     }}
 
     .nome-realizado {{
         background-color: {CARD};
         border: 1px solid {BORDA};
         border-left: 4px solid {VERDE};
-        border-radius: 8px;
-        padding: 9px 14px;
-        margin-bottom: 6px;
+        border-radius: 10px;
+        padding: 11px 15px;
+        margin-bottom: 7px;
         color: {TEXTO};
         font-size: 14px;
+        box-shadow: 0 2px 8px rgba(41, 50, 65, 0.03);
     }}
 
     .nome-pendente {{
         background-color: {CARD};
         border: 1px solid {BORDA};
         border-left: 4px solid {LARANJA};
-        border-radius: 8px;
-        padding: 9px 14px;
-        margin-bottom: 6px;
+        border-radius: 10px;
+        padding: 11px 15px;
+        margin-bottom: 7px;
         color: {TEXTO};
         font-size: 14px;
+        box-shadow: 0 2px 8px rgba(41, 50, 65, 0.03);
+    }}
+
+    .funcao {{
+        color: {TEXTO_SECUNDARIO};
+        font-size: 12px;
+        margin-top: 4px;
+    }}
+
+    .nota {{
+        color: {ROXO};
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 3px;
     }}
 
     </style>
@@ -192,6 +224,213 @@ monitorias_google["Data Monitoria Offline"] = pd.to_datetime(
 )
 
 # ==========================================
+# FUNÇÕES DOS COLABORADORES
+# ==========================================
+
+execs = {
+    "Gabriela Cardoso de Sousa",
+    "Rayssa Sobral Araújo",
+    "Monique de Souza Marques",
+    "Felipe de Souza Carvalho",
+    "João Paulo Ribeiro Rodrigues",
+    "Amanda Ribeiro Carvalho",
+    "Gabriela Salvi Sbardelotto",
+    "Juliette Mendes Lima",
+    "Isabela Cason",
+    "Gabriella Farias de Melo",
+    "Emanuele Maria Carvalho Silva",
+    "Matheus Fernando de Oliveira Fernandes",
+    "Milena Silva Monteiro",
+    "Micaella Vieira de Moura",
+    "Ana Carolina Silva Vilela",
+    "Naiara Borcatt Porto",
+    "Marine Vitória Guimarães Fortunato",
+    "Lucas Scalambrini Caetano",
+    "Guilherme Tarragô Mendonça da Silva",
+    "Karine Kethely Soares",
+    "Ermandos de Lacerda Ferreira",
+    "Yasmim Francisca dos Santos",
+    "Danilo Batista de Freitas Silva",
+    "Isabel Albuquerque Checchia",
+    "Maisa da Silva Pereira",
+    "Roberta Camargo Zorzetto",
+    "Matheus Marucci Hudzinski",
+    "Mirella Pereira de Oliveira",
+    "Giulia Rodrigues Pimentel",
+    "Maria Eduarda Rodrigues Gama",
+    "Hellen Salles de Freitas",
+    "Luccas Nakamoto de Paula",
+    "Tito de Jesus Nascimento",
+    "Gustavo Bertholino Cardoso",
+    "Marcelly Paiva da Silva",
+    "Amanda Alves Ferreira",
+    "Gabriel Bulhões Vieira",
+    "Gabriely da Rocha Ferreira Silva",
+    "Elissama Laís Cuscan Alves",
+    "Ingrid Nunes da Cruz",
+    "Stefany Miriam Marçal",
+    "Raquel Lima Santos",
+    "Julio César Merola",
+    "Eduarda de Araujo Rodrigues",
+    "Samuel Malheiro Ramos",
+    "Ana Gabriela Moreno dos Santos",
+    "Luciana de Campos Silva",
+    "João Pedro Cardoso",
+    "Gabriela Nerone Pinheiro",
+    "Camila Alves Bender Azevedo",
+    "Ian Monteiro Hernandez",
+    "Luanna Soares dos Santos Siqueira",
+    "Cassiele Chare Roberto",
+    "Amanda Lima Pereira",
+    "Letícia Lima Souza",
+    "Lírian Rossete Nunes",
+    "Hosana de Souza Soares",
+    "Lorena da Silva Souza",
+    "Jessica Carol Alves de Aguiar",
+    "Isabella da Silva Neves",
+    "Gabriel Colacino Pitoni",
+    "Luana Ocsany Modonezi",
+    "Yasmin da Fonseca Buffel Pantoja",
+    "Sarah Andressa de Araújo Antunes",
+    "Davi de Araujo Lima",
+    "Henzo Silva Oliveira",
+    "Lucas Rodrigues dos Santos Baltazar",
+    "Sérgio Vinícius Souza Silva da Hora",
+    "Sabrina Kahati Cardoso",
+    "Cauã Petrella de Sousa",
+    "Ana Beatriz de Queiroz",
+    "Douglas de Souza Oliveira",
+    "Sarah Rodrigues Silva",
+    "Jefferson Amaral Silva Junior",
+    "Cayo Soares De Souza",
+    "Robson Souto Campos da Silva",
+    "Mateus Custódio Dias da Conceição",
+    "Eduarda Paes Leme Maldonado",
+    "Isabella Santana Felix dos Santos",
+    "Juliene Dolores Ferreira da Silva",
+    "Aline Maria dos Santos",
+    "Rebeca Beatriz Amaral Lopes",
+    "João Victor Matias Belmiro",
+    "Bianca da Silva Marchon",
+    "Vanessa Lisboa de Pontes",
+    "Arison Pereira da Costa",
+    "Carla Maria da Silva",
+    "Débora Viana Marim Rosa",
+    "Bianca Santos de Oliveira",
+    "Thaynara Ferreira Leite",
+    "Bruna Ribeiro da Silva",
+    "Camila Costa Gaspar",
+    "Thiago Martins de Almeida",
+    "Thayna de Jesus Santos",
+    "Ana Beatriz De Oliveira Jovino",
+    "Sabrina Rodrigues da Silva",
+    "Emile Cristine Brito da Silva",
+    "Aline Trindade Moreira",
+    "Erik Xavier Gonçalves",
+    "Keren Jamille Coutinho Albrechete"
+}
+
+apoio_adm = {
+    "Felipe Santos Nery",
+    "Pedro Llanos Iampietro",
+    "Matheus Lacerda Lima",
+    "Angel Almeida Braga",
+    "Evellyn Silva dos Santos",
+    "Felipe Félix da Rocha Lima",
+    "Isabelle Steidl de Oliveira",
+    "Pedro Paulo Clemente Torres",
+    "Gabriel Soares Gonçalves",
+    "Fernanda Dias da Silva",
+    "Bruna Clementino Graça",
+    "Emilly Oliveira França",
+    "Laura Marques da Silva",
+    "Amanda Cruz dos Santos",
+    "Ana Carolina Gabriel Amador",
+    "Juliana Santos de Freitas",
+    "Wendy Aparecida Vieira Sabino",
+    "Alessandra da Silva dos Santos",
+    "Andressa Caroline Pereira Santana",
+    "Ana Luiza Cavalcante Silva",
+    "Lidiane Israel Domingos",
+    "Nataly Freitas Souza Santos",
+    "Beatriz Fusari Martins Moreira",
+    "Davi Rodrigues da Silva",
+    "Igor Silva Leite",
+    "Amanda Ferreira da Silva",
+    "Maria Clara Duarte Alves",
+    "Cristina de Deus Aguiar Stoski",
+    "Ana Beatriz Rodrigues Proença",
+    "Amanda Brito da Silva",
+    "Stella Angela da Silva"
+}
+
+def identificar_funcao(nome):
+    if nome in execs:
+        return "Exec"
+    if nome in apoio_adm:
+        return "Apoio ADM"
+    return ""
+
+monitorias_google["Função"] = (
+    monitorias_google["Colaborador"]
+    .apply(identificar_funcao)
+)
+
+# ==========================================
+# CONVERSÃO DAS NOTAS
+# ==========================================
+
+def converter_percentual(valor):
+
+    if pd.isna(valor):
+        return pd.NA
+
+    texto = str(valor).strip()
+
+    if texto == "":
+        return pd.NA
+
+    texto = (
+        texto
+        .replace("%", "")
+        .replace(" ", "")
+        .replace(",", ".")
+    )
+
+    numero = pd.to_numeric(
+        texto,
+        errors="coerce"
+    )
+
+    if pd.isna(numero):
+        return pd.NA
+
+    # Caso o Google Sheets entregue 0,75 em vez de 75%
+    if numero <= 1:
+        numero = numero * 100
+
+    return numero
+
+
+monitorias_google["Nota Ligação 1"] = (
+    monitorias_google["Ligação 1"]
+    .apply(converter_percentual)
+)
+
+monitorias_google["Nota Ligação 2"] = (
+    monitorias_google["Ligação 2"]
+    .apply(converter_percentual)
+)
+
+monitorias_google["Nota Média"] = (
+    monitorias_google[
+        ["Nota Ligação 1", "Nota Ligação 2"]
+    ]
+    .astype(float)
+    .mean(axis=1, skipna=True)
+)
+
+# ==========================================
 # CABEÇALHO
 # ==========================================
 
@@ -200,7 +439,7 @@ st.markdown(
     <div style="
         color:{AZUL};
         font-size:13px;
-        font-weight:600;
+        font-weight:700;
         letter-spacing:1px;
         margin-bottom:4px;
     ">
@@ -237,8 +476,11 @@ supervisao = st.selectbox(
 # ==========================================
 
 if supervisao == "Todas":
+
     dados = monitorias_google.copy()
+
 else:
+
     dados = monitorias_google[
         monitorias_google["Supervisão"] == supervisao
     ].copy()
@@ -262,56 +504,197 @@ percentual = (
 )
 
 # ==========================================
+# MÉDIA GERAL DAS NOTAS
+# ==========================================
+
+notas_validas = dados[
+    dados["Nota Média"].notna()
+]["Nota Média"]
+
+media_notas = (
+    notas_validas.mean()
+    if len(notas_validas) > 0
+    else 0
+)
+
+# ==========================================
+# CÍRCULO DE DESEMPENHO
+# ==========================================
+
+st.markdown(
+    f"""
+    <div style="
+        text-align:center;
+        margin-top:20px;
+        margin-bottom:-10px;
+    ">
+        <div style="
+            color:{TEXTO};
+            font-size:22px;
+            font-weight:700;
+        ">
+            Desempenho geral
+        </div>
+
+        <div style="
+            color:{TEXTO_SECUNDARIO};
+            font-size:13px;
+            margin-top:4px;
+        ">
+            Média das notas das monitorias
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+fig_circulo = go.Figure(
+    go.Pie(
+        values=[
+            media_notas,
+            max(100 - media_notas, 0)
+        ],
+        hole=0.78,
+        marker=dict(
+            colors=[
+                AZUL,
+                "#E9EBF5"
+            ],
+            line=dict(
+                color=FUNDO,
+                width=2
+            )
+        ),
+        textinfo="none",
+        hoverinfo="skip",
+        sort=False
+    )
+)
+
+fig_circulo.add_annotation(
+    text=f"""
+        <b style="font-size:34px;">{media_notas:.1f}%</b>
+    """,
+    x=0.5,
+    y=0.5,
+    showarrow=False,
+    font=dict(
+        color=TEXTO,
+        size=30
+    )
+)
+
+fig_circulo.update_layout(
+    paper_bgcolor=FUNDO,
+    plot_bgcolor=FUNDO,
+    height=270,
+    margin=dict(
+        l=0,
+        r=0,
+        t=5,
+        b=5
+    ),
+    showlegend=False
+)
+
+col_circulo1, col_circulo2, col_circulo3 = st.columns(
+    [1, 1.2, 1]
+)
+
+with col_circulo2:
+
+    st.plotly_chart(
+        fig_circulo,
+        use_container_width=True,
+        config={
+            "displayModeBar": False
+        }
+    )
+
+st.markdown(
+    f"""
+    <div style="
+        text-align:center;
+        color:{TEXTO_SECUNDARIO};
+        font-size:12px;
+        margin-top:-25px;
+        margin-bottom:25px;
+    ">
+        {len(notas_validas)} colaborador(es) com nota registrada
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# ==========================================
 # CARDS PRINCIPAIS
 # ==========================================
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
+
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title">COLABORADORES</div>
-            <div class="card-value">{total}</div>
+            <div class="card-title">
+                COLABORADORES
+            </div>
+
+            <div class="card-value">
+                {total}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
 with col2:
+
     st.markdown(
         f"""
         <div class="card">
             <div class="card-title" style="color:{VERDE};">
                 REALIZADAS
             </div>
-            <div class="card-value">{realizadas}</div>
+
+            <div class="card-value">
+                {realizadas}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
 with col3:
+
     st.markdown(
         f"""
         <div class="card">
             <div class="card-title" style="color:{LARANJA};">
                 PENDENTES
             </div>
-            <div class="card-value">{pendentes}</div>
+
+            <div class="card-value">
+                {pendentes}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
 with col4:
+
     st.markdown(
         f"""
         <div class="card">
-            <div class="card-title" style="color:{AZUL};">
+            <div class="card-title" style="color:{ROXO};">
                 CONCLUÍDO
             </div>
-            <div class="card-value">{percentual:.1f}%</div>
+
+            <div class="card-value">
+                {percentual:.1f}%
+            </div>
         </div>
         """,
         unsafe_allow_html=True
@@ -325,8 +708,8 @@ st.markdown(
     f"""
     <div style="
         color:{TEXTO};
-        font-size:20px;
-        font-weight:600;
+        font-size:21px;
+        font-weight:700;
         margin-top:30px;
         margin-bottom:5px;
     ">
@@ -349,8 +732,8 @@ st.markdown(
 # ==========================================
 
 pracas = {
+
     "São Paulo": {
-        "icone": "📍",
         "responsavel": "Danielly Palaro",
         "supervisores": [
             "Wesley Alves Martins",
@@ -363,7 +746,6 @@ pracas = {
     },
 
     "GMSP": {
-        "icone": "🌐",
         "responsavel": "Caio Marques",
         "supervisores": [
             "Camila Dias Silva",
@@ -373,7 +755,6 @@ pracas = {
     },
 
     "Conne-Sul": {
-        "icone": "🧭",
         "responsavel": "Evelyn Viegas",
         "supervisores": [
             "Angelica Yumi Gaspar de Oliveira",
@@ -382,7 +763,6 @@ pracas = {
     },
 
     "Sudeste": {
-        "icone": "📊",
         "responsavel": "Darlene Carvalho",
         "supervisores": [
             "Maiara Bravo",
@@ -399,7 +779,6 @@ if "praca_selecionada" not in st.session_state:
     st.session_state.praca_selecionada = None
 
 col_praca1, col_praca2 = st.columns(2)
-
 col_praca3, col_praca4 = st.columns(2)
 
 botoes_pracas = [
@@ -417,10 +796,6 @@ for coluna, nome_praca in botoes_pracas:
 
         html_praca = f"""
         <div class="praca-card">
-
-            <div class="praca-icone">
-                {dados_praca["icone"]}
-            </div>
 
             <div class="praca-nome">
                 {nome_praca}
@@ -440,6 +815,7 @@ for coluna, nome_praca in botoes_pracas:
             key=f"btn_{nome_praca}",
             use_container_width=True
         ):
+
             st.session_state.praca_selecionada = nome_praca
 
 # ==========================================
@@ -449,6 +825,7 @@ for coluna, nome_praca in botoes_pracas:
 if st.session_state.praca_selecionada:
 
     nome_praca = st.session_state.praca_selecionada
+
     dados_praca = pracas[nome_praca]
 
     st.markdown("---")
@@ -457,12 +834,12 @@ if st.session_state.praca_selecionada:
         f"""
         <div style="
             color:{AZUL};
-            font-size:22px;
+            font-size:25px;
             font-weight:700;
             margin-top:10px;
             margin-bottom:5px;
         ">
-            {dados_praca["icone"]} {nome_praca}
+            {nome_praca}
         </div>
 
         <div style="
@@ -470,7 +847,8 @@ if st.session_state.praca_selecionada:
             font-size:14px;
             margin-bottom:20px;
         ">
-            Responsável pela praça: <strong>{dados_praca["responsavel"]}</strong>
+            Responsável pela praça:
+            <strong>{dados_praca["responsavel"]}</strong>
         </div>
         """,
         unsafe_allow_html=True
@@ -481,7 +859,7 @@ if st.session_state.praca_selecionada:
         <div style="
             color:{TEXTO};
             font-size:18px;
-            font-weight:600;
+            font-weight:700;
             margin-bottom:15px;
         ">
             Supervisores da praça
@@ -492,7 +870,9 @@ if st.session_state.praca_selecionada:
 
     col_sup1, col_sup2 = st.columns(2)
 
-    for i, nome in enumerate(dados_praca["supervisores"]):
+    for i, nome in enumerate(
+        dados_praca["supervisores"]
+    ):
 
         with [col_sup1, col_sup2][i % 2]:
 
@@ -501,14 +881,15 @@ if st.session_state.praca_selecionada:
                 <div style="
                     background-color:{CARD};
                     border:1px solid {BORDA};
-                    border-left:4px solid {AZUL};
+                    border-left:4px solid {ROXO};
                     border-radius:10px;
                     padding:14px 16px;
                     margin-bottom:8px;
                     color:{TEXTO};
                     font-size:14px;
+                    box-shadow:0 2px 8px rgba(41,50,65,0.03);
                 ">
-                    👤 {nome}
+                    {nome}
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -518,6 +899,7 @@ if st.session_state.praca_selecionada:
         "← Voltar para praças",
         key="voltar_pracas"
     ):
+
         st.session_state.praca_selecionada = None
         st.rerun()
 
@@ -529,8 +911,8 @@ st.markdown(
     f"""
     <div style="
         color:{TEXTO};
-        font-size:20px;
-        font-weight:600;
+        font-size:21px;
+        font-weight:700;
         margin-top:30px;
         margin-bottom:5px;
     ">
@@ -586,13 +968,14 @@ if supervisao == "Todas":
         <div style="
             background-color:{CARD};
             border:1px solid {BORDA};
-            border-radius:12px;
+            border-radius:14px;
             padding:20px;
             margin-bottom:20px;
+            box-shadow:0 4px 14px rgba(41,50,65,0.04);
         ">
 
             <div style="
-                color:{AZUL};
+                color:{ROXO};
                 font-size:17px;
                 font-weight:700;
                 margin-bottom:12px;
@@ -619,6 +1002,7 @@ if supervisao == "Todas":
                 color:{VERDE};
                 font-size:13px;
                 margin-top:8px;
+                font-weight:600;
             ">
                 ✓ Realizadas: {linha["Realizadas"]}
             </div>
@@ -627,14 +1011,16 @@ if supervisao == "Todas":
                 color:{LARANJA};
                 font-size:13px;
                 margin-top:4px;
+                font-weight:600;
             ">
-                ⏳ Pendentes: {linha["Pendentes"]}
+                Pendentes: {linha["Pendentes"]}
             </div>
 
         </div>
         """
 
         with colunas_resumo[i % 3]:
+
             st.html(html_card)
 
 # ==========================================
@@ -647,23 +1033,23 @@ else:
         dados[
             dados["Data Monitoria"].notna()
         ]
-        .sort_values("Colaborador")["Colaborador"]
-        .tolist()
+        .sort_values("Colaborador")
+        .to_dict("records")
     )
 
     pendentes_lista = (
         dados[
             dados["Data Monitoria"].isna()
         ]
-        .sort_values("Colaborador")["Colaborador"]
-        .tolist()
+        .sort_values("Colaborador")
+        .to_dict("records")
     )
 
     col_realizadas, col_pendentes = st.columns(2)
 
-    # ======================================
+    # --------------------------------------
     # REALIZADAS
-    # ======================================
+    # --------------------------------------
 
     with col_realizadas:
 
@@ -671,18 +1057,19 @@ else:
         <div style="
             background-color:{CARD};
             border:1px solid {BORDA};
-            border-radius:12px;
+            border-radius:14px;
             padding:20px;
             text-align:center;
             margin-bottom:20px;
+            box-shadow:0 4px 14px rgba(41,50,65,0.04);
         ">
 
             <div style="
                 color:{VERDE};
                 font-size:13px;
-                font-weight:600;
+                font-weight:700;
             ">
-                ✓ MONITORIAS REALIZADAS
+                MONITORIAS REALIZADAS
             </div>
 
             <div style="
@@ -701,20 +1088,43 @@ else:
 
         if realizadas_lista:
 
-            for nome in realizadas_lista:
+            for registro in realizadas_lista:
+
+                nome = registro["Colaborador"]
+                funcao = registro["Função"]
+                nota = registro["Nota Média"]
+
+                funcao_html = ""
+
+                if funcao:
+
+                    funcao_html = f"""
+                    <div class="funcao">
+                        {funcao}
+                    </div>
+                    """
+
+                nota_html = ""
+
+                if pd.notna(nota):
+
+                    nota_html = f"""
+                    <div class="nota">
+                        Nota: {nota:.1f}%
+                    </div>
+                    """
 
                 html_nome = f"""
-                <div style="
-                    background-color:{CARD};
-                    border:1px solid {BORDA};
-                    border-left:4px solid {VERDE};
-                    border-radius:8px;
-                    padding:9px 14px;
-                    margin-bottom:6px;
-                    color:{TEXTO};
-                    font-size:14px;
-                ">
-                    ✓ {nome}
+                <div class="nome-realizado">
+
+                    <div>
+                        ✓ {nome}
+                    </div>
+
+                    {funcao_html}
+
+                    {nota_html}
+
                 </div>
                 """
 
@@ -726,9 +1136,9 @@ else:
                 "Nenhuma monitoria realizada."
             )
 
-    # ======================================
+    # --------------------------------------
     # PENDENTES
-    # ======================================
+    # --------------------------------------
 
     with col_pendentes:
 
@@ -736,18 +1146,19 @@ else:
         <div style="
             background-color:{CARD};
             border:1px solid {BORDA};
-            border-radius:12px;
+            border-radius:14px;
             padding:20px;
             text-align:center;
             margin-bottom:20px;
+            box-shadow:0 4px 14px rgba(41,50,65,0.04);
         ">
 
             <div style="
                 color:{LARANJA};
                 font-size:13px;
-                font-weight:600;
+                font-weight:700;
             ">
-                ⏳ MONITORIAS PENDENTES
+                MONITORIAS PENDENTES
             </div>
 
             <div style="
@@ -766,20 +1177,30 @@ else:
 
         if pendentes_lista:
 
-            for nome in pendentes_lista:
+            for registro in pendentes_lista:
+
+                nome = registro["Colaborador"]
+                funcao = registro["Função"]
+
+                funcao_html = ""
+
+                if funcao:
+
+                    funcao_html = f"""
+                    <div class="funcao">
+                        {funcao}
+                    </div>
+                    """
 
                 html_nome = f"""
-                <div style="
-                    background-color:{CARD};
-                    border:1px solid {BORDA};
-                    border-left:4px solid {LARANJA};
-                    border-radius:8px;
-                    padding:9px 14px;
-                    margin-bottom:6px;
-                    color:{TEXTO};
-                    font-size:14px;
-                ">
-                    ⏳ {nome}
+                <div class="nome-pendente">
+
+                    <div>
+                        {nome}
+                    </div>
+
+                    {funcao_html}
+
                 </div>
                 """
 
@@ -799,9 +1220,9 @@ st.markdown(
     f"""
     <div style="
         color:{TEXTO};
-        font-size:20px;
-        font-weight:600;
-        margin-top:30px;
+        font-size:21px;
+        font-weight:700;
+        margin-top:35px;
         margin-bottom:5px;
     ">
         Evolução das Monitorias
@@ -861,7 +1282,7 @@ fig.add_trace(
         text=valores,
         textposition="inside",
         textfont={
-            "color": TEXTO,
+            "color": "#FFFFFF",
             "size": 13
         },
         hovertemplate=(
@@ -905,5 +1326,8 @@ fig.update_yaxes(
 
 st.plotly_chart(
     fig,
-    use_container_width=True
+    use_container_width=True,
+    config={
+        "displayModeBar": False
+    }
 )
