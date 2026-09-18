@@ -242,27 +242,53 @@ percentual = (
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric(
-        "COLABORADORES",
-        total
+    st.markdown(
+        f"""
+        <div class="card">
+            <div class="card-title">COLABORADORES</div>
+            <div class="card-value">{total}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 with col2:
-    st.metric(
-        "REALIZADAS",
-        realizadas
+    st.markdown(
+        f"""
+        <div class="card">
+            <div class="card-title" style="color:{VERDE};">
+                REALIZADAS
+            </div>
+            <div class="card-value">{realizadas}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 with col3:
-    st.metric(
-        "PENDENTES",
-        pendentes
+    st.markdown(
+        f"""
+        <div class="card">
+            <div class="card-title" style="color:{LARANJA};">
+                PENDENTES
+            </div>
+            <div class="card-value">{pendentes}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 with col4:
-    st.metric(
-        "CONCLUÍDO",
-        f"{percentual:.1f}%"
+    st.markdown(
+        f"""
+        <div class="card">
+            <div class="card-title" style="color:{AZUL};">
+                CONCLUÍDO
+            </div>
+            <div class="card-value">{percentual:.1f}%</div>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 # ==========================================
@@ -298,9 +324,84 @@ st.markdown(
 
 if supervisao == "Todas":
 
-    st.info(
-        "Selecione uma supervisão acima para consultar os colaboradores."
+    resumo_equipes = (
+        monitorias_google
+        .assign(
+            Status=monitorias_google["Data Monitoria"].notna()
+        )
+        .groupby("Supervisão")
+        .agg(
+            Colaboradores=("Colaborador", "count"),
+            Realizadas=("Status", "sum")
+        )
+        .reset_index()
     )
+
+    resumo_equipes["Pendentes"] = (
+        resumo_equipes["Colaboradores"]
+        - resumo_equipes["Realizadas"]
+    )
+
+    resumo_equipes = resumo_equipes.sort_values(
+        "Supervisão"
+    )
+
+    colunas_resumo = st.columns(3)
+
+    for i, (_, linha) in enumerate(
+        resumo_equipes.iterrows()
+    ):
+
+        with colunas_resumo[i % 3]:
+
+            st.markdown(
+                f"""
+                <div class="card" style="text-align:left;">
+
+                    <div style="
+                        color:{AZUL};
+                        font-size:17px;
+                        font-weight:700;
+                        margin-bottom:12px;
+                    ">
+                        {linha["Supervisão"]}
+                    </div>
+
+                    <div style="
+                        color:{TEXTO_SECUNDARIO};
+                        font-size:13px;
+                    ">
+                        Colaboradores
+                    </div>
+
+                    <div style="
+                        color:{TEXTO};
+                        font-size:22px;
+                        font-weight:700;
+                    ">
+                        {linha["Colaboradores"]}
+                    </div>
+
+                    <div style="
+                        color:{VERDE};
+                        font-size:13px;
+                        margin-top:8px;
+                    ">
+                        ✓ Realizadas: {linha["Realizadas"]}
+                    </div>
+
+                    <div style="
+                        color:{LARANJA};
+                        font-size:13px;
+                        margin-top:4px;
+                    ">
+                        ⏳ Pendentes: {linha["Pendentes"]}
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
 # ==========================================
 # LISTAS DA SUPERVISÃO SELECIONADA
