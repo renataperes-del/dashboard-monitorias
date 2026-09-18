@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import gspread
 import html
+
 from datetime import datetime
 from google.oauth2.service_account import Credentials
 
@@ -19,20 +20,29 @@ st.set_page_config(
 
 
 # =========================================================
-# CORES
+# PALETA
 # =========================================================
 
-BG = "#F7F8FC"
+BG = "#F6F7FB"
 CARD = "#FFFFFF"
-BORDER = "#E8EAF2"
-TEXT = "#293241"
-SECONDARY = "#7B8496"
+BORDER = "#E5E8F0"
 
-BLUE = "#5B7CFA"
-PURPLE = "#8B7CF6"
-GREEN = "#55B99D"
-ORANGE = "#F2A66F"
-PINK = "#E58FA3"
+TEXT = "#1F2937"
+SECONDARY = "#6B7280"
+
+PRIMARY = "#4361EE"
+PRIMARY_SOFT = "#EEF2FF"
+
+SUCCESS = "#059669"
+SUCCESS_SOFT = "#ECFDF5"
+
+WARNING = "#D97706"
+WARNING_SOFT = "#FFFBEB"
+
+CRITICAL = "#DC2626"
+CRITICAL_SOFT = "#FEF2F2"
+
+GRAY = "#CBD5E1"
 
 
 # =========================================================
@@ -43,162 +53,306 @@ st.markdown(
     f"""
     <style>
 
+    @import url(
+        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+    );
+
+    html,
+    body,
+    .stApp,
+    [class*="st-"] {{
+        font-family: 'Inter', sans-serif;
+    }}
+
     .stApp {{
         background: {BG};
+        color: {TEXT};
     }}
 
     .block-container {{
-        padding-top: 2rem;
-        padding-bottom: 3rem;
         max-width: 1400px;
+        padding-top: 2rem;
+        padding-bottom: 4rem;
+    }}
+
+    #MainMenu,
+    footer {{
+        visibility: hidden;
     }}
 
     [data-testid="stHeader"] {{
         background: transparent !important;
     }}
 
-    [data-testid="stToolbar"] {{
-        right: 1rem;
+    h1 {{
+        color: {TEXT} !important;
+        font-size: 1.9rem !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.03em;
+        margin-bottom: 4px !important;
     }}
 
-    h1, h2, h3, h4 {{
+    h2,
+    h3 {{
         color: {TEXT} !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.015em;
+    }}
+
+    h2 {{
+        font-size: 1.2rem !important;
+    }}
+
+    h3 {{
+        font-size: 1rem !important;
+    }}
+
+    p {{
+        color: {TEXT};
     }}
 
     .stCaption {{
         color: {SECONDARY} !important;
     }}
 
+    .subtitle {{
+        color: {SECONDARY};
+        font-size: 14px;
+        margin-top: -2px;
+        margin-bottom: 26px;
+    }}
+
+    .section-caption {{
+        color: {SECONDARY};
+        font-size: 13px;
+        margin-top: -8px;
+        margin-bottom: 16px;
+    }}
+
+    /* ----------------------------------------------------- */
+    /* SELECTBOX */
+    /* ----------------------------------------------------- */
+
     div[data-baseweb="select"] > div {{
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 12px;
+        min-height: 42px;
+        box-shadow: none;
     }}
+
+    div[data-baseweb="select"] > div:hover {{
+        border-color: {PRIMARY};
+    }}
+
+    /* ----------------------------------------------------- */
+    /* BOTÕES */
+    /* ----------------------------------------------------- */
+
+    .stButton > button {{
+        background: {CARD};
+        color: {TEXT};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        min-height: 42px;
+        font-weight: 600;
+        box-shadow: none;
+        transition: all 0.15s ease;
+    }}
+
+    .stButton > button:hover {{
+        border-color: {PRIMARY};
+        color: {PRIMARY};
+        background: {PRIMARY_SOFT};
+    }}
+
+    /* ----------------------------------------------------- */
+    /* CARDS */
+    /* ----------------------------------------------------- */
 
     .custom-card {{
         background: {CARD};
         border: 1px solid {BORDER};
-        border-radius: 18px;
-        padding: 22px;
-        min-height: 128px;
-        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+        border-radius: 12px;
+        padding: 20px;
+        min-height: 126px;
+        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
     }}
 
     .custom-card-title {{
         color: {SECONDARY};
-        font-size: 13px;
+        font-size: 11px;
         font-weight: 600;
-        margin-bottom: 10px;
+        letter-spacing: 0.06em;
+        margin-bottom: 12px;
     }}
 
     .custom-card-value {{
         color: {TEXT};
         font-size: 30px;
-        font-weight: 750;
+        font-weight: 700;
         line-height: 1;
+        font-variant-numeric: tabular-nums;
     }}
 
     .custom-card-subtitle {{
         color: {SECONDARY};
-        font-size: 13px;
-        margin-top: 8px;
+        font-size: 12px;
+        margin-top: 9px;
     }}
+
+    /* ----------------------------------------------------- */
+    /* PRAÇAS */
+    /* ----------------------------------------------------- */
 
     .praca-card {{
         background: {CARD};
         border: 1px solid {BORDER};
-        border-radius: 18px;
-        padding: 24px;
-        min-height: 130px;
-        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+        border-radius: 12px;
+        padding: 20px;
+        min-height: 118px;
+        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
     }}
 
     .praca-name {{
         color: {TEXT};
-        font-size: 24px;
-        font-weight: 750;
+        font-size: 21px;
+        font-weight: 700;
         margin-bottom: 12px;
+        letter-spacing: -0.02em;
     }}
 
     .praca-info {{
         color: {SECONDARY};
-        font-size: 13px;
-    }}
-
-    .info-card {{
-        background: {CARD};
-        border: 1px solid {BORDER};
-        border-radius: 18px;
-        padding: 22px;
-        margin-top: 12px;
-        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
-    }}
-
-    .info-label {{
-        color: {SECONDARY};
         font-size: 12px;
-        font-weight: 600;
-        margin-bottom: 5px;
     }}
 
-    .info-value {{
-        color: {TEXT};
-        font-size: 16px;
-        font-weight: 650;
-        margin-bottom: 14px;
-    }}
+    /* ----------------------------------------------------- */
+    /* SCORE */
+    /* ----------------------------------------------------- */
 
     .score-card {{
         background: {CARD};
         border: 1px solid {BORDER};
-        border-radius: 18px;
+        border-radius: 12px;
         padding: 28px;
         min-height: 250px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
     }}
 
     .score-label {{
         color: {SECONDARY};
-        font-size: 13px;
+        font-size: 11px;
         font-weight: 600;
+        letter-spacing: 0.06em;
         margin-bottom: 12px;
     }}
 
     .score-value {{
         color: {TEXT};
-        font-size: 46px;
-        font-weight: 800;
+        font-size: 42px;
+        font-weight: 700;
         line-height: 1;
+        font-variant-numeric: tabular-nums;
     }}
 
     .score-description {{
         color: {SECONDARY};
-        font-size: 13px;
+        font-size: 12px;
         margin-top: 12px;
+        line-height: 1.5;
     }}
+
+    /* ----------------------------------------------------- */
+    /* EQUIPE */
+    /* ----------------------------------------------------- */
+
+    .team-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        padding: 20px;
+        min-height: 174px;
+        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
+    }}
+
+    .team-name {{
+        color: {TEXT};
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 14px;
+    }}
+
+    .team-number {{
+        color: {TEXT};
+        font-size: 27px;
+        font-weight: 700;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }}
+
+    .team-label {{
+        color: {SECONDARY};
+        font-size: 11px;
+        margin-top: 4px;
+    }}
+
+    .team-progress {{
+        width: 100%;
+        height: 6px;
+        background: {GRAY};
+        border-radius: 99px;
+        margin-top: 17px;
+        overflow: hidden;
+    }}
+
+    .team-progress-fill {{
+        height: 100%;
+        background: {PRIMARY};
+        border-radius: 99px;
+    }}
+
+    .team-status {{
+        display: flex;
+        justify-content: space-between;
+        margin-top: 9px;
+        font-size: 11px;
+    }}
+
+    .team-realizada {{
+        color: {SUCCESS};
+    }}
+
+    .team-pendente {{
+        color: {WARNING};
+    }}
+
+    /* ----------------------------------------------------- */
+    /* LISTAS */
+    /* ----------------------------------------------------- */
 
     .list-card {{
         background: {CARD};
         border: 1px solid {BORDER};
-        border-radius: 18px;
+        border-radius: 12px;
         padding: 20px;
-        min-height: 180px;
-        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+        min-height: 160px;
+        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
     }}
 
     .list-title {{
         color: {TEXT};
-        font-size: 17px;
-        font-weight: 750;
+        font-size: 15px;
+        font-weight: 600;
         margin-bottom: 14px;
     }}
 
     .list-item {{
         border-bottom: 1px solid {BORDER};
-        padding: 11px 0;
+        padding: 10px 0;
     }}
 
     .list-item:last-child {{
@@ -207,68 +361,74 @@ st.markdown(
 
     .list-name {{
         color: {TEXT};
-        font-size: 14px;
-        font-weight: 650;
+        font-size: 13px;
+        font-weight: 600;
     }}
 
     .list-function {{
         color: {SECONDARY};
-        font-size: 12px;
+        font-size: 11px;
         margin-top: 3px;
     }}
 
     .list-score {{
-        color: {BLUE};
-        font-size: 12px;
-        font-weight: 700;
-        margin-top: 3px;
+        color: {PRIMARY};
+        font-size: 11px;
+        font-weight: 600;
+        margin-top: 4px;
+        font-variant-numeric: tabular-nums;
     }}
 
     .empty-message {{
         color: {SECONDARY};
-        font-size: 13px;
+        font-size: 12px;
         padding: 12px 0;
     }}
 
-    .team-card {{
-        background: {CARD};
-        border: 1px solid {BORDER};
-        border-radius: 18px;
-        padding: 20px;
-        min-height: 150px;
-        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+    /* ----------------------------------------------------- */
+    /* STATUS BADGES */
+    /* ----------------------------------------------------- */
+
+    .badge {{
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 600;
     }}
 
-    .team-name {{
+    .badge-success {{
+        color: {SUCCESS};
+        background: {SUCCESS_SOFT};
+    }}
+
+    .badge-warning {{
+        color: {WARNING};
+        background: {WARNING_SOFT};
+    }}
+
+    .badge-critical {{
+        color: {CRITICAL};
+        background: {CRITICAL_SOFT};
+    }}
+
+    /* ----------------------------------------------------- */
+    /* FILTRO ATIVO */
+    /* ----------------------------------------------------- */
+
+    .filter-summary {{
+        background: {PRIMARY_SOFT};
+        border: 1px solid #DCE4FF;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-top: 8px;
+        margin-bottom: 24px;
         color: {TEXT};
-        font-size: 16px;
-        font-weight: 750;
-        margin-bottom: 16px;
-    }}
-
-    .team-number {{
-        color: {TEXT};
-        font-size: 28px;
-        font-weight: 800;
-    }}
-
-    .team-label {{
-        color: {SECONDARY};
         font-size: 12px;
     }}
 
-    .status-realizada {{
-        color: {GREEN};
-        font-size: 13px;
-        font-weight: 650;
-        margin-top: 14px;
-    }}
-
-    .status-pendente {{
-        color: {ORANGE};
-        font-size: 13px;
-        font-weight: 650;
-        margin-top: 4px;
+    .filter-summary strong {{
+        color: {PRIMARY};
     }}
 
     </style>
@@ -310,10 +470,10 @@ def carregar_dados():
 
 
 # =========================================================
-# BOTÃO ATUALIZAR
+# ATUALIZAÇÃO
 # =========================================================
 
-col_atualizacao, col_botao = st.columns([5, 1])
+col_data, col_botao = st.columns([6, 1])
 
 with col_botao:
 
@@ -323,27 +483,36 @@ with col_botao:
         st.rerun()
 
 
+data_consulta = datetime.now().strftime(
+    "%d/%m/%Y às %H:%M"
+)
+
+with col_data:
+
+    st.caption(
+        f"Última atualização dos dados: {data_consulta}"
+    )
+
+
 # =========================================================
 # CARREGAMENTO
 # =========================================================
 
 dados_aplicacao = carregar_dados()
 
-data_consulta = datetime.now().strftime(
-    "%d/%m/%Y às %H:%M"
-)
 
+if len(dados_aplicacao) <= 3:
 
-with col_atualizacao:
-
-    st.caption(
-        f"Última atualização dos dados: "
-        f"{data_consulta}"
+    st.error(
+        "A aba 'Aplicação' não possui dados suficientes "
+        "para carregar o dashboard."
     )
+
+    st.stop()
 
 
 # =========================================================
-# VALIDAÇÃO DA ESTRUTURA
+# ESTRUTURA DA PLANILHA
 # =========================================================
 
 COLUNAS_ESPERADAS = [
@@ -361,16 +530,6 @@ COLUNAS_ESPERADAS = [
     "Percentual Offline",
     "Observações Gerais"
 ]
-
-
-if len(dados_aplicacao) <= 3:
-
-    st.error(
-        "A aba 'Aplicação' não possui dados suficientes "
-        "para carregar o dashboard."
-    )
-
-    st.stop()
 
 
 linhas_dados = dados_aplicacao[3:]
@@ -396,7 +555,7 @@ monitorias_google = pd.DataFrame(
 
 
 # =========================================================
-# LIMPEZA DOS DADOS
+# LIMPEZA
 # =========================================================
 
 monitorias_google = monitorias_google[
@@ -435,7 +594,11 @@ monitorias_google["Supervisão"] = (
 
 monitorias_google["Supervisão"] = (
     monitorias_google["Supervisão"]
-    .replace("Júlio", "Julio")
+    .replace(
+        {
+            "Júlio": "Julio"
+        }
+    )
 )
 
 
@@ -443,25 +606,17 @@ monitorias_google["Supervisão"] = (
 # DATAS
 # =========================================================
 
-monitorias_google["Data Monitoria"] = pd.to_datetime(
-    monitorias_google["Data Monitoria"],
-    dayfirst=True,
-    errors="coerce"
-)
+for coluna in [
+    "Data Monitoria",
+    "Data Lado a Lado",
+    "Data Monitoria Offline"
+]:
 
-
-monitorias_google["Data Lado a Lado"] = pd.to_datetime(
-    monitorias_google["Data Lado a Lado"],
-    dayfirst=True,
-    errors="coerce"
-)
-
-
-monitorias_google["Data Monitoria Offline"] = pd.to_datetime(
-    monitorias_google["Data Monitoria Offline"],
-    dayfirst=True,
-    errors="coerce"
-)
+    monitorias_google[coluna] = pd.to_datetime(
+        monitorias_google[coluna],
+        dayfirst=True,
+        errors="coerce"
+    )
 
 
 # =========================================================
@@ -469,9 +624,7 @@ monitorias_google["Data Monitoria Offline"] = pd.to_datetime(
 # =========================================================
 
 duplicados = (
-    monitorias_google[
-        monitorias_google["Colaborador"].notna()
-    ]
+    monitorias_google
     .groupby("Colaborador")
     .size()
 )
@@ -494,18 +647,13 @@ if not duplicados.empty:
 
         for nome, quantidade in duplicados.items():
 
-            nome_seguro = html.escape(
-                str(nome)
-            )
-
             st.write(
-                f"- {nome_seguro}: "
-                f"{quantidade} registros"
+                f"- {nome}: {quantidade} registros"
             )
 
 
 # =========================================================
-# FUNÇÕES
+# FUNÇÕES DOS COLABORADORES
 # =========================================================
 
 execs = [
@@ -649,10 +797,8 @@ apoio_adm = [
 
 funcao_por_nome = {}
 
-
 for nome in execs:
     funcao_por_nome[nome] = "Exec"
-
 
 for nome in apoio_adm:
     funcao_por_nome[nome] = "Apoio ADM"
@@ -663,32 +809,6 @@ monitorias_google["Função"] = (
     .map(funcao_por_nome)
     .fillna("Não identificado")
 )
-
-
-# =========================================================
-# AVISO DE FUNÇÕES NÃO IDENTIFICADAS
-# =========================================================
-
-nomes_sem_funcao = sorted(
-    monitorias_google.loc[
-        monitorias_google["Função"] == "Não identificado",
-        "Colaborador"
-    ]
-    .dropna()
-    .unique()
-    .tolist()
-)
-
-
-if nomes_sem_funcao:
-
-    with st.expander(
-        f"⚠️ {len(nomes_sem_funcao)} colaborador(es) "
-        "sem função identificada"
-    ):
-
-        for nome in nomes_sem_funcao:
-            st.write(f"- {nome}")
 
 
 # =========================================================
@@ -790,11 +910,11 @@ monitorias_google["Média"] = (
 
 
 # =========================================================
-# STATUS DA MONITORIA
+# STATUS
 # =========================================================
 
 # REGRA OFICIAL:
-# Data Monitoria preenchida = monitoria realizada
+# Data Monitoria preenchida = realizada
 
 monitorias_google["Realizada"] = (
     monitorias_google["Data Monitoria"].notna()
@@ -846,10 +966,68 @@ pracas = {
 
 
 # =========================================================
+# MAPEAMENTO REAL:
+# PRAÇA -> NOME DA SUPERVISÃO NA PLANILHA
+# =========================================================
+
+supervisao_por_praca = {
+
+    "São Paulo": [
+        "Wesley",
+        "Kelly",
+        "Jean",
+        "Julio",
+        "Murilo"
+    ],
+
+    "GMSP": [
+        "Camila",
+        "Laila",
+        "Alexssander"
+    ],
+
+    "Conne-Sul": [
+        "Angélica",
+        "Karine"
+    ],
+
+    "Sudeste": [
+        "Maiara",
+        "Leticia"
+    ]
+}
+
+
+# Inverte o dicionário para descobrir
+# a praça a partir da supervisão
+
+praca_por_supervisao = {}
+
+for praca, supervisoes in supervisao_por_praca.items():
+
+    for supervisao in supervisoes:
+
+        praca_por_supervisao[
+            supervisao
+        ] = praca
+
+
+monitorias_google["Praça"] = (
+    monitorias_google["Supervisão"]
+    .map(praca_por_supervisao)
+    .fillna("Não identificada")
+)
+
+
+# =========================================================
 # FUNÇÕES VISUAIS
 # =========================================================
 
-def html_card(titulo, valor, subtitulo=""):
+def html_card(
+    titulo,
+    valor,
+    subtitulo=""
+):
 
     titulo = html.escape(str(titulo))
     valor = html.escape(str(valor))
@@ -874,7 +1052,10 @@ def html_card(titulo, valor, subtitulo=""):
     """
 
 
-def html_praca(nome, quantidade):
+def html_praca(
+    nome,
+    quantidade
+):
 
     nome = html.escape(str(nome))
 
@@ -902,6 +1083,12 @@ def html_team(
 
     nome = html.escape(str(nome))
 
+    percentual = (
+        realizadas / total * 100
+        if total > 0
+        else 0
+    )
+
     return f"""
     <div class="team-card">
 
@@ -917,12 +1104,25 @@ def html_team(
             colaboradores
         </div>
 
-        <div class="status-realizada">
-            {realizadas} realizadas
+        <div class="team-progress">
+
+            <div
+                class="team-progress-fill"
+                style="width: {percentual:.1f}%"
+            ></div>
+
         </div>
 
-        <div class="status-pendente">
-            {pendentes} pendentes
+        <div class="team-status">
+
+            <span class="team-realizada">
+                {realizadas} realizadas
+            </span>
+
+            <span class="team-pendente">
+                {pendentes} pendentes
+            </span>
+
         </div>
 
     </div>
@@ -1013,12 +1213,19 @@ def html_lista(
 # CABEÇALHO
 # =========================================================
 
-st.caption("NUBE • TREINAMENTO COMERCIAL")
+st.caption(
+    "NUBE • TREINAMENTO COMERCIAL"
+)
 
-st.title("Dashboard de Monitorias")
+st.title(
+    "Dashboard de Monitorias"
+)
 
-st.write(
-    "Acompanhamento das aplicações de monitoria"
+st.markdown(
+    '<div class="subtitle">'
+    'Acompanhamento das aplicações de monitoria'
+    '</div>',
+    unsafe_allow_html=True
 )
 
 
@@ -1028,20 +1235,75 @@ st.write(
 
 st.subheader("Filtros")
 
-col_filtro_supervisao, col_filtro_status = st.columns(2)
 
-
-supervisoes = sorted(
-    monitorias_google["Supervisão"]
-    .dropna()
-    .unique()
-    .tolist()
+col_filtro_praca, col_filtro_supervisao, col_filtro_status = (
+    st.columns(3)
 )
+
+
+# ---------------------------------------------------------
+# PRAÇA
+# ---------------------------------------------------------
+
+opcoes_praca = [
+    "Todas"
+] + list(pracas.keys())
+
+
+with col_filtro_praca:
+
+    praca_selecionada = st.selectbox(
+        "Praça",
+        opcoes_praca
+    )
+
+
+# ---------------------------------------------------------
+# SUPERVISÃO
+# ---------------------------------------------------------
+
+if praca_selecionada == "Todas":
+
+    supervisoes_disponiveis = sorted(
+        monitorias_google[
+            "Supervisão"
+        ]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+else:
+
+    supervisoes_da_praca = (
+        supervisao_por_praca[
+            praca_selecionada
+        ]
+    )
+
+    supervisoes_existentes = (
+        monitorias_google[
+            "Supervisão"
+        ]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    supervisoes_disponiveis = sorted(
+        [
+            supervisao
+            for supervisao
+            in supervisoes_da_praca
+            if supervisao
+            in supervisoes_existentes
+        ]
+    )
 
 
 opcoes_supervisao = [
     "Todas"
-] + supervisoes
+] + supervisoes_disponiveis
 
 
 with col_filtro_supervisao:
@@ -1051,6 +1313,10 @@ with col_filtro_supervisao:
         opcoes_supervisao
     )
 
+
+# ---------------------------------------------------------
+# STATUS
+# ---------------------------------------------------------
 
 with col_filtro_status:
 
@@ -1065,10 +1331,18 @@ with col_filtro_status:
 
 
 # =========================================================
-# FILTRO DOS DADOS
+# APLICA FILTROS
 # =========================================================
 
 df_filtrado = monitorias_google.copy()
+
+
+if praca_selecionada != "Todas":
+
+    df_filtrado = df_filtrado[
+        df_filtrado["Praça"]
+        == praca_selecionada
+    ].copy()
 
 
 if supervisao_selecionada != "Todas":
@@ -1094,13 +1368,51 @@ elif status_selecionado == "Pendentes":
 
 
 # =========================================================
+# RESUMO DO FILTRO
+# =========================================================
+
+filtros_ativos = []
+
+if praca_selecionada != "Todas":
+    filtros_ativos.append(
+        f"<strong>Praça:</strong> "
+        f"{html.escape(praca_selecionada)}"
+    )
+
+if supervisao_selecionada != "Todas":
+    filtros_ativos.append(
+        f"<strong>Supervisão:</strong> "
+        f"{html.escape(supervisao_selecionada)}"
+    )
+
+if status_selecionado != "Todos":
+    filtros_ativos.append(
+        f"<strong>Status:</strong> "
+        f"{html.escape(status_selecionado)}"
+    )
+
+
+if filtros_ativos:
+
+    st.markdown(
+        '<div class="filter-summary">'
+        + " &nbsp; • &nbsp; ".join(filtros_ativos)
+        + "</div>",
+        unsafe_allow_html=True
+    )
+
+
+# =========================================================
 # DESEMPENHO GERAL
 # =========================================================
 
 st.subheader("Desempenho geral")
 
-st.caption(
-    "Média das notas das monitorias"
+st.markdown(
+    '<div class="section-caption">'
+    'Média das notas das monitorias'
+    '</div>',
+    unsafe_allow_html=True
 )
 
 
@@ -1109,9 +1421,11 @@ col_grafico, col_score = st.columns(
 )
 
 
-notas_validas = df_filtrado[
-    df_filtrado["Média"].notna()
-]["Média"]
+notas_validas = (
+    df_filtrado[
+        df_filtrado["Média"].notna()
+    ]["Média"]
+)
 
 
 if len(notas_validas) > 0:
@@ -1121,15 +1435,6 @@ if len(notas_validas) > 0:
 else:
 
     media_geral = None
-
-
-if media_geral is not None:
-
-    texto_media = f"{media_geral:.1f}%"
-
-else:
-
-    texto_media = "—"
 
 
 with col_grafico:
@@ -1151,11 +1456,11 @@ with col_grafico:
                     "Média",
                     "Restante"
                 ],
-                hole=0.72,
+                hole=0.74,
                 marker=dict(
                     colors=[
-                        BLUE,
-                        "#EEF0F7"
+                        PRIMARY,
+                        GRAY
                     ]
                 ),
                 textinfo="none",
@@ -1174,14 +1479,19 @@ with col_grafico:
             height=250,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(
+                family="Inter, sans-serif",
+                color=TEXT
+            ),
             annotations=[
                 dict(
-                    text=f"<b>{texto_media}</b>",
+                    text=f"<b>{media_geral:.1f}%</b>",
                     x=0.5,
                     y=0.5,
                     font=dict(
-                        size=28,
-                        color=TEXT
+                        size=27,
+                        color=TEXT,
+                        family="Inter, sans-serif"
                     ),
                     showarrow=False
                 )
@@ -1203,6 +1513,10 @@ with col_grafico:
             height=250,
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(
+                family="Inter, sans-serif",
+                color=TEXT
+            ),
             annotations=[
                 dict(
                     text="<b>—</b>",
@@ -1228,9 +1542,11 @@ with col_grafico:
 
 with col_score:
 
-    quantidade_com_nota = df_filtrado[
-        df_filtrado["Média"].notna()
-    ].shape[0]
+    quantidade_com_nota = (
+        df_filtrado[
+            df_filtrado["Média"].notna()
+        ].shape[0]
+    )
 
     st.html(
         f"""
@@ -1353,71 +1669,18 @@ for coluna, (
 
     with coluna:
 
+        quantidade_supervisoes = len(
+            supervisao_por_praca[
+                nome_praca
+            ]
+        )
+
         st.html(
             html_praca(
                 nome_praca,
-                len(
-                    dados_praca[
-                        "supervisores"
-                    ]
-                )
+                quantidade_supervisoes
             )
         )
-
-
-# =========================================================
-# CONSULTAR PRAÇA
-# =========================================================
-
-st.subheader("Consultar praça")
-
-
-praca_selecionada = st.selectbox(
-    "Selecione uma praça",
-    ["Selecione"] + list(pracas.keys())
-)
-
-
-if praca_selecionada != "Selecione":
-
-    dados_praca = pracas[
-        praca_selecionada
-    ]
-
-    supervisores_texto = "<br>".join(
-        html.escape(str(nome))
-        for nome in dados_praca["supervisores"]
-    )
-
-    responsavel = html.escape(
-        str(
-            dados_praca["responsavel"]
-        )
-    )
-
-    st.html(
-        f"""
-        <div class="info-card">
-
-            <div class="info-label">
-                RESPONSÁVEL
-            </div>
-
-            <div class="info-value">
-                {responsavel}
-            </div>
-
-            <div class="info-label">
-                SUPERVISORES
-            </div>
-
-            <div class="info-value">
-                {supervisores_texto}
-            </div>
-
-        </div>
-        """
-    )
 
 
 # =========================================================
@@ -1432,11 +1695,29 @@ st.subheader(
 if supervisao_selecionada == "Todas":
 
     nomes_supervisoes = sorted(
-        monitorias_google["Supervisão"]
+        df_filtrado[
+            "Supervisão"
+        ]
         .dropna()
         .unique()
         .tolist()
     )
+
+
+    if not nomes_supervisoes:
+
+        st.html(
+            """
+            <div class="list-card">
+
+                <div class="empty-message">
+                    Nenhuma equipe encontrada
+                    para os filtros selecionados.
+                </div>
+
+            </div>
+            """
+        )
 
 
     for inicio in range(
@@ -1459,8 +1740,8 @@ if supervisao_selecionada == "Todas":
         ):
 
             df_supervisao = (
-                monitorias_google[
-                    monitorias_google["Supervisão"]
+                df_filtrado[
+                    df_filtrado["Supervisão"]
                     == supervisao
                 ]
             )
@@ -1499,8 +1780,8 @@ if supervisao_selecionada == "Todas":
 else:
 
     df_supervisao = (
-        monitorias_google[
-            monitorias_google["Supervisão"]
+        df_filtrado[
+            df_filtrado["Supervisão"]
             == supervisao_selecionada
         ].copy()
     )
@@ -1508,9 +1789,11 @@ else:
 
     if status_selecionado == "Realizadas":
 
-        realizadas_df = df_supervisao[
-            df_supervisao["Realizada"]
-        ].copy()
+        realizadas_df = (
+            df_supervisao[
+                df_supervisao["Realizada"]
+            ].copy()
+        )
 
         pendentes_df = pd.DataFrame(
             columns=df_supervisao.columns
@@ -1523,20 +1806,26 @@ else:
             columns=df_supervisao.columns
         )
 
-        pendentes_df = df_supervisao[
-            ~df_supervisao["Realizada"]
-        ].copy()
+        pendentes_df = (
+            df_supervisao[
+                ~df_supervisao["Realizada"]
+            ].copy()
+        )
 
 
     else:
 
-        realizadas_df = df_supervisao[
-            df_supervisao["Realizada"]
-        ].copy()
+        realizadas_df = (
+            df_supervisao[
+                df_supervisao["Realizada"]
+            ].copy()
+        )
 
-        pendentes_df = df_supervisao[
-            ~df_supervisao["Realizada"]
-        ].copy()
+        pendentes_df = (
+            df_supervisao[
+                ~df_supervisao["Realizada"]
+            ].copy()
+        )
 
 
     col_realizadas, col_pendentes = (
@@ -1569,7 +1858,7 @@ else:
 
 
 # =========================================================
-# LISTA GERAL DE PENDÊNCIAS
+# PENDÊNCIAS
 # =========================================================
 
 st.subheader("Pendências")
@@ -1608,14 +1897,27 @@ if pendencias.empty:
         """
     )
 
+
 else:
 
-    col_pend_1, col_pend_2 = st.columns(2)
+    col_pend_1, col_pend_2 = (
+        st.columns(2)
+    )
 
-    metade = (len(pendencias) + 1) // 2
 
-    pendencias_1 = pendencias.iloc[:metade]
-    pendencias_2 = pendencias.iloc[metade:]
+    metade = (
+        len(pendencias) + 1
+    ) // 2
+
+
+    pendencias_1 = (
+        pendencias.iloc[:metade]
+    )
+
+    pendencias_2 = (
+        pendencias.iloc[metade:]
+    )
+
 
     with col_pend_1:
 
@@ -1628,11 +1930,11 @@ else:
             )
         )
 
+
     with col_pend_2:
 
         st.html(
-            " <div style='height: 1px;'></div> "
-            + html_lista(
+            html_lista(
                 "",
                 pendencias_2,
                 mostrar_nota=False
@@ -1641,7 +1943,7 @@ else:
 
 
 # =========================================================
-# EVOLUÇÃO DAS MONITORIAS
+# EVOLUÇÃO
 # =========================================================
 
 st.subheader(
@@ -1696,13 +1998,11 @@ nomes_meses = []
 for periodo in meses:
 
     inicio_mes = (
-        periodo
-        .start_time
+        periodo.start_time
     )
 
     fim_mes = (
-        periodo
-        .end_time
+        periodo.end_time
     )
 
 
@@ -1743,7 +2043,7 @@ fig_evolucao.add_trace(
     go.Bar(
         x=nomes_meses,
         y=quantidades,
-        marker_color=BLUE,
+        marker_color=PRIMARY,
         text=quantidades,
         textposition="outside",
         hovertemplate=(
@@ -1764,6 +2064,10 @@ fig_evolucao.update_layout(
     ),
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(
+        family="Inter, sans-serif",
+        color=TEXT
+    ),
     xaxis=dict(
         title=None,
         showgrid=False
@@ -1802,14 +2106,14 @@ col_lado, col_offline = (
 
 
 total_lado_a_lado = int(
-    monitorias_google[
+    df_filtrado[
         "Data Lado a Lado"
     ].notna().sum()
 )
 
 
 total_offline = int(
-    monitorias_google[
+    df_filtrado[
         "Data Monitoria Offline"
     ].notna().sum()
 )
