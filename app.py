@@ -53,8 +53,12 @@ st.markdown(
     f"""
     <style>
 
+    /* =====================================================
+       BASE
+       ===================================================== */
+
     @import url(
-        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
     );
 
     html,
@@ -65,14 +69,20 @@ st.markdown(
     }}
 
     .stApp {{
-        background: {BG};
+        background:
+            radial-gradient(
+                circle at 92% 0%,
+                rgba(67, 97, 238, 0.055),
+                transparent 28%
+            ),
+            {BG};
         color: {TEXT};
     }}
 
     .block-container {{
-        max-width: 1400px;
-        padding-top: 2rem;
-        padding-bottom: 4rem;
+        max-width: 1440px;
+        padding-top: 1.8rem;
+        padding-bottom: 5rem;
     }}
 
     #MainMenu,
@@ -84,27 +94,31 @@ st.markdown(
         background: transparent !important;
     }}
 
+    /* =====================================================
+       TIPOGRAFIA
+       ===================================================== */
+
     h1 {{
         color: {TEXT} !important;
-        font-size: 1.9rem !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.03em;
-        margin-bottom: 4px !important;
-    }}
-
-    h2,
-    h3 {{
-        color: {TEXT} !important;
-        font-weight: 600 !important;
-        letter-spacing: -0.015em;
+        font-size: 2rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.045em;
+        margin-bottom: 3px !important;
     }}
 
     h2 {{
-        font-size: 1.2rem !important;
+        color: {TEXT} !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.025em;
+        margin-top: 2.2rem !important;
+        margin-bottom: 5px !important;
     }}
 
     h3 {{
+        color: {TEXT} !important;
         font-size: 1rem !important;
+        font-weight: 600 !important;
     }}
 
     p {{
@@ -118,241 +132,384 @@ st.markdown(
     .subtitle {{
         color: {SECONDARY};
         font-size: 14px;
-        margin-top: -2px;
-        margin-bottom: 26px;
+        font-weight: 400;
+        margin-top: 0;
+        margin-bottom: 28px;
     }}
 
     .section-caption {{
         color: {SECONDARY};
         font-size: 13px;
-        margin-top: -8px;
-        margin-bottom: 16px;
+        margin-top: -2px;
+        margin-bottom: 17px;
     }}
 
-    /* ----------------------------------------------------- */
-    /* SELECTBOX */
-    /* ----------------------------------------------------- */
+    /* =====================================================
+       SELECTBOX / FILTROS
+       ===================================================== */
+
+    div[data-baseweb="select"] {{
+        width: 100%;
+    }}
 
     div[data-baseweb="select"] > div {{
-        background: {CARD};
-        border: 1px solid {BORDER};
-        border-radius: 12px;
-        min-height: 42px;
-        box-shadow: none;
+        background: {CARD} !important;
+        border: 1px solid {BORDER} !important;
+        border-radius: 12px !important;
+        min-height: 44px;
+        box-shadow:
+            0 1px 2px rgba(31, 41, 55, 0.025);
+        transition:
+            border-color 0.18s ease,
+            box-shadow 0.18s ease;
     }}
 
     div[data-baseweb="select"] > div:hover {{
-        border-color: {PRIMARY};
+        border-color: rgba(67, 97, 238, 0.45) !important;
+        box-shadow:
+            0 3px 10px rgba(67, 97, 238, 0.07);
     }}
 
-    /* ----------------------------------------------------- */
-    /* BOTÕES */
-    /* ----------------------------------------------------- */
+    div[data-baseweb="select"] [data-baseweb="icon"] {{
+        color: {PRIMARY};
+    }}
+
+    label[data-testid="stWidgetLabel"] p {{
+        color: {TEXT} !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        margin-bottom: 6px !important;
+    }}
+
+    /* =====================================================
+       BOTÃO
+       ===================================================== */
 
     .stButton > button {{
-        background: {CARD};
-        color: {TEXT};
-        border: 1px solid {BORDER};
-        border-radius: 12px;
+        background: {CARD} !important;
+        color: {TEXT} !important;
+        border: 1px solid {BORDER} !important;
+        border-radius: 11px !important;
         min-height: 42px;
+        padding: 0 17px;
         font-weight: 600;
-        box-shadow: none;
-        transition: all 0.15s ease;
+        font-size: 13px;
+        box-shadow:
+            0 1px 2px rgba(31, 41, 55, 0.03);
+        transition:
+            all 0.18s ease;
     }}
 
     .stButton > button:hover {{
-        border-color: {PRIMARY};
-        color: {PRIMARY};
-        background: {PRIMARY_SOFT};
+        background: {PRIMARY_SOFT} !important;
+        border-color: rgba(67, 97, 238, 0.35) !important;
+        color: {PRIMARY} !important;
+        transform: translateY(-1px);
+        box-shadow:
+            0 5px 14px rgba(67, 97, 238, 0.10);
     }}
 
-    /* ----------------------------------------------------- */
-    /* CARDS */
-    /* ----------------------------------------------------- */
+    /* =====================================================
+       CARD BASE
+       ===================================================== */
 
     .custom-card {{
+        position: relative;
         background: {CARD};
         border: 1px solid {BORDER};
-        border-radius: 12px;
-        padding: 20px;
-        min-height: 126px;
-        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
+        border-radius: 16px;
+        padding: 22px;
+        min-height: 132px;
+        overflow: hidden;
+        box-shadow:
+            0 2px 5px rgba(31, 41, 55, 0.025),
+            0 8px 24px rgba(31, 41, 55, 0.025);
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease,
+            border-color 0.18s ease;
+    }}
+
+    .custom-card::before {{
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: {PRIMARY};
+        opacity: 0.9;
+    }}
+
+    .custom-card:hover {{
+        transform: translateY(-2px);
+        border-color: #D9DEEB;
+        box-shadow:
+            0 5px 12px rgba(31, 41, 55, 0.035),
+            0 14px 30px rgba(31, 41, 55, 0.035);
     }}
 
     .custom-card-title {{
         color: {SECONDARY};
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        margin-bottom: 12px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        margin-bottom: 13px;
     }}
 
     .custom-card-value {{
         color: {TEXT};
-        font-size: 30px;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         line-height: 1;
+        letter-spacing: -0.035em;
         font-variant-numeric: tabular-nums;
     }}
 
     .custom-card-subtitle {{
         color: {SECONDARY};
         font-size: 12px;
-        margin-top: 9px;
+        margin-top: 10px;
     }}
 
-    /* ----------------------------------------------------- */
-    /* PRAÇAS */
-    /* ----------------------------------------------------- */
+    /* =====================================================
+       PRAÇAS
+       ===================================================== */
 
     .praca-card {{
-        background: {CARD};
+        position: relative;
+        background: linear-gradient(
+            145deg,
+            {CARD} 0%,
+            #FAFBFF 100%
+        );
         border: 1px solid {BORDER};
-        border-radius: 12px;
-        padding: 20px;
-        min-height: 118px;
-        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
+        border-radius: 16px;
+        padding: 21px;
+        min-height: 125px;
+        overflow: hidden;
+        box-shadow:
+            0 2px 5px rgba(31, 41, 55, 0.025),
+            0 8px 22px rgba(31, 41, 55, 0.025);
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
+    }}
+
+    .praca-card::after {{
+        content: "";
+        position: absolute;
+        width: 70px;
+        height: 70px;
+        right: -24px;
+        top: -24px;
+        border-radius: 50%;
+        background: {PRIMARY_SOFT};
+    }}
+
+    .praca-card:hover {{
+        transform: translateY(-2px);
+        box-shadow:
+            0 8px 22px rgba(31, 41, 55, 0.06);
     }}
 
     .praca-name {{
+        position: relative;
+        z-index: 1;
         color: {TEXT};
-        font-size: 21px;
-        font-weight: 700;
+        font-size: 20px;
+        font-weight: 750;
         margin-bottom: 12px;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.025em;
     }}
 
     .praca-info {{
+        position: relative;
+        z-index: 1;
         color: {SECONDARY};
         font-size: 12px;
     }}
 
-    /* ----------------------------------------------------- */
-    /* SCORE */
-    /* ----------------------------------------------------- */
+    /* =====================================================
+       SCORE
+       ===================================================== */
 
     .score-card {{
-        background: {CARD};
-        border: 1px solid {BORDER};
-        border-radius: 12px;
-        padding: 28px;
+        position: relative;
+        background:
+            linear-gradient(
+                145deg,
+                #FFFFFF 0%,
+                #F8F9FF 100%
+            );
+        border: 1px solid #DDE3F4;
+        border-radius: 18px;
+        padding: 30px;
         min-height: 250px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
+        overflow: hidden;
+        box-shadow:
+            0 4px 10px rgba(67, 97, 238, 0.035),
+            0 16px 32px rgba(31, 41, 55, 0.035);
+    }}
+
+    .score-card::before {{
+        content: "";
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        right: -55px;
+        top: -55px;
+        border-radius: 50%;
+        background: {PRIMARY_SOFT};
     }}
 
     .score-label {{
+        position: relative;
+        z-index: 1;
         color: {SECONDARY};
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        margin-bottom: 12px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        margin-bottom: 13px;
     }}
 
     .score-value {{
+        position: relative;
+        z-index: 1;
         color: {TEXT};
-        font-size: 42px;
-        font-weight: 700;
+        font-size: 46px;
+        font-weight: 800;
         line-height: 1;
+        letter-spacing: -0.04em;
         font-variant-numeric: tabular-nums;
     }}
 
     .score-description {{
+        position: relative;
+        z-index: 1;
         color: {SECONDARY};
         font-size: 12px;
-        margin-top: 12px;
-        line-height: 1.5;
+        margin-top: 13px;
+        line-height: 1.55;
+        max-width: 280px;
     }}
 
-    /* ----------------------------------------------------- */
-    /* EQUIPE */
-    /* ----------------------------------------------------- */
+    /* =====================================================
+       EQUIPE
+       ===================================================== */
 
     .team-card {{
+        position: relative;
         background: {CARD};
         border: 1px solid {BORDER};
-        border-radius: 12px;
+        border-radius: 16px;
         padding: 20px;
-        min-height: 174px;
-        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
+        min-height: 180px;
+        overflow: hidden;
+        box-shadow:
+            0 2px 5px rgba(31, 41, 55, 0.025),
+            0 8px 22px rgba(31, 41, 55, 0.025);
+        transition:
+            transform 0.18s ease,
+            box-shadow 0.18s ease;
+    }}
+
+    .team-card:hover {{
+        transform: translateY(-2px);
+        box-shadow:
+            0 8px 24px rgba(31, 41, 55, 0.055);
     }}
 
     .team-name {{
         color: {TEXT};
-        font-size: 15px;
-        font-weight: 600;
-        margin-bottom: 14px;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -0.01em;
     }}
 
     .team-number {{
         color: {TEXT};
-        font-size: 27px;
-        font-weight: 700;
+        font-size: 30px;
+        font-weight: 800;
         line-height: 1;
+        letter-spacing: -0.035em;
         font-variant-numeric: tabular-nums;
     }}
 
     .team-label {{
         color: {SECONDARY};
         font-size: 11px;
-        margin-top: 4px;
+        margin-top: 5px;
     }}
 
     .team-progress {{
         width: 100%;
-        height: 6px;
-        background: {GRAY};
+        height: 7px;
+        background: #E9ECF3;
         border-radius: 99px;
-        margin-top: 17px;
+        margin-top: 18px;
         overflow: hidden;
     }}
 
     .team-progress-fill {{
         height: 100%;
-        background: {PRIMARY};
+        background: linear-gradient(
+            90deg,
+            {PRIMARY},
+            #5C75EE
+        );
         border-radius: 99px;
+        transition: width 0.4s ease;
     }}
 
     .team-status {{
         display: flex;
         justify-content: space-between;
-        margin-top: 9px;
+        align-items: center;
+        margin-top: 10px;
         font-size: 11px;
     }}
 
     .team-realizada {{
         color: {SUCCESS};
+        font-weight: 600;
     }}
 
     .team-pendente {{
         color: {WARNING};
+        font-weight: 600;
     }}
 
-    /* ----------------------------------------------------- */
-    /* LISTAS */
-    /* ----------------------------------------------------- */
+    /* =====================================================
+       LISTAS
+       ===================================================== */
 
     .list-card {{
         background: {CARD};
         border: 1px solid {BORDER};
-        border-radius: 12px;
-        padding: 20px;
+        border-radius: 16px;
+        padding: 21px;
         min-height: 160px;
-        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.025);
+        box-shadow:
+            0 2px 5px rgba(31, 41, 55, 0.025),
+            0 8px 22px rgba(31, 41, 55, 0.025);
     }}
 
     .list-title {{
         color: {TEXT};
-        font-size: 15px;
-        font-weight: 600;
-        margin-bottom: 14px;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 13px;
+        letter-spacing: -0.01em;
     }}
 
     .list-item {{
-        border-bottom: 1px solid {BORDER};
-        padding: 10px 0;
+        border-bottom: 1px solid #EEF0F4;
+        padding: 11px 0;
     }}
 
     .list-item:last-child {{
@@ -372,10 +529,14 @@ st.markdown(
     }}
 
     .list-score {{
+        display: inline-block;
         color: {PRIMARY};
-        font-size: 11px;
-        font-weight: 600;
-        margin-top: 4px;
+        background: {PRIMARY_SOFT};
+        border-radius: 6px;
+        padding: 3px 7px;
+        font-size: 10px;
+        font-weight: 700;
+        margin-top: 5px;
         font-variant-numeric: tabular-nums;
     }}
 
@@ -385,16 +546,16 @@ st.markdown(
         padding: 12px 0;
     }}
 
-    /* ----------------------------------------------------- */
-    /* STATUS BADGES */
-    /* ----------------------------------------------------- */
+    /* =====================================================
+       STATUS
+       ===================================================== */
 
     .badge {{
         display: inline-block;
-        padding: 4px 8px;
-        border-radius: 6px;
+        padding: 5px 9px;
+        border-radius: 7px;
         font-size: 10px;
-        font-weight: 600;
+        font-weight: 700;
     }}
 
     .badge-success {{
@@ -412,23 +573,82 @@ st.markdown(
         background: {CRITICAL_SOFT};
     }}
 
-    /* ----------------------------------------------------- */
-    /* FILTRO ATIVO */
-    /* ----------------------------------------------------- */
+    /* =====================================================
+       FILTRO ATIVO
+       ===================================================== */
 
     .filter-summary {{
-        background: {PRIMARY_SOFT};
+        background: linear-gradient(
+            90deg,
+            {PRIMARY_SOFT},
+            #F8F9FF
+        );
         border: 1px solid #DCE4FF;
         border-radius: 12px;
         padding: 12px 16px;
         margin-top: 8px;
-        margin-bottom: 24px;
+        margin-bottom: 25px;
         color: {TEXT};
         font-size: 12px;
+        box-shadow:
+            0 3px 10px rgba(67, 97, 238, 0.035);
     }}
 
     .filter-summary strong {{
         color: {PRIMARY};
+        font-weight: 700;
+    }}
+
+    /* =====================================================
+       GRÁFICOS PLOTLY
+       ===================================================== */
+
+    .js-plotly-plot {{
+        border-radius: 16px;
+    }}
+
+    /* =====================================================
+       ESPAÇAMENTO
+       ===================================================== */
+
+    [data-testid="column"] {{
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+    }}
+
+    /* =====================================================
+       EXPANDER
+       ===================================================== */
+
+    [data-testid="stExpander"] {{
+        border: 1px solid {BORDER} !important;
+        border-radius: 12px !important;
+        background: {CARD} !important;
+    }}
+
+    /* =====================================================
+       RESPONSIVIDADE
+       ===================================================== */
+
+    @media (max-width: 900px) {{
+
+        .block-container {{
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }}
+
+        h1 {{
+            font-size: 1.65rem !important;
+        }}
+
+        .custom-card-value {{
+            font-size: 27px;
+        }}
+
+        .score-value {{
+            font-size: 40px;
+        }}
+
     }}
 
     </style>
@@ -1213,8 +1433,42 @@ def html_lista(
 # CABEÇALHO
 # =========================================================
 
-st.caption(
-    "NUBE • TREINAMENTO COMERCIAL"
+st.markdown(
+    f"""
+    <div style="
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:7px;
+    ">
+
+        <span style="
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            width:29px;
+            height:29px;
+            border-radius:9px;
+            background:{PRIMARY_SOFT};
+            color:{PRIMARY};
+            font-size:13px;
+            font-weight:800;
+        ">
+            N
+        </span>
+
+        <span style="
+            color:{PRIMARY};
+            font-size:11px;
+            font-weight:700;
+            letter-spacing:.09em;
+        ">
+            NUBE • TREINAMENTO COMERCIAL
+        </span>
+
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 st.title(
@@ -1456,12 +1710,16 @@ with col_grafico:
                     "Média",
                     "Restante"
                 ],
-                hole=0.74,
+                hole=0.76,
                 marker=dict(
                     colors=[
                         PRIMARY,
-                        GRAY
-                    ]
+                        "#E8EBF3"
+                    ],
+                    line=dict(
+                        color="#FFFFFF",
+                        width=3
+                    )
                 ),
                 textinfo="none",
                 hoverinfo="skip"
@@ -1489,7 +1747,7 @@ with col_grafico:
                     x=0.5,
                     y=0.5,
                     font=dict(
-                        size=27,
+                        size=28,
                         color=TEXT,
                         family="Inter, sans-serif"
                     ),
@@ -2043,9 +2301,18 @@ fig_evolucao.add_trace(
     go.Bar(
         x=nomes_meses,
         y=quantidades,
-        marker_color=PRIMARY,
+        marker=dict(
+            color=PRIMARY,
+            line=dict(
+                width=0
+            )
+        ),
         text=quantidades,
         textposition="outside",
+        textfont=dict(
+            color=TEXT,
+            size=11
+        ),
         hovertemplate=(
             "%{x}: %{y} monitorias"
             "<extra></extra>"
@@ -2070,14 +2337,24 @@ fig_evolucao.update_layout(
     ),
     xaxis=dict(
         title=None,
-        showgrid=False
+        showgrid=False,
+        linecolor=BORDER,
+        tickfont=dict(
+            size=11,
+            color=SECONDARY
+        )
     ),
     yaxis=dict(
         title=None,
         showgrid=True,
-        gridcolor=BORDER,
-        zeroline=False
+        gridcolor="#EDF0F5",
+        zeroline=False,
+        tickfont=dict(
+            size=11,
+            color=SECONDARY
+        )
     ),
+    bargap=0.32,
     showlegend=False
 )
 
