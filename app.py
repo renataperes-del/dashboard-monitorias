@@ -40,6 +40,7 @@ PINK = "#E58FA3"
 st.markdown(
     f"""
     <style>
+
     .stApp {{
         background: {BG};
     }}
@@ -51,7 +52,7 @@ st.markdown(
     }}
 
     [data-testid="stHeader"] {{
-        background: transparent;
+        background: transparent !important;
     }}
 
     [data-testid="stToolbar"] {{
@@ -59,35 +60,231 @@ st.markdown(
     }}
 
     h1, h2, h3, h4 {{
-        color: {TEXT};
+        color: {TEXT} !important;
     }}
 
     .stCaption {{
-        color: {SECONDARY};
+        color: {SECONDARY} !important;
     }}
+
+    /* ========================================================
+       SELECTBOX
+       ======================================================== */
+
+    div[data-baseweb="select"] > div {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+    }}
+
+    /* ========================================================
+       METRICS
+       ======================================================== */
 
     div[data-testid="stMetric"] {{
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 16px;
-        padding: 18px;
+        padding: 20px;
         box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+        min-height: 120px;
     }}
 
     div[data-testid="stMetricLabel"] {{
-        color: {SECONDARY};
+        color: {SECONDARY} !important;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
     }}
 
     div[data-testid="stMetricValue"] {{
-        color: {TEXT};
+        color: {TEXT} !important;
+        font-size: 2rem;
+        font-weight: 700;
     }}
 
     div[data-testid="stMetricDelta"] {{
-        color: {SECONDARY};
+        color: {SECONDARY} !important;
     }}
 
-    .section-space {{
-        margin-top: 20px;
+    /* ========================================================
+       CARDS PERSONALIZADOS
+       ======================================================== */
+
+    .custom-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+        margin-bottom: 12px;
+    }}
+
+    .custom-card-title {{
+        color: {SECONDARY};
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+    }}
+
+    .custom-card-value {{
+        color: {TEXT};
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1.1;
+    }}
+
+    .custom-card-name {{
+        color: {TEXT};
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }}
+
+    .custom-card-subtitle {{
+        color: {SECONDARY};
+        font-size: 0.9rem;
+    }}
+
+    .team-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 20px;
+        min-height: 145px;
+        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+    }}
+
+    .team-name {{
+        color: {TEXT};
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }}
+
+    .team-number {{
+        color: {SECONDARY};
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }}
+
+    .status-realizada {{
+        color: {GREEN};
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }}
+
+    .status-pendente {{
+        color: {ORANGE};
+        font-size: 0.9rem;
+        font-weight: 600;
+    }}
+
+    .praca-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 22px;
+        min-height: 125px;
+        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+    }}
+
+    .praca-name {{
+        color: {TEXT};
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }}
+
+    .praca-info {{
+        color: {SECONDARY};
+        font-size: 0.88rem;
+    }}
+
+    .info-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+    }}
+
+    .info-label {{
+        color: {SECONDARY};
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 5px;
+    }}
+
+    .info-value {{
+        color: {TEXT};
+        font-size: 1rem;
+        line-height: 1.5;
+    }}
+
+    .score-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 18px 22px;
+        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+    }}
+
+    .score-label {{
+        color: {SECONDARY};
+        font-size: 0.76rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }}
+
+    .score-value {{
+        color: {TEXT};
+        font-size: 1.9rem;
+        font-weight: 700;
+        margin-top: 5px;
+    }}
+
+    .score-description {{
+        color: {SECONDARY};
+        font-size: 0.85rem;
+        margin-top: 4px;
+    }}
+
+    .list-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 4px 14px rgba(41, 50, 65, 0.04);
+    }}
+
+    .list-title {{
+        color: {TEXT};
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }}
+
+    .list-item {{
+        color: {TEXT};
+        font-size: 0.9rem;
+        padding: 6px 0;
+        border-bottom: 1px solid {BORDER};
+    }}
+
+    .list-item:last-child {{
+        border-bottom: none;
+    }}
+
+    .empty-message {{
+        color: {SECONDARY};
+        font-size: 0.9rem;
     }}
 
     </style>
@@ -612,9 +809,20 @@ with col_score:
 
 with col_info:
 
-    st.metric(
-        "Colaboradores com nota registrada",
-        len(notas_validas)
+    st.html(
+        f"""
+        <div class="score-card">
+            <div class="score-label">
+                Colaboradores com nota registrada
+            </div>
+            <div class="score-value">
+                {len(notas_validas)}
+            </div>
+            <div class="score-description">
+                colaboradores com média disponível
+            </div>
+        </div>
+        """
     )
 
 
@@ -627,27 +835,43 @@ st.subheader("Resumo")
 c1, c2, c3, c4 = st.columns(4)
 
 with c1:
-    st.metric(
-        "COLABORADORES",
-        total_colaboradores
+    st.html(
+        f"""
+        <div class="custom-card">
+            <div class="custom-card-title">Colaboradores</div>
+            <div class="custom-card-value">{total_colaboradores}</div>
+        </div>
+        """
     )
 
 with c2:
-    st.metric(
-        "REALIZADAS",
-        realizadas
+    st.html(
+        f"""
+        <div class="custom-card">
+            <div class="custom-card-title">Realizadas</div>
+            <div class="custom-card-value">{realizadas}</div>
+        </div>
+        """
     )
 
 with c3:
-    st.metric(
-        "PENDENTES",
-        pendentes
+    st.html(
+        f"""
+        <div class="custom-card">
+            <div class="custom-card-title">Pendentes</div>
+            <div class="custom-card-value">{pendentes}</div>
+        </div>
+        """
     )
 
 with c4:
-    st.metric(
-        "% CONCLUÍDO",
-        f"{percentual_concluido:.1f}%"
+    st.html(
+        f"""
+        <div class="custom-card">
+            <div class="custom-card-title">% Concluído</div>
+            <div class="custom-card-value">{percentual_concluido:.1f}%</div>
+        </div>
+        """
     )
 
 
@@ -667,10 +891,17 @@ for i, (nome_praca, dados_praca) in enumerate(pracas.items()):
 
     with cols_pracas[i]:
 
-        st.markdown(f"### {nome_praca}")
-
-        st.caption(
-            f'{len(dados_praca["supervisores"])} supervisores'
+        st.html(
+            f"""
+            <div class="praca-card">
+                <div class="praca-name">
+                    {nome_praca}
+                </div>
+                <div class="praca-info">
+                    {len(dados_praca["supervisores"])} supervisores
+                </div>
+            </div>
+            """
         )
 
 
@@ -687,13 +918,30 @@ if praca_selecionada != "Todas":
 
     dados_praca = pracas[praca_selecionada]
 
-    st.write(
-        f"**Responsável:** {dados_praca['responsavel']}"
-    )
+    st.html(
+        f"""
+        <div class="info-card">
 
-    st.write(
-        "**Supervisores:** "
-        + ", ".join(dados_praca["supervisores"])
+            <div class="info-label">
+                Responsável
+            </div>
+
+            <div class="info-value">
+                {dados_praca["responsavel"]}
+            </div>
+
+            <div style="height:14px;"></div>
+
+            <div class="info-label">
+                Supervisores
+            </div>
+
+            <div class="info-value">
+                {" • ".join(dados_praca["supervisores"])}
+            </div>
+
+        </div>
+        """
     )
 
 
@@ -752,18 +1000,28 @@ if supervisao_selecionada == "Todas":
 
             with cols[i]:
 
-                st.markdown(f"### {nome}")
+                st.html(
+                    f"""
+                    <div class="team-card">
 
-                st.write(
-                    f"Colaboradores: **{int(row['Colaboradores'])}**"
-                )
+                        <div class="team-name">
+                            {nome}
+                        </div>
 
-                st.success(
-                    f"✓ Realizadas: {int(row['Realizadas'])}"
-                )
+                        <div class="team-number">
+                            Colaboradores: <b>{int(row["Colaboradores"])}</b>
+                        </div>
 
-                st.warning(
-                    f"Pendentes: {int(row['Pendentes'])}"
+                        <div class="status-realizada">
+                            ✓ Realizadas: {int(row["Realizadas"])}
+                        </div>
+
+                        <div class="status-pendente">
+                            Pendentes: {int(row["Pendentes"])}
+                        </div>
+
+                    </div>
+                    """
                 )
 
 else:
@@ -780,34 +1038,78 @@ else:
 
     with col_realizadas:
 
-        st.markdown(
-            f"### ✓ Realizadas ({len(realizados_nomes)})"
+        itens_realizados = "".join(
+            f'<div class="list-item">• {nome}</div>'
+            for nome in realizados_nomes
         )
 
         if realizados_nomes:
 
-            for nome in realizados_nomes:
-                st.write(f"• {nome}")
+            st.html(
+                f"""
+                <div class="list-card">
+
+                    <div class="list-title">
+                        ✓ Realizadas ({len(realizados_nomes)})
+                    </div>
+
+                    {itens_realizados}
+
+                </div>
+                """
+            )
 
         else:
-            st.info(
-                "Nenhuma monitoria realizada."
+
+            st.html(
+                """
+                <div class="list-card">
+                    <div class="list-title">
+                        ✓ Realizadas
+                    </div>
+                    <div class="empty-message">
+                        Nenhuma monitoria realizada.
+                    </div>
+                </div>
+                """
             )
 
     with col_pendentes:
 
-        st.markdown(
-            f"### Pendentes ({len(pendentes_nomes)})"
+        itens_pendentes = "".join(
+            f'<div class="list-item">• {nome}</div>'
+            for nome in pendentes_nomes
         )
 
         if pendentes_nomes:
 
-            for nome in pendentes_nomes:
-                st.write(f"• {nome}")
+            st.html(
+                f"""
+                <div class="list-card">
+
+                    <div class="list-title">
+                        Pendentes ({len(pendentes_nomes)})
+                    </div>
+
+                    {itens_pendentes}
+
+                </div>
+                """
+            )
 
         else:
-            st.success(
-                "Nenhuma monitoria pendente."
+
+            st.html(
+                """
+                <div class="list-card">
+                    <div class="list-title">
+                        Pendentes
+                    </div>
+                    <div class="empty-message">
+                        Nenhuma monitoria pendente.
+                    </div>
+                </div>
+                """
             )
 
 
@@ -963,20 +1265,41 @@ c5, c6 = st.columns(2)
 
 with c5:
 
-    st.metric(
-        "LADO A LADO",
-        lado_a_lado_realizadas
+    st.html(
+        f"""
+        <div class="custom-card">
+            <div class="custom-card-title">
+                Lado a Lado
+            </div>
+
+            <div class="custom-card-value">
+                {lado_a_lado_realizadas}
+            </div>
+
+            <div class="custom-card-subtitle">
+                {"Ainda não iniciado" if lado_a_lado_realizadas == 0 else "realizadas"}
+            </div>
+        </div>
+        """
     )
 
-    if lado_a_lado_realizadas == 0:
-        st.caption("Ainda não iniciado")
 
 with c6:
 
-    st.metric(
-        "MONITORIA OFFLINE",
-        offline_realizadas
-    )
+    st.html(
+        f"""
+        <div class="custom-card">
+            <div class="custom-card-title">
+                Monitoria Offline
+            </div>
 
-    if offline_realizadas == 0:
-        st.caption("Ainda não iniciado")
+            <div class="custom-card-value">
+                {offline_realizadas}
+            </div>
+
+            <div class="custom-card-subtitle">
+                {"Ainda não iniciado" if offline_realizadas == 0 else "realizadas"}
+            </div>
+        </div>
+        """
+    )
