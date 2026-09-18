@@ -62,28 +62,6 @@ st.markdown(
         margin-top: 5px;
     }}
 
-    .nome-realizado {{
-        background-color: {CARD};
-        border: 1px solid {BORDA};
-        border-left: 4px solid {VERDE};
-        border-radius: 8px;
-        padding: 9px 14px;
-        margin-bottom: 6px;
-        color: {TEXTO};
-        font-size: 14px;
-    }}
-
-    .nome-pendente {{
-        background-color: {CARD};
-        border: 1px solid {BORDA};
-        border-left: 4px solid {LARANJA};
-        border-radius: 8px;
-        padding: 9px 14px;
-        margin-bottom: 6px;
-        color: {TEXTO};
-        font-size: 14px;
-    }}
-
     </style>
     """,
     unsafe_allow_html=True
@@ -437,20 +415,37 @@ else:
 
     with col_realizadas:
 
-        st.markdown(
-            f"""
-            <div class="card">
-                <div class="card-title" style="color:{VERDE};">
-                    ✓ MONITORIAS REALIZADAS
-                </div>
+        html_realizadas = f"""
+        <div style="
+            background-color:{CARD};
+            border:1px solid {BORDA};
+            border-radius:12px;
+            padding:20px;
+            text-align:center;
+            margin-bottom:20px;
+        ">
 
-                <div class="card-value">
-                    {len(realizadas_lista)}
-                </div>
+            <div style="
+                color:{VERDE};
+                font-size:13px;
+                font-weight:600;
+            ">
+                ✓ MONITORIAS REALIZADAS
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+
+            <div style="
+                color:{TEXTO};
+                font-size:32px;
+                font-weight:700;
+                margin-top:5px;
+            ">
+                {len(realizadas_lista)}
+            </div>
+
+        </div>
+        """
+
+        st.html(html_realizadas)
 
         if realizadas_lista:
 
@@ -485,20 +480,37 @@ else:
 
     with col_pendentes:
 
-        st.markdown(
-            f"""
-            <div class="card">
-                <div class="card-title" style="color:{LARANJA};">
-                    ⏳ MONITORIAS PENDENTES
-                </div>
+        html_pendentes = f"""
+        <div style="
+            background-color:{CARD};
+            border:1px solid {BORDA};
+            border-radius:12px;
+            padding:20px;
+            text-align:center;
+            margin-bottom:20px;
+        ">
 
-                <div class="card-value">
-                    {len(pendentes_lista)}
-                </div>
+            <div style="
+                color:{LARANJA};
+                font-size:13px;
+                font-weight:600;
+            ">
+                ⏳ MONITORIAS PENDENTES
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+
+            <div style="
+                color:{TEXTO};
+                font-size:32px;
+                font-weight:700;
+                margin-top:5px;
+            ">
+                {len(pendentes_lista)}
+            </div>
+
+        </div>
+        """
+
+        st.html(html_pendentes)
 
         if pendentes_lista:
 
