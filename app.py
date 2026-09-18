@@ -315,14 +315,10 @@ def carregar_dados():
 
 col_atualizacao, col_botao = st.columns([5, 1])
 
-with col_atualizacao:
-    st.caption(
-        f"Dados consultados em "
-        f"{datetime.now().strftime('%d/%m/%Y às %H:%M')}"
-    )
-
 with col_botao:
+
     if st.button("↻ Atualizar"):
+
         st.cache_data.clear()
         st.rerun()
 
@@ -332,6 +328,18 @@ with col_botao:
 # =========================================================
 
 dados_aplicacao = carregar_dados()
+
+data_consulta = datetime.now().strftime(
+    "%d/%m/%Y às %H:%M"
+)
+
+
+with col_atualizacao:
+
+    st.caption(
+        f"Última atualização dos dados: "
+        f"{data_consulta}"
+    )
 
 
 # =========================================================
@@ -356,10 +364,12 @@ COLUNAS_ESPERADAS = [
 
 
 if len(dados_aplicacao) <= 3:
+
     st.error(
         "A aba 'Aplicação' não possui dados suficientes "
         "para carregar o dashboard."
     )
+
     st.stop()
 
 
@@ -370,10 +380,12 @@ if not all(
     len(linha) == len(COLUNAS_ESPERADAS)
     for linha in linhas_dados
 ):
+
     st.error(
         "A estrutura da aba 'Aplicação' foi alterada. "
         "Verifique se as colunas continuam na estrutura esperada."
     )
+
     st.stop()
 
 
@@ -389,7 +401,13 @@ monitorias_google = pd.DataFrame(
 
 monitorias_google = monitorias_google[
     monitorias_google["Colaborador"].notna()
-    & (monitorias_google["Colaborador"].astype(str).str.strip() != "")
+    &
+    (
+        monitorias_google["Colaborador"]
+        .astype(str)
+        .str.strip()
+        != ""
+    )
 ].copy()
 
 
@@ -458,7 +476,9 @@ duplicados = (
     .size()
 )
 
-duplicados = duplicados[duplicados > 1]
+duplicados = duplicados[
+    duplicados > 1
+]
 
 
 if not duplicados.empty:
@@ -474,7 +494,9 @@ if not duplicados.empty:
 
         for nome, quantidade in duplicados.items():
 
-            nome_seguro = html.escape(str(nome))
+            nome_seguro = html.escape(
+                str(nome)
+            )
 
             st.write(
                 f"- {nome_seguro}: "
@@ -627,6 +649,7 @@ apoio_adm = [
 
 funcao_por_nome = {}
 
+
 for nome in execs:
     funcao_por_nome[nome] = "Exec"
 
@@ -764,32 +787,6 @@ monitorias_google["Média"] = (
     monitorias_google["Colaborador"]
     .apply(calcular_media_notas)
 )
-
-
-# =========================================================
-# AVISO DE NOMES SEM NOTA
-# =========================================================
-
-nomes_sem_nota = sorted(
-    monitorias_google.loc[
-        monitorias_google["Média"].isna(),
-        "Colaborador"
-    ]
-    .dropna()
-    .unique()
-    .tolist()
-)
-
-
-if nomes_sem_nota:
-
-    with st.expander(
-        f"ℹ️ {len(nomes_sem_nota)} colaborador(es) "
-        "sem nota registrada"
-    ):
-
-        for nome in nomes_sem_nota:
-            st.write(f"- {nome}")
 
 
 # =========================================================
@@ -1026,8 +1023,13 @@ st.write(
 
 
 # =========================================================
-# FILTRO DE SUPERVISÃO
+# FILTROS
 # =========================================================
+
+st.subheader("Filtros")
+
+col_filtro_supervisao, col_filtro_status = st.columns(2)
+
 
 supervisoes = sorted(
     monitorias_google["Supervisão"]
@@ -1042,25 +1044,52 @@ opcoes_supervisao = [
 ] + supervisoes
 
 
-supervisao_selecionada = st.selectbox(
-    "Supervisão",
-    opcoes_supervisao
-)
+with col_filtro_supervisao:
+
+    supervisao_selecionada = st.selectbox(
+        "Supervisão",
+        opcoes_supervisao
+    )
+
+
+with col_filtro_status:
+
+    status_selecionado = st.selectbox(
+        "Status",
+        [
+            "Todos",
+            "Realizadas",
+            "Pendentes"
+        ]
+    )
 
 
 # =========================================================
 # FILTRO DOS DADOS
 # =========================================================
 
-if supervisao_selecionada == "Todas":
+df_filtrado = monitorias_google.copy()
 
-    df_filtrado = monitorias_google.copy()
 
-else:
+if supervisao_selecionada != "Todas":
 
-    df_filtrado = monitorias_google[
-        monitorias_google["Supervisão"]
+    df_filtrado = df_filtrado[
+        df_filtrado["Supervisão"]
         == supervisao_selecionada
+    ].copy()
+
+
+if status_selecionado == "Realizadas":
+
+    df_filtrado = df_filtrado[
+        df_filtrado["Realizada"]
+    ].copy()
+
+
+elif status_selecionado == "Pendentes":
+
+    df_filtrado = df_filtrado[
+        ~df_filtrado["Realizada"]
     ].copy()
 
 
@@ -1477,18 +1506,37 @@ else:
     )
 
 
-    realizadas_df = (
-        df_supervisao[
+    if status_selecionado == "Realizadas":
+
+        realizadas_df = df_supervisao[
             df_supervisao["Realizada"]
         ].copy()
-    )
+
+        pendentes_df = pd.DataFrame(
+            columns=df_supervisao.columns
+        )
 
 
-    pendentes_df = (
-        df_supervisao[
+    elif status_selecionado == "Pendentes":
+
+        realizadas_df = pd.DataFrame(
+            columns=df_supervisao.columns
+        )
+
+        pendentes_df = df_supervisao[
             ~df_supervisao["Realizada"]
         ].copy()
-    )
+
+
+    else:
+
+        realizadas_df = df_supervisao[
+            df_supervisao["Realizada"]
+        ].copy()
+
+        pendentes_df = df_supervisao[
+            ~df_supervisao["Realizada"]
+        ].copy()
 
 
     col_realizadas, col_pendentes = (
@@ -1521,6 +1569,78 @@ else:
 
 
 # =========================================================
+# LISTA GERAL DE PENDÊNCIAS
+# =========================================================
+
+st.subheader("Pendências")
+
+
+pendencias = df_filtrado[
+    ~df_filtrado["Realizada"]
+].copy()
+
+
+pendencias = pendencias.sort_values(
+    by=[
+        "Supervisão",
+        "Colaborador"
+    ],
+    na_position="last"
+)
+
+
+if pendencias.empty:
+
+    st.html(
+        """
+        <div class="list-card">
+
+            <div class="list-title">
+                Nenhuma pendência
+            </div>
+
+            <div class="empty-message">
+                Não há colaboradores pendentes
+                nos filtros selecionados.
+            </div>
+
+        </div>
+        """
+    )
+
+else:
+
+    col_pend_1, col_pend_2 = st.columns(2)
+
+    metade = (len(pendencias) + 1) // 2
+
+    pendencias_1 = pendencias.iloc[:metade]
+    pendencias_2 = pendencias.iloc[metade:]
+
+    with col_pend_1:
+
+        st.html(
+            html_lista(
+                f"Colaboradores pendentes · "
+                f"{len(pendencias)}",
+                pendencias_1,
+                mostrar_nota=False
+            )
+        )
+
+    with col_pend_2:
+
+        st.html(
+            " <div style='height: 1px;'></div> "
+            + html_lista(
+                "",
+                pendencias_2,
+                mostrar_nota=False
+            )
+        )
+
+
+# =========================================================
 # EVOLUÇÃO DAS MONITORIAS
 # =========================================================
 
@@ -1530,8 +1650,8 @@ st.subheader(
 
 
 datas_validas = (
-    monitorias_google[
-        monitorias_google["Data Monitoria"].notna()
+    df_filtrado[
+        df_filtrado["Data Monitoria"].notna()
     ]["Data Monitoria"]
 )
 
@@ -1587,15 +1707,15 @@ for periodo in meses:
 
 
     quantidade = (
-        monitorias_google[
+        df_filtrado[
             (
-                monitorias_google[
+                df_filtrado[
                     "Data Monitoria"
                 ] >= inicio_mes
             )
             &
             (
-                monitorias_google[
+                df_filtrado[
                     "Data Monitoria"
                 ] <= fim_mes
             )
