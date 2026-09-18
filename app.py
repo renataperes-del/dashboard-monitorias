@@ -62,6 +62,28 @@ st.markdown(
         margin-top: 5px;
     }}
 
+    .nome-realizado {{
+        background-color: {CARD};
+        border: 1px solid {BORDA};
+        border-left: 4px solid {VERDE};
+        border-radius: 8px;
+        padding: 9px 14px;
+        margin-bottom: 6px;
+        color: {TEXTO};
+        font-size: 14px;
+    }}
+
+    .nome-pendente {{
+        background-color: {CARD};
+        border: 1px solid {BORDA};
+        border-left: 4px solid {LARANJA};
+        border-radius: 8px;
+        padding: 9px 14px;
+        margin-bottom: 6px;
+        color: {TEXTO};
+        font-size: 14px;
+    }}
+
     </style>
     """,
     unsafe_allow_html=True
@@ -270,6 +292,220 @@ with col4:
     )
 
 # ==========================================
+# ACOMPANHAMENTO POR EQUIPE
+# ==========================================
+
+st.markdown(
+    f"""
+    <div style="
+        color:{TEXTO};
+        font-size:20px;
+        font-weight:600;
+        margin-top:30px;
+        margin-bottom:5px;
+    ">
+        Acompanhamento por equipe
+    </div>
+
+    <div style="
+        color:{TEXTO_SECUNDARIO};
+        font-size:13px;
+        margin-bottom:15px;
+    ">
+        Consulte quem já realizou e quem ainda está pendente.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# ==========================================
+# VISÃO GERAL DE TODAS AS EQUIPES
+# ==========================================
+
+if supervisao == "Todas":
+
+    resumo_equipes = (
+        monitorias_google
+        .assign(
+            Status=monitorias_google["Data Monitoria"].notna()
+        )
+        .groupby("Supervisão")
+        .agg(
+            Colaboradores=("Colaborador", "count"),
+            Realizadas=("Status", "sum")
+        )
+        .reset_index()
+    )
+
+    resumo_equipes["Pendentes"] = (
+        resumo_equipes["Colaboradores"]
+        - resumo_equipes["Realizadas"]
+    )
+
+    resumo_equipes = resumo_equipes.sort_values(
+        "Supervisão"
+    )
+
+    colunas_resumo = st.columns(3)
+
+    for i, (_, linha) in enumerate(resumo_equipes.iterrows()):
+
+        with colunas_resumo[i % 3]:
+
+            st.markdown(
+                f"""
+                <div class="card" style="text-align:left;">
+
+                    <div style="
+                        color:{AZUL};
+                        font-size:17px;
+                        font-weight:700;
+                        margin-bottom:12px;
+                    ">
+                        {linha["Supervisão"]}
+                    </div>
+
+                    <div style="
+                        color:{TEXTO_SECUNDARIO};
+                        font-size:13px;
+                    ">
+                        Colaboradores
+                    </div>
+
+                    <div style="
+                        color:{TEXTO};
+                        font-size:22px;
+                        font-weight:700;
+                    ">
+                        {linha["Colaboradores"]}
+                    </div>
+
+                    <div style="
+                        color:{VERDE};
+                        font-size:13px;
+                        margin-top:8px;
+                    ">
+                        ✓ Realizadas: {linha["Realizadas"]}
+                    </div>
+
+                    <div style="
+                        color:{LARANJA};
+                        font-size:13px;
+                        margin-top:4px;
+                    ">
+                        ⏳ Pendentes: {linha["Pendentes"]}
+                    </div>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+# ==========================================
+# LISTAS DA SUPERVISÃO SELECIONADA
+# ==========================================
+
+else:
+
+    realizadas_lista = (
+        dados[
+            dados["Data Monitoria"].notna()
+        ]
+        .sort_values("Colaborador")["Colaborador"]
+        .tolist()
+    )
+
+    pendentes_lista = (
+        dados[
+            dados["Data Monitoria"].isna()
+        ]
+        .sort_values("Colaborador")["Colaborador"]
+        .tolist()
+    )
+
+    col_realizadas, col_pendentes = st.columns(2)
+
+    # ======================================
+    # REALIZADAS
+    # ======================================
+
+    with col_realizadas:
+
+        st.markdown(
+            f"""
+            <div class="card">
+                <div class="card-title" style="color:{VERDE};">
+                    ✓ MONITORIAS REALIZADAS
+                </div>
+
+                <div class="card-value">
+                    {len(realizadas_lista)}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        if realizadas_lista:
+
+            for nome in realizadas_lista:
+
+                st.markdown(
+                    f"""
+                    <div class="nome-realizado">
+                        ✓ {nome}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        else:
+
+            st.info(
+                "Nenhuma monitoria realizada."
+            )
+
+    # ======================================
+    # PENDENTES
+    # ======================================
+
+    with col_pendentes:
+
+        st.markdown(
+            f"""
+            <div class="card">
+                <div class="card-title" style="color:{LARANJA};">
+                    ⏳ MONITORIAS PENDENTES
+                </div>
+
+                <div class="card-value">
+                    {len(pendentes_lista)}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        if pendentes_lista:
+
+            for nome in pendentes_lista:
+
+                st.markdown(
+                    f"""
+                    <div class="nome-pendente">
+                        ⏳ {nome}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        else:
+
+            st.success(
+                "Todas as monitorias foram realizadas."
+            )
+
+# ==========================================
 # GRÁFICO MENSAL
 # ==========================================
 
@@ -279,7 +515,7 @@ st.markdown(
         color:{TEXTO};
         font-size:20px;
         font-weight:600;
-        margin-top:25px;
+        margin-top:30px;
         margin-bottom:5px;
     ">
         Evolução das Monitorias
