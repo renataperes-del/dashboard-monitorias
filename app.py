@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import gspread
+import html
+from datetime import datetime
 from google.oauth2.service_account import Credentials
 
 
@@ -14,6 +16,11 @@ st.set_page_config(
     page_icon="N",
     layout="wide"
 )
+
+
+# =========================================================
+# CORES
+# =========================================================
 
 BG = "#F7F8FC"
 CARD = "#FFFFFF"
@@ -68,10 +75,6 @@ st.markdown(
         border-radius: 12px;
     }}
 
-    /* -------------------------------------------------- */
-    /* CARDS                                                */
-    /* -------------------------------------------------- */
-
     .custom-card {{
         background: {CARD};
         border: 1px solid {BORDER};
@@ -95,21 +98,11 @@ st.markdown(
         line-height: 1;
     }}
 
-    .custom-card-name {{
-        color: {TEXT};
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }}
-
     .custom-card-subtitle {{
         color: {SECONDARY};
         font-size: 13px;
+        margin-top: 8px;
     }}
-
-    /* -------------------------------------------------- */
-    /* PRAÇAS                                               */
-    /* -------------------------------------------------- */
 
     .praca-card {{
         background: {CARD};
@@ -131,10 +124,6 @@ st.markdown(
         color: {SECONDARY};
         font-size: 13px;
     }}
-
-    /* -------------------------------------------------- */
-    /* INFORMAÇÕES                                          */
-    /* -------------------------------------------------- */
 
     .info-card {{
         background: {CARD};
@@ -158,10 +147,6 @@ st.markdown(
         font-weight: 650;
         margin-bottom: 14px;
     }}
-
-    /* -------------------------------------------------- */
-    /* NOTA GERAL                                           */
-    /* -------------------------------------------------- */
 
     .score-card {{
         background: {CARD};
@@ -194,10 +179,6 @@ st.markdown(
         font-size: 13px;
         margin-top: 12px;
     }}
-
-    /* -------------------------------------------------- */
-    /* LISTAS                                               */
-    /* -------------------------------------------------- */
 
     .list-card {{
         background: {CARD};
@@ -249,10 +230,6 @@ st.markdown(
         padding: 12px 0;
     }}
 
-    /* -------------------------------------------------- */
-    /* SUPERVISÃO                                           */
-    /* -------------------------------------------------- */
-
     .team-card {{
         background: {CARD};
         border: 1px solid {BORDER};
@@ -284,20 +261,14 @@ st.markdown(
         color: {GREEN};
         font-size: 13px;
         font-weight: 650;
+        margin-top: 14px;
     }}
 
     .status-pendente {{
         color: {ORANGE};
         font-size: 13px;
         font-weight: 650;
-    }}
-
-    /* -------------------------------------------------- */
-    /* SEPARADORES                                          */
-    /* -------------------------------------------------- */
-
-    .section-space {{
-        height: 12px;
+        margin-top: 4px;
     }}
 
     </style>
@@ -313,31 +284,61 @@ st.markdown(
 SHEET_ID = "1bSYqD9wLkpMxTIGN6kyFh6zuVTixM384oQr8cGskYcM"
 ABA = "Aplicação"
 
-credenciais = Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"],
-    scopes=[
-        "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive"
-    ]
-)
 
-gc = gspread.authorize(credenciais)
+@st.cache_resource
+def get_client():
 
-planilha = gc.open_by_key(SHEET_ID)
-aba_aplicacao = planilha.worksheet(ABA)
+    credenciais = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=[
+            "https://www.googleapis.com/auth/spreadsheets.readonly"
+        ]
+    )
 
-dados_aplicacao = aba_aplicacao.get_all_values()
+    return gspread.authorize(credenciais)
+
+
+@st.cache_data(ttl=300)
+def carregar_dados():
+
+    gc = get_client()
+
+    planilha = gc.open_by_key(SHEET_ID)
+    aba_aplicacao = planilha.worksheet(ABA)
+
+    return aba_aplicacao.get_all_values()
 
 
 # =========================================================
-# DATAFRAME
+# BOTÃO ATUALIZAR
 # =========================================================
 
-monitorias_google = pd.DataFrame(dados_aplicacao)
+col_atualizacao, col_botao = st.columns([5, 1])
 
-monitorias_google = monitorias_google.iloc[3:].copy()
+with col_atualizacao:
+    st.caption(
+        f"Dados consultados em "
+        f"{datetime.now().strftime('%d/%m/%Y às %H:%M')}"
+    )
 
-monitorias_google.columns = [
+with col_botao:
+    if st.button("↻ Atualizar"):
+        st.cache_data.clear()
+        st.rerun()
+
+
+# =========================================================
+# CARREGAMENTO
+# =========================================================
+
+dados_aplicacao = carregar_dados()
+
+
+# =========================================================
+# VALIDAÇÃO DA ESTRUTURA
+# =========================================================
+
+COLUNAS_ESPERADAS = [
     "Colaborador",
     "Supervisão",
     "Data Monitoria",
@@ -353,17 +354,76 @@ monitorias_google.columns = [
     "Observações Gerais"
 ]
 
+
+if len(dados_aplicacao) <= 3:
+    st.error(
+        "A aba 'Aplicação' não possui dados suficientes "
+        "para carregar o dashboard."
+    )
+    st.stop()
+
+
+linhas_dados = dados_aplicacao[3:]
+
+
+if not all(
+    len(linha) == len(COLUNAS_ESPERADAS)
+    for linha in linhas_dados
+):
+    st.error(
+        "A estrutura da aba 'Aplicação' foi alterada. "
+        "Verifique se as colunas continuam na estrutura esperada."
+    )
+    st.stop()
+
+
+monitorias_google = pd.DataFrame(
+    linhas_dados,
+    columns=COLUNAS_ESPERADAS
+)
+
+
+# =========================================================
+# LIMPEZA DOS DADOS
+# =========================================================
+
 monitorias_google = monitorias_google[
     monitorias_google["Colaborador"].notna()
-    & (monitorias_google["Colaborador"] != "")
+    & (monitorias_google["Colaborador"].astype(str).str.strip() != "")
 ].copy()
 
-monitorias_google = monitorias_google.replace("", pd.NA)
+
+monitorias_google = monitorias_google.replace(
+    {
+        "": pd.NA,
+        " ": pd.NA
+    }
+)
+
+
+monitorias_google["Colaborador"] = (
+    monitorias_google["Colaborador"]
+    .astype("string")
+    .str.strip()
+)
+
+
+monitorias_google["Supervisão"] = (
+    monitorias_google["Supervisão"]
+    .astype("string")
+    .str.strip()
+)
+
 
 monitorias_google["Supervisão"] = (
     monitorias_google["Supervisão"]
     .replace("Júlio", "Julio")
 )
+
+
+# =========================================================
+# DATAS
+# =========================================================
 
 monitorias_google["Data Monitoria"] = pd.to_datetime(
     monitorias_google["Data Monitoria"],
@@ -371,17 +431,55 @@ monitorias_google["Data Monitoria"] = pd.to_datetime(
     errors="coerce"
 )
 
+
 monitorias_google["Data Lado a Lado"] = pd.to_datetime(
     monitorias_google["Data Lado a Lado"],
     dayfirst=True,
     errors="coerce"
 )
 
+
 monitorias_google["Data Monitoria Offline"] = pd.to_datetime(
     monitorias_google["Data Monitoria Offline"],
     dayfirst=True,
     errors="coerce"
 )
+
+
+# =========================================================
+# DUPLICIDADES
+# =========================================================
+
+duplicados = (
+    monitorias_google[
+        monitorias_google["Colaborador"].notna()
+    ]
+    .groupby("Colaborador")
+    .size()
+)
+
+duplicados = duplicados[duplicados > 1]
+
+
+if not duplicados.empty:
+
+    with st.expander(
+        f"⚠️ {len(duplicados)} colaborador(es) "
+        "com mais de um registro"
+    ):
+
+        st.write(
+            "Os registros não foram removidos automaticamente."
+        )
+
+        for nome, quantidade in duplicados.items():
+
+            nome_seguro = html.escape(str(nome))
+
+            st.write(
+                f"- {nome_seguro}: "
+                f"{quantidade} registros"
+            )
 
 
 # =========================================================
@@ -491,6 +589,7 @@ execs = [
     "Keren Jamille Coutinho Albrechete"
 ]
 
+
 apoio_adm = [
     "Felipe Santos Nery",
     "Pedro Llanos Iampietro",
@@ -525,19 +624,48 @@ apoio_adm = [
     "Stella Angela da Silva"
 ]
 
+
 funcao_por_nome = {}
 
 for nome in execs:
     funcao_por_nome[nome] = "Exec"
 
+
 for nome in apoio_adm:
     funcao_por_nome[nome] = "Apoio ADM"
+
 
 monitorias_google["Função"] = (
     monitorias_google["Colaborador"]
     .map(funcao_por_nome)
     .fillna("Não identificado")
 )
+
+
+# =========================================================
+# AVISO DE FUNÇÕES NÃO IDENTIFICADAS
+# =========================================================
+
+nomes_sem_funcao = sorted(
+    monitorias_google.loc[
+        monitorias_google["Função"] == "Não identificado",
+        "Colaborador"
+    ]
+    .dropna()
+    .unique()
+    .tolist()
+)
+
+
+if nomes_sem_funcao:
+
+    with st.expander(
+        f"⚠️ {len(nomes_sem_funcao)} colaborador(es) "
+        "sem função identificada"
+    ):
+
+        for nome in nomes_sem_funcao:
+            st.write(f"- {nome}")
 
 
 # =========================================================
@@ -623,6 +751,7 @@ notas_monitoria = {
 
 
 def calcular_media_notas(nome):
+
     notas = notas_monitoria.get(nome, [])
 
     if not notas:
@@ -638,11 +767,37 @@ monitorias_google["Média"] = (
 
 
 # =========================================================
-# STATUS
+# AVISO DE NOMES SEM NOTA
+# =========================================================
+
+nomes_sem_nota = sorted(
+    monitorias_google.loc[
+        monitorias_google["Média"].isna(),
+        "Colaborador"
+    ]
+    .dropna()
+    .unique()
+    .tolist()
+)
+
+
+if nomes_sem_nota:
+
+    with st.expander(
+        f"ℹ️ {len(nomes_sem_nota)} colaborador(es) "
+        "sem nota registrada"
+    ):
+
+        for nome in nomes_sem_nota:
+            st.write(f"- {nome}")
+
+
+# =========================================================
+# STATUS DA MONITORIA
 # =========================================================
 
 # REGRA OFICIAL:
-# Monitoria realizada = Data Monitoria preenchida
+# Data Monitoria preenchida = monitoria realizada
 
 monitorias_google["Realizada"] = (
     monitorias_google["Data Monitoria"].notna()
@@ -665,6 +820,7 @@ pracas = {
             "Murilo Henrique Xavier"
         ]
     },
+
     "GMSP": {
         "responsavel": "Caio Marques",
         "supervisores": [
@@ -673,6 +829,7 @@ pracas = {
             "Alexssander Affonso da Silva"
         ]
     },
+
     "Conne-Sul": {
         "responsavel": "Evelyn Viegas",
         "supervisores": [
@@ -680,6 +837,7 @@ pracas = {
             "Karine Conceição Rodrigues"
         ]
     },
+
     "Sudeste": {
         "responsavel": "Darlene Carvalho",
         "supervisores": [
@@ -691,60 +849,110 @@ pracas = {
 
 
 # =========================================================
-# FUNÇÕES AUXILIARES
+# FUNÇÕES VISUAIS
 # =========================================================
 
 def html_card(titulo, valor, subtitulo=""):
+
+    titulo = html.escape(str(titulo))
+    valor = html.escape(str(valor))
+    subtitulo = html.escape(str(subtitulo))
+
     return f"""
     <div class="custom-card">
-        <div class="custom-card-title">{titulo}</div>
-        <div class="custom-card-value">{valor}</div>
-        <div class="custom-card-subtitle">{subtitulo}</div>
+
+        <div class="custom-card-title">
+            {titulo}
+        </div>
+
+        <div class="custom-card-value">
+            {valor}
+        </div>
+
+        <div class="custom-card-subtitle">
+            {subtitulo}
+        </div>
+
     </div>
     """
 
 
 def html_praca(nome, quantidade):
+
+    nome = html.escape(str(nome))
+
     return f"""
     <div class="praca-card">
-        <div class="praca-name">{nome}</div>
+
+        <div class="praca-name">
+            {nome}
+        </div>
+
         <div class="praca-info">
             {quantidade} supervisões
         </div>
+
     </div>
     """
 
 
-def html_team(nome, total, realizadas, pendentes):
+def html_team(
+    nome,
+    total,
+    realizadas,
+    pendentes
+):
+
+    nome = html.escape(str(nome))
+
     return f"""
     <div class="team-card">
-        <div class="team-name">{nome}</div>
 
-        <div class="team-number">{total}</div>
-        <div class="team-label">colaboradores</div>
-
-        <div style="margin-top:14px;">
-            <div class="status-realizada">
-                {realizadas} realizadas
-            </div>
-
-            <div class="status-pendente">
-                {pendentes} pendentes
-            </div>
+        <div class="team-name">
+            {nome}
         </div>
+
+        <div class="team-number">
+            {total}
+        </div>
+
+        <div class="team-label">
+            colaboradores
+        </div>
+
+        <div class="status-realizada">
+            {realizadas} realizadas
+        </div>
+
+        <div class="status-pendente">
+            {pendentes} pendentes
+        </div>
+
     </div>
     """
 
 
-def html_lista(titulo, dataframe, mostrar_nota=True):
+def html_lista(
+    titulo,
+    dataframe,
+    mostrar_nota=True
+):
+
+    titulo = html.escape(str(titulo))
 
     if dataframe.empty:
+
         return f"""
         <div class="list-card">
-            <div class="list-title">{titulo}</div>
+
+            <div class="list-title">
+                {titulo}
+            </div>
+
             <div class="empty-message">
                 Nenhum colaborador nesta categoria.
             </div>
+
         </div>
         """
 
@@ -752,14 +960,23 @@ def html_lista(titulo, dataframe, mostrar_nota=True):
 
     for _, row in dataframe.iterrows():
 
-        nome = row["Colaborador"]
-        funcao = row["Função"]
+        nome = html.escape(
+            str(row["Colaborador"])
+        )
 
-        media = row["Média"]
+        funcao = html.escape(
+            str(row["Função"])
+        )
 
         nota_html = ""
 
-        if mostrar_nota and pd.notna(media):
+        media = row["Média"]
+
+        if (
+            mostrar_nota
+            and pd.notna(media)
+        ):
+
             nota_html = f"""
             <div class="list-score">
                 Média: {media:.2f}%
@@ -809,7 +1026,7 @@ st.write(
 
 
 # =========================================================
-# FILTRO
+# FILTRO DE SUPERVISÃO
 # =========================================================
 
 supervisoes = sorted(
@@ -819,7 +1036,11 @@ supervisoes = sorted(
     .tolist()
 )
 
-opcoes_supervisao = ["Todas"] + supervisoes
+
+opcoes_supervisao = [
+    "Todas"
+] + supervisoes
+
 
 supervisao_selecionada = st.selectbox(
     "Supervisão",
@@ -828,7 +1049,7 @@ supervisao_selecionada = st.selectbox(
 
 
 # =========================================================
-# DATAFRAME FILTRADO
+# FILTRO DOS DADOS
 # =========================================================
 
 if supervisao_selecionada == "Todas":
@@ -849,14 +1070,20 @@ else:
 
 st.subheader("Desempenho geral")
 
-st.caption("Média das notas das monitorias")
+st.caption(
+    "Média das notas das monitorias"
+)
 
-col_grafico, col_score = st.columns([1, 1])
+
+col_grafico, col_score = st.columns(
+    [1, 1]
+)
 
 
 notas_validas = df_filtrado[
     df_filtrado["Média"].notna()
 ]["Média"]
+
 
 if len(notas_validas) > 0:
 
@@ -864,62 +1091,109 @@ if len(notas_validas) > 0:
 
 else:
 
-    media_geral = 0
+    media_geral = None
+
+
+if media_geral is not None:
+
+    texto_media = f"{media_geral:.1f}%"
+
+else:
+
+    texto_media = "—"
 
 
 with col_grafico:
 
-    fig = go.Figure(
-        go.Pie(
-            values=[
-                media_geral,
-                max(0, 100 - media_geral)
-            ],
-            labels=[
-                "Média",
-                "Restante"
-            ],
-            hole=0.72,
-            marker=dict(
-                colors=[
-                    BLUE,
-                    "#EEF0F7"
-                ]
-            ),
-            textinfo="none",
-            hoverinfo="skip"
-        )
-    )
+    if media_geral is not None:
 
-    fig.update_layout(
-        showlegend=False,
-        margin=dict(
-            l=10,
-            r=10,
-            t=10,
-            b=10
-        ),
-        height=250,
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        annotations=[
-            dict(
-                text=f"<b>{media_geral:.1f}%</b>",
-                x=0.5,
-                y=0.5,
-                font=dict(
-                    size=28,
-                    color=TEXT
+        restante = max(
+            0,
+            100 - media_geral
+        )
+
+        fig = go.Figure(
+            go.Pie(
+                values=[
+                    media_geral,
+                    restante
+                ],
+                labels=[
+                    "Média",
+                    "Restante"
+                ],
+                hole=0.72,
+                marker=dict(
+                    colors=[
+                        BLUE,
+                        "#EEF0F7"
+                    ]
                 ),
-                showarrow=False
+                textinfo="none",
+                hoverinfo="skip"
             )
-        ]
-    )
+        )
+
+        fig.update_layout(
+            showlegend=False,
+            margin=dict(
+                l=10,
+                r=10,
+                t=10,
+                b=10
+            ),
+            height=250,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            annotations=[
+                dict(
+                    text=f"<b>{texto_media}</b>",
+                    x=0.5,
+                    y=0.5,
+                    font=dict(
+                        size=28,
+                        color=TEXT
+                    ),
+                    showarrow=False
+                )
+            ]
+        )
+
+    else:
+
+        fig = go.Figure()
+
+        fig.update_layout(
+            showlegend=False,
+            margin=dict(
+                l=10,
+                r=10,
+                t=10,
+                b=10
+            ),
+            height=250,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            annotations=[
+                dict(
+                    text="<b>—</b>",
+                    x=0.5,
+                    y=0.5,
+                    font=dict(
+                        size=34,
+                        color=TEXT
+                    ),
+                    showarrow=False
+                )
+            ]
+        )
 
     st.plotly_chart(
         fig,
         use_container_width=True,
-        config={"displayModeBar": False}
+        config={
+            "displayModeBar": False
+        }
     )
 
 
@@ -957,19 +1231,27 @@ with col_score:
 
 st.subheader("Resumo")
 
-total_colaboradores = len(df_filtrado)
+
+total_colaboradores = len(
+    df_filtrado
+)
+
 
 total_realizadas = int(
     df_filtrado["Realizada"].sum()
 )
+
 
 total_pendentes = (
     total_colaboradores
     - total_realizadas
 )
 
+
 percentual_concluido = (
-    total_realizadas / total_colaboradores * 100
+    total_realizadas
+    / total_colaboradores
+    * 100
     if total_colaboradores > 0
     else 0
 )
@@ -977,7 +1259,9 @@ percentual_concluido = (
 
 col1, col2, col3, col4 = st.columns(4)
 
+
 with col1:
+
     st.html(
         html_card(
             "COLABORADORES",
@@ -986,7 +1270,9 @@ with col1:
         )
     )
 
+
 with col2:
+
     st.html(
         html_card(
             "REALIZADAS",
@@ -995,7 +1281,9 @@ with col2:
         )
     )
 
+
 with col3:
+
     st.html(
         html_card(
             "PENDENTES",
@@ -1004,7 +1292,9 @@ with col3:
         )
     )
 
+
 with col4:
+
     st.html(
         html_card(
             "% CONCLUÍDO",
@@ -1020,9 +1310,14 @@ with col4:
 
 st.subheader("Praças e equipes")
 
+
 colunas_pracas = st.columns(4)
 
-for coluna, (nome_praca, dados_praca) in zip(
+
+for coluna, (
+    nome_praca,
+    dados_praca
+) in zip(
     colunas_pracas,
     pracas.items()
 ):
@@ -1032,7 +1327,11 @@ for coluna, (nome_praca, dados_praca) in zip(
         st.html(
             html_praca(
                 nome_praca,
-                len(dados_praca["supervisores"])
+                len(
+                    dados_praca[
+                        "supervisores"
+                    ]
+                )
             )
         )
 
@@ -1043,17 +1342,28 @@ for coluna, (nome_praca, dados_praca) in zip(
 
 st.subheader("Consultar praça")
 
+
 praca_selecionada = st.selectbox(
     "Selecione uma praça",
     ["Selecione"] + list(pracas.keys())
 )
 
+
 if praca_selecionada != "Selecione":
 
-    dados_praca = pracas[praca_selecionada]
+    dados_praca = pracas[
+        praca_selecionada
+    ]
 
     supervisores_texto = "<br>".join(
-        dados_praca["supervisores"]
+        html.escape(str(nome))
+        for nome in dados_praca["supervisores"]
+    )
+
+    responsavel = html.escape(
+        str(
+            dados_praca["responsavel"]
+        )
     )
 
     st.html(
@@ -1065,7 +1375,7 @@ if praca_selecionada != "Selecione":
             </div>
 
             <div class="info-value">
-                {dados_praca["responsavel"]}
+                {responsavel}
             </div>
 
             <div class="info-label">
@@ -1085,7 +1395,9 @@ if praca_selecionada != "Selecione":
 # ACOMPANHAMENTO POR EQUIPE
 # =========================================================
 
-st.subheader("Acompanhamento por equipe")
+st.subheader(
+    "Acompanhamento por equipe"
+)
 
 
 if supervisao_selecionada == "Todas":
@@ -1097,6 +1409,7 @@ if supervisao_selecionada == "Todas":
         .tolist()
     )
 
+
     for inicio in range(
         0,
         len(nomes_supervisoes),
@@ -1107,27 +1420,40 @@ if supervisao_selecionada == "Todas":
             inicio:inicio + 4
         ]
 
+
         colunas = st.columns(4)
+
 
         for coluna, supervisao in zip(
             colunas,
             grupo
         ):
 
-            df_supervisao = monitorias_google[
-                monitorias_google["Supervisão"]
-                == supervisao
-            ]
+            df_supervisao = (
+                monitorias_google[
+                    monitorias_google["Supervisão"]
+                    == supervisao
+                ]
+            )
 
-            total = len(df_supervisao)
+
+            total = len(
+                df_supervisao
+            )
+
 
             realizadas = int(
-                df_supervisao["Realizada"].sum()
+                df_supervisao[
+                    "Realizada"
+                ].sum()
             )
 
+
             pendentes = (
-                total - realizadas
+                total
+                - realizadas
             )
+
 
             with coluna:
 
@@ -1140,38 +1466,54 @@ if supervisao_selecionada == "Todas":
                     )
                 )
 
+
 else:
 
-    df_supervisao = monitorias_google[
-        monitorias_google["Supervisão"]
-        == supervisao_selecionada
-    ].copy()
+    df_supervisao = (
+        monitorias_google[
+            monitorias_google["Supervisão"]
+            == supervisao_selecionada
+        ].copy()
+    )
 
-    realizadas_df = df_supervisao[
-        df_supervisao["Realizada"]
-    ].copy()
 
-    pendentes_df = df_supervisao[
-        ~df_supervisao["Realizada"]
-    ].copy()
+    realizadas_df = (
+        df_supervisao[
+            df_supervisao["Realizada"]
+        ].copy()
+    )
 
-    col_realizadas, col_pendentes = st.columns(2)
+
+    pendentes_df = (
+        df_supervisao[
+            ~df_supervisao["Realizada"]
+        ].copy()
+    )
+
+
+    col_realizadas, col_pendentes = (
+        st.columns(2)
+    )
+
 
     with col_realizadas:
 
         st.html(
             html_lista(
-                f"Realizadas · {len(realizadas_df)}",
+                f"Realizadas · "
+                f"{len(realizadas_df)}",
                 realizadas_df,
                 mostrar_nota=True
             )
         )
 
+
     with col_pendentes:
 
         st.html(
             html_lista(
-                f"Pendentes · {len(pendentes_df)}",
+                f"Pendentes · "
+                f"{len(pendentes_df)}",
                 pendentes_df,
                 mostrar_nota=False
             )
@@ -1182,42 +1524,100 @@ else:
 # EVOLUÇÃO DAS MONITORIAS
 # =========================================================
 
-st.subheader("Evolução das Monitorias")
-
-meses = pd.date_range(
-    "2026-05-01",
-    "2026-09-01",
-    freq="MS"
+st.subheader(
+    "Evolução das Monitorias"
 )
 
-nomes_meses = [
-    "Mai",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Set"
-]
+
+datas_validas = (
+    monitorias_google[
+        monitorias_google["Data Monitoria"].notna()
+    ]["Data Monitoria"]
+)
+
+
+if not datas_validas.empty:
+
+    primeiro_mes = (
+        datas_validas
+        .min()
+        .to_period("M")
+    )
+
+    ultimo_mes = max(
+        datas_validas
+        .max()
+        .to_period("M"),
+        pd.Timestamp.today()
+        .to_period("M")
+    )
+
+    meses = pd.period_range(
+        primeiro_mes,
+        ultimo_mes,
+        freq="M"
+    )
+
+else:
+
+    meses = pd.period_range(
+        pd.Timestamp.today()
+        .to_period("M"),
+        pd.Timestamp.today()
+        .to_period("M"),
+        freq="M"
+    )
+
 
 quantidades = []
+nomes_meses = []
 
-for mes in meses:
 
-    proximo_mes = mes + pd.offsets.MonthBegin(1)
+for periodo in meses:
 
-    quantidade = monitorias_google[
-        (
-            monitorias_google["Data Monitoria"] >= mes
-        )
-        &
-        (
-            monitorias_google["Data Monitoria"] < proximo_mes
-        )
-    ].shape[0]
+    inicio_mes = (
+        periodo
+        .start_time
+    )
 
-    quantidades.append(quantidade)
+    fim_mes = (
+        periodo
+        .end_time
+    )
+
+
+    quantidade = (
+        monitorias_google[
+            (
+                monitorias_google[
+                    "Data Monitoria"
+                ] >= inicio_mes
+            )
+            &
+            (
+                monitorias_google[
+                    "Data Monitoria"
+                ] <= fim_mes
+            )
+        ]
+        .shape[0]
+    )
+
+
+    quantidades.append(
+        quantidade
+    )
+
+
+    nomes_meses.append(
+        periodo
+        .strftime("%b/%y")
+        .capitalize()
+    )
 
 
 fig_evolucao = go.Figure()
+
 
 fig_evolucao.add_trace(
     go.Bar(
@@ -1226,9 +1626,13 @@ fig_evolucao.add_trace(
         marker_color=BLUE,
         text=quantidades,
         textposition="outside",
-        hovertemplate="%{x}: %{y} monitorias<extra></extra>"
+        hovertemplate=(
+            "%{x}: %{y} monitorias"
+            "<extra></extra>"
+        )
     )
 )
+
 
 fig_evolucao.update_layout(
     height=360,
@@ -1247,16 +1651,19 @@ fig_evolucao.update_layout(
     yaxis=dict(
         title=None,
         showgrid=True,
-        gridcolor="#E8EAF2",
+        gridcolor=BORDER,
         zeroline=False
     ),
     showlegend=False
 )
 
+
 st.plotly_chart(
     fig_evolucao,
     use_container_width=True,
-    config={"displayModeBar": False}
+    config={
+        "displayModeBar": False
+    }
 )
 
 
@@ -1264,21 +1671,27 @@ st.plotly_chart(
 # OUTRAS ETAPAS
 # =========================================================
 
-st.subheader("Outras etapas")
+st.subheader(
+    "Outras etapas"
+)
 
-col_lado, col_offline = st.columns(2)
+
+col_lado, col_offline = (
+    st.columns(2)
+)
 
 
 total_lado_a_lado = int(
-    monitorias_google["Data Lado a Lado"]
-    .notna()
-    .sum()
+    monitorias_google[
+        "Data Lado a Lado"
+    ].notna().sum()
 )
 
+
 total_offline = int(
-    monitorias_google["Data Monitoria Offline"]
-    .notna()
-    .sum()
+    monitorias_google[
+        "Data Monitoria Offline"
+    ].notna().sum()
 )
 
 
@@ -1289,6 +1702,7 @@ with col_lado:
         if total_lado_a_lado > 0
         else "Ainda não iniciado"
     )
+
 
     st.html(
         f"""
@@ -1318,6 +1732,7 @@ with col_offline:
         if total_offline > 0
         else "Ainda não iniciado"
     )
+
 
     st.html(
         f"""
