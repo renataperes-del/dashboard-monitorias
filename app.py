@@ -418,13 +418,6 @@ except RuntimeError as erro:
     st.stop()
 
 
-with col_data:
-
-    st.caption(
-        f"Última atualização dos dados: {data_consulta}"
-    )
-
-
 # =========================================================
 # VALIDAÇÃO INICIAL
 # =========================================================
