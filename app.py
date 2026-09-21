@@ -54,300 +54,458 @@ GRAY = "#CBD5E1"
 st.markdown(
     f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    @import url(
+        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'
+    );
+
+    .stApp,
+    .stApp p,
+    .stApp label,
+    .stApp button,
+    .stApp input,
+    .stApp h1,
+    .stApp h2,
+    .stApp h3,
+    .stApp li {{
+        font-family: 'Inter', sans-serif;
+    }}
 
     .stApp {{
         background: {BG};
         color: {TEXT};
-        font-family: 'Inter', sans-serif;
     }}
 
     .block-container {{
-        max-width: none;
-        padding: 1.25rem 2rem 3rem;
+        max-width: 1400px;
+        padding-top: 1.5rem;
+        padding-bottom: 4rem;
     }}
 
-    #MainMenu, footer {{ visibility: hidden; }}
-    [data-testid="stHeader"] {{ background: transparent !important; }}
-
-    .topbar {{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:20px;
-        margin-bottom:18px;
+    #MainMenu,
+    footer {{
+        visibility: hidden;
     }}
 
-    .eyebrow {{
-        color:{PRIMARY};
-        font-size:11px;
-        font-weight:800;
-        letter-spacing:.10em;
-        text-transform:uppercase;
+    [data-testid="stHeader"] {{
+        background: transparent !important;
     }}
 
-    .page-title {{
-        color:{TEXT};
-        font-size:28px;
-        line-height:1.1;
-        font-weight:800;
-        letter-spacing:-.04em;
-        margin-top:5px;
+    h1 {{
+        color: {TEXT} !important;
+        font-size: 2rem !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.04em;
+        margin-bottom: 3px !important;
     }}
 
-    .page-subtitle {{
-        color:{SECONDARY};
-        font-size:12px;
-        margin-top:6px;
+    h2,
+    h3 {{
+        color: {TEXT} !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.02em;
     }}
 
-    .sidebar {{
-        position:fixed;
-        z-index:999999;
-        left:0;
-        top:0;
-        bottom:0;
-        width:218px;
-        padding:25px 18px;
-        background:{PRIMARY};
-        color:white;
-        box-sizing:border-box;
+    h2 {{
+        font-size: 1.2rem !important;
+        margin-top: 30px !important;
     }}
 
-    .sidebar-brand {{
-        display:flex;
-        align-items:center;
-        gap:10px;
-        padding:3px 8px 28px;
+    h3 {{
+        font-size: 1rem !important;
     }}
 
-    .sidebar-logo {{
-        width:34px;
-        height:34px;
-        border-radius:10px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        background:rgba(255,255,255,.16);
-        font-weight:800;
-        font-size:15px;
+    p {{
+        color: {TEXT};
     }}
 
-    .sidebar-title {{
-        font-size:12px;
-        font-weight:800;
-        letter-spacing:.08em;
+    .section-caption {{
+        color: {SECONDARY};
+        font-size: 13px;
+        margin-top: -8px;
+        margin-bottom: 16px;
     }}
 
-    .nav-label {{
-        color:rgba(255,255,255,.55);
-        font-size:11px;
-        font-weight:700;
-        text-transform:uppercase;
-        letter-spacing:.12em;
-        padding:0 10px 8px;
-        margin-top:6px;
-    }}
 
-    .nav-item {{
-        text-decoration: none;
-        display: block;
-        display:flex;
-        align-items:center;
-        gap:11px;
-            padding:10px 10px;
-        margin:3px 0;
-        border-radius:9px;
-        color:rgba(255,255,255,.86);
-        font-size:12px;
-        font-weight:500;
-    }}
-
-    .nav-item.active {{
-        background:rgba(255,255,255,.16);
-        color:#fff;
-        font-weight:700;
-    }}
-
-    .nav-icon {{
-        width:17px;
-        text-align:center;
-        font-size:13px;
-    }}
-
-    .sidebar-note {{
-        position:absolute;
-        left:18px;
-        right:18px;
-        bottom:24px;
-        padding:12px;
-        border:1px solid rgba(255,255,255,.12);
-        border-radius:10px;
-        background:rgba(255,255,255,.07);
-        color:rgba(255,255,255,.68);
-        font-size:11px;
-        line-height:1.5;
-    }}
-
-    .filter-panel {{
-        background:{CARD};
-        border:1px solid {BORDER};
-        border-radius:14px;
-        padding:14px 16px 4px;
-        box-shadow:0 4px 18px rgba(31,41,55,.035);
-        margin-bottom:16px;
-    }}
-
-    .panel-title {{
-        color:{TEXT};
-        font-size:12px;
-        font-weight:800;
-        letter-spacing:.04em;
-        margin-bottom:3px;
-    }}
-
-    .panel-subtitle {{
-        color:{SECONDARY};
-        font-size:11px;
-        margin-bottom:8px;
-    }}
+    /* =====================================================
+       SELECTBOX
+       ===================================================== */
 
     div[data-baseweb="select"] > div {{
-        background:{CARD};
-        border:1px solid {BORDER};
-        border-radius:9px;
-        min-height:40px;
-        box-shadow:none;
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        min-height: 44px;
+        box-shadow: none;
+        transition: all .15s ease;
     }}
 
     div[data-baseweb="select"] > div:hover {{
-        border-color:{PRIMARY};
+        border-color: {PRIMARY};
+        box-shadow: 0 0 0 3px {PRIMARY_SOFT};
     }}
 
-    .metric-card {{
-        background:{CARD};
-        border:1px solid {BORDER};
-        border-radius:13px;
-        padding:16px 17px;
-        min-height:105px;
-        box-shadow:0 4px 15px rgba(31,41,55,.035);
-    }}
 
-    .metric-label {{
-        color:{SECONDARY};
-        font-size:10px;
-        font-weight:800;
-        letter-spacing:.08em;
-        text-transform:uppercase;
-    }}
-
-    .metric-value {{
-        color:{TEXT};
-        font-size:27px;
-        font-weight:800;
-        line-height:1;
-        margin-top:11px;
-        font-variant-numeric:tabular-nums;
-    }}
-
-    .metric-foot {{
-        color:{SECONDARY};
-        font-size:10px;
-        margin-top:8px;
-    }}
-
-    .panel-card {{
-        background:{CARD};
-        border:1px solid {BORDER};
-        border-radius:14px;
-        padding:15px 17px 10px;
-        box-shadow:0 4px 15px rgba(31,41,55,.035);
-        height:100%;
-        box-sizing:border-box;
-    }}
-
-    .panel-card-title {{
-        color:{TEXT};
-        font-size:13px;
-        font-weight:800;
-    }}
-
-    .panel-card-subtitle {{
-        color:{SECONDARY};
-        font-size:10px;
-        margin-top:3px;
-        margin-bottom:4px;
-    }}
-
-    .status-list {{ margin-top:4px; }}
-    .status-row {{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:9px 0;
-        border-bottom:1px solid {BORDER};
-        font-size:11px;
-    }}
-    .status-row:last-child {{ border-bottom:0; }}
-    .status-name {{ color:{SECONDARY}; }}
-    .status-number {{ color:{TEXT}; font-weight:800; }}
-
-    .pending-row {{
-        display:flex;
-        justify-content:space-between;
-        gap:15px;
-        padding:9px 0;
-        border-bottom:1px solid {BORDER};
-    }}
-    .pending-row:last-child {{ border-bottom:0; }}
-    .pending-name {{ color:{TEXT}; font-size:11px; font-weight:700; }}
-    .pending-meta {{ color:{SECONDARY}; font-size:10px; margin-top:2px; }}
-    .pending-badge {{
-        color:{WARNING};
-        background:{WARNING_SOFT};
-        border-radius:20px;
-        padding:4px 7px;
-        font-size:11px;
-        font-weight:700;
-        white-space:nowrap;
-        height:max-content;
-    }}
-
-    .filter-summary {{
-        background:{PRIMARY_SOFT};
-        border:1px solid #DCE4FF;
-        border-radius:9px;
-        padding:8px 12px;
-        margin:0 0 14px;
-        color:{TEXT};
-        font-size:10px;
-    }}
-
-    .update-info {{
-        color:{SECONDARY};
-        font-size:10px;
-        text-align:right;
-        margin-top:3px;
-    }}
+    /* =====================================================
+       BOTÕES
+       ===================================================== */
 
     .stButton > button {{
-        border:1px solid {BORDER};
-        border-radius:9px;
-        background:{CARD};
-        color:{TEXT};
-        font-weight:700;
-        min-height:40px;
-    }}
-    .stButton > button:hover {{
-        border-color:{PRIMARY};
-        color:{PRIMARY};
+        background: {CARD};
+        color: {TEXT};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        min-height: 44px;
+        font-weight: 600;
+        box-shadow: none;
+        transition: all .15s ease;
     }}
 
-    .stDownloadButton > button {{
-        border:1px solid {BORDER};
-        border-radius:9px;
-        background:{CARD};
-        font-size:11px;
+    .stButton > button:hover {{
+        border-color: {PRIMARY};
+        color: {PRIMARY};
+        background: {PRIMARY_SOFT};
+    }}
+
+
+    /* =====================================================
+       CARDS
+       ===================================================== */
+
+    .custom-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 16px;
+        padding: 21px;
+        min-height: 126px;
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
+        transition: all .15s ease;
+    }}
+
+    .custom-card:hover {{
+        border-color: #D8DEEF;
+        box-shadow: 0 7px 20px rgba(31, 41, 55, .055);
+        transform: translateY(-1px);
+    }}
+
+    .custom-card-title {{
+        color: {SECONDARY};
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        margin-bottom: 12px;
+    }}
+
+    .custom-card-value {{
+        color: {TEXT};
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }}
+
+    .custom-card-subtitle {{
+        color: {SECONDARY};
+        font-size: 12px;
+        margin-top: 9px;
+    }}
+
+
+    /* =====================================================
+       CABEÇALHO
+       ===================================================== */
+
+    .dashboard-brand {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }}
+
+    .brand-icon {{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: {PRIMARY_SOFT};
+        color: {PRIMARY};
+        font-size: 14px;
+        font-weight: 800;
+    }}
+
+    .brand-text {{
+        color: {PRIMARY};
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .09em;
+    }}
+
+    .dashboard-header {{
+        background: linear-gradient(
+            135deg,
+            #FFFFFF 0%,
+            #F9FAFF 100%
+        );
+        border: 1px solid {BORDER};
+        border-radius: 18px;
+        padding: 24px 26px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 18px rgba(31, 41, 55, .035);
+    }}
+
+
+    /* =====================================================
+       PRAÇAS
+       ===================================================== */
+
+    .praca-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 16px;
+        padding: 20px;
+        min-height: 135px;
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
+        transition: all .15s ease;
+    }}
+
+    .praca-card:hover {{
+        border-color: #D8DEEF;
+        transform: translateY(-1px);
+        box-shadow: 0 7px 20px rgba(31, 41, 55, .055);
+    }}
+
+    .praca-name {{
+        color: {TEXT};
+        font-size: 19px;
+        font-weight: 800;
+        margin-bottom: 9px;
+        letter-spacing: -.025em;
+    }}
+
+    .praca-info {{
+        color: {SECONDARY};
+        font-size: 12px;
+        line-height: 1.55;
+    }}
+
+    .praca-dot {{
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: {PRIMARY};
+        margin-right: 6px;
+    }}
+
+
+    /* =====================================================
+       SCORE
+       ===================================================== */
+
+    .score-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 16px;
+        padding: 28px;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
+    }}
+
+    .score-label {{
+        color: {SECONDARY};
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        margin-bottom: 12px;
+    }}
+
+    .score-value {{
+        color: {TEXT};
+        font-size: 42px;
+        font-weight: 800;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }}
+
+    .score-description {{
+        color: {SECONDARY};
+        font-size: 12px;
+        margin-top: 12px;
+        line-height: 1.5;
+    }}
+
+
+    /* =====================================================
+       EQUIPE
+       ===================================================== */
+
+    .team-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 16px;
+        padding: 20px;
+        min-height: 174px;
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
+        transition: all .15s ease;
+    }}
+
+    .team-card:hover {{
+        border-color: #D8DEEF;
+        transform: translateY(-1px);
+        box-shadow: 0 7px 20px rgba(31, 41, 55, .055);
+    }}
+
+    .team-name {{
+        color: {TEXT};
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }}
+
+    .team-number {{
+        color: {TEXT};
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }}
+
+    .team-label {{
+        color: {SECONDARY};
+        font-size: 12px;
+        margin-top: 4px;
+    }}
+
+    .team-progress {{
+        width: 100%;
+        height: 7px;
+        background: #EEF1F6;
+        border-radius: 99px;
+        margin-top: 17px;
+        overflow: hidden;
+    }}
+
+    .team-progress-fill {{
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            {PRIMARY},
+            #6680F2
+        );
+        border-radius: 99px;
+    }}
+
+    .team-status {{
+        display: flex;
+        justify-content: space-between;
+        margin-top: 9px;
+        font-size: 12px;
+    }}
+
+    .team-realizada {{
+        color: {SUCCESS};
+        font-weight: 600;
+    }}
+
+    .team-pendente {{
+        color: {WARNING};
+        font-weight: 600;
+    }}
+
+
+    /* =====================================================
+       LISTAS
+       ===================================================== */
+
+    .list-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 16px;
+        padding: 20px;
+        min-height: 160px;
+        box-shadow: 0 3px 12px rgba(31, 41, 55, .035);
+    }}
+
+    .list-title {{
+        color: {TEXT};
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }}
+
+    .list-item {{
+        border-bottom: 1px solid {BORDER};
+        padding: 10px 0;
+    }}
+
+    .list-item:last-child {{
+        border-bottom: none;
+    }}
+
+    .list-name {{
+        color: {TEXT};
+        font-size: 13px;
+        font-weight: 600;
+    }}
+
+    .list-function {{
+        color: {SECONDARY};
+        font-size: 12px;
+        margin-top: 3px;
+    }}
+
+    .list-score {{
+        color: {PRIMARY};
+        font-size: 12px;
+        font-weight: 700;
+        margin-top: 4px;
+        font-variant-numeric: tabular-nums;
+    }}
+
+    .empty-message {{
+        color: {SECONDARY};
+        font-size: 12px;
+        padding: 12px 0;
+    }}
+
+
+    /* =====================================================
+       FILTRO ATIVO
+       ===================================================== */
+
+    .filter-summary {{
+        background: {PRIMARY_SOFT};
+        border: 1px solid #DCE4FF;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-top: 8px;
+        margin-bottom: 24px;
+        color: {TEXT};
+        font-size: 12px;
+    }}
+
+    .filter-summary strong {{
+        color: {PRIMARY};
+    }}
+
+
+    /* =====================================================
+       AVISOS
+       ===================================================== */
+
+    .data-warning {{
+        background: {WARNING_SOFT};
+        border: 1px solid #F6D7A7;
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: {TEXT};
+        font-size: 12px;
+        margin-bottom: 18px;
     }}
 
     </style>
@@ -405,6 +563,20 @@ def carregar_dados():
 
 
 # =========================================================
+# ATUALIZAÇÃO
+# =========================================================
+
+col_data, col_botao = st.columns([6, 1])
+
+with col_botao:
+
+    if st.button("↻ Atualizar"):
+
+        st.cache_data.clear()
+        st.rerun()
+
+
+# =========================================================
 # CARREGAMENTO
 # =========================================================
 
@@ -416,6 +588,13 @@ except RuntimeError as erro:
 
     st.error(str(erro))
     st.stop()
+
+
+with col_data:
+
+    st.caption(
+        f"Última atualização dos dados: {data_consulta}"
+    )
 
 
 # =========================================================
@@ -436,58 +615,53 @@ if len(dados_aplicacao) <= 3:
 # ESTRUTURA DA PLANILHA
 # =========================================================
 
-# A aba "Aplicação" possui 3 linhas de cabeçalho.
-# Os nomes das colunas ficam distribuídos entre essas linhas,
-# então não devemos tentar localizar um único cabeçalho pelo nome.
-# O mapeamento abaixo corresponde à estrutura real da planilha:
-# A=Colaborador, B=Supervisão, C=Data Monitoria, D=Quem Aplicou Monitoria,
-# E=Ligação 1, F=Ligação 2, G=Data Lado a Lado, H=Quem Aplicou Lado a Lado,
-# I=Observação Lado a Lado, J=Data Monitoria Offline, K=Quem Aplicou Offline,
-# L=Percentual Offline, M=Observações Gerais.
-
 COLUNAS_ESPERADAS = [
-    "Colaborador", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria",
-    "Ligação 1", "Ligação 2", "Data Lado a Lado", "Quem Aplicou Lado a Lado",
-    "Observação Lado a Lado", "Data Monitoria Offline", "Quem Aplicou Offline",
-    "Percentual Offline", "Observações Gerais"
+    "Colaborador",
+    "Supervisão",
+    "Data Monitoria",
+    "Quem Aplicou Monitoria",
+    "Ligação 1",
+    "Ligação 2",
+    "Data Lado a Lado",
+    "Quem Aplicou Lado a Lado",
+    "Observação Lado a Lado",
+    "Data Monitoria Offline",
+    "Quem Aplicou Offline",
+    "Percentual Offline",
+    "Observações Gerais"
 ]
 
-mapa_colunas = {
-    "Colaborador": 0,
-    "Supervisão": 1,
-    "Data Monitoria": 2,
-    "Quem Aplicou Monitoria": 3,
-    "Ligação 1": 4,
-    "Ligação 2": 5,
-    "Data Lado a Lado": 6,
-    "Quem Aplicou Lado a Lado": 7,
-    "Observação Lado a Lado": 8,
-    "Data Monitoria Offline": 9,
-    "Quem Aplicou Offline": 10,
-    "Percentual Offline": 11,
-    "Observações Gerais": 12,
-}
-
-# Os dados começam na linha 4 da planilha.
-LINHA_INICIAL_DADOS = 4
 
 linhas_dados = []
-for numero_planilha, linha in enumerate(
-    dados_aplicacao[LINHA_INICIAL_DADOS - 1:],
-    start=LINHA_INICIAL_DADOS
-):
-    registro = {
-        coluna: (linha[indice] if indice < len(linha) else "")
-        for coluna, indice in mapa_colunas.items()
-    }
-    registro["_Linha Planilha"] = numero_planilha
-    linhas_dados.append(registro)
+
+for linha in dados_aplicacao[3:]:
+
+    if len(linha) < len(COLUNAS_ESPERADAS):
+        linha = linha + (
+            [""] *
+            (len(COLUNAS_ESPERADAS) - len(linha))
+        )
+
+    linhas_dados.append(
+        linha[:len(COLUNAS_ESPERADAS)]
+    )
+
 
 if not linhas_dados:
-    st.error("Não foram encontradas linhas de colaboradores na aba 'Aplicação'.")
+
+    st.error(
+        "Não foram encontradas linhas de colaboradores "
+        "na aba 'Aplicação'."
+    )
+
     st.stop()
 
-monitorias_google = pd.DataFrame(linhas_dados)
+
+monitorias_google = pd.DataFrame(
+    linhas_dados,
+    columns=COLUNAS_ESPERADAS
+)
+
 
 # =========================================================
 # FUNÇÃO DE NORMALIZAÇÃO
@@ -608,7 +782,14 @@ for coluna in COLUNAS_DATA:
 
     if falhas.any():
 
-        datas_invalidas[coluna] = monitorias_google.loc[falhas, ["Colaborador", coluna, "_Linha Planilha"]].copy()
+        datas_invalidas[coluna] = (
+            monitorias_google.loc[
+                falhas,
+                "Colaborador"
+            ]
+            .astype(str)
+            .tolist()
+        )
 
     monitorias_google[coluna] = convertida
 
@@ -616,8 +797,8 @@ for coluna in COLUNAS_DATA:
 if datas_invalidas:
 
     quantidade_datas_invalidas = sum(
-        len(linhas)
-        for linhas in datas_invalidas.values()
+        len(nomes)
+        for nomes in datas_invalidas.values()
     )
 
     st.warning(
@@ -628,20 +809,17 @@ if datas_invalidas:
 
     with st.expander("Ver colaboradores com data inválida"):
 
-        for coluna, linhas_invalidas in datas_invalidas.items():
-            st.markdown(f"**{coluna}:**")
-            for _, linha in linhas_invalidas.iterrows():
-                st.write(f"- Linha {int(linha['_Linha Planilha'])}: {linha['Colaborador']} | valor: {linha[coluna]}")
+        for coluna, nomes in datas_invalidas.items():
 
+            st.markdown(
+                f"**{coluna}:**"
+            )
 
-# =========================================================
-# NOME NORMALIZADO
-# =========================================================
+            for nome in nomes:
 
-monitorias_google["Nome Normalizado"] = (
-    monitorias_google["Colaborador"]
-    .apply(normalizar_texto)
-)
+                st.write(
+                    f"- {nome}"
+                )
 
 
 # =========================================================
@@ -650,12 +828,8 @@ monitorias_google["Nome Normalizado"] = (
 
 duplicados = (
     monitorias_google
-    .groupby("Nome Normalizado")
-    .agg(
-        Colaborador=("Colaborador", "first"),
-        Registros=("Colaborador", "size")
-    )
-    .query("Registros > 1")
+    .groupby("Colaborador")
+    .size()
 )
 
 duplicados = duplicados[
@@ -674,15 +848,11 @@ if not duplicados.empty:
             "Os registros não foram removidos automaticamente."
         )
 
-        for _, linha in duplicados.iterrows():
-            st.write(f"- {linha['Colaborador']}: {int(linha['Registros'])} registros")
+        for nome, quantidade in duplicados.items():
 
-
-# Mantém apenas um registro por colaborador normalizado.
-# Se houver duplicidade, ela é sinalizada acima para correção na origem.
-monitorias_google = monitorias_google.drop_duplicates(
-    subset=["Nome Normalizado"], keep="first"
-).copy()
+            st.write(
+                f"- {nome}: {quantidade} registros"
+            )
 
 
 # =========================================================
@@ -842,6 +1012,12 @@ for nome in apoio_adm:
     funcao_por_nome_normalizada[
         normalizar_texto(nome)
     ] = "Apoio ADM"
+
+
+monitorias_google["Nome Normalizado"] = (
+    monitorias_google["Colaborador"]
+    .apply(normalizar_texto)
+)
 
 
 monitorias_google["Função"] = (
@@ -1017,23 +1193,6 @@ pracas = {
 # =========================================================
 # MAPEAMENTO PRAÇA -> SUPERVISÃO
 # =========================================================
-
-# Usa os nomes cadastrados em `pracas` como padrão de exibição.
-# Assim, diferenças como "Júlio" e "Julio" na planilha
-# não criam duas opções diferentes no dashboard.
-supervisao_canonica_por_primeiro_nome = {}
-
-for dados_praca in pracas.values():
-
-    for supervisor in dados_praca["supervisores"]:
-
-        primeiro_original = str(supervisor).strip().split()[0]
-        primeiro_normalizado = primeiro_nome(supervisor)
-
-        supervisao_canonica_por_primeiro_nome[
-            primeiro_normalizado
-        ] = primeiro_original
-
 
 praca_por_primeiro_nome_supervisao = {}
 
@@ -1284,467 +1443,1027 @@ def html_lista(titulo, dataframe, mostrar_nota=True):
 
 
 # =========================================================
-# INTERFACE DA DASHBOARD
+# CABEÇALHO
 # =========================================================
 
-st.sidebar.markdown("### NUBE")
-st.sidebar.caption("Treinamento Comercial")
-st.sidebar.markdown("**Monitorias**")
-nav_secao = st.sidebar.radio(
-    "",
-    ["Visão geral", "Indicadores", "Supervisores", "Pendências", "Evolução", "Etapas"],
-    label_visibility="collapsed"
+st.html(
+    f"""
+    <div class="dashboard-header">
+
+        <div class="dashboard-brand">
+
+            <span class="brand-icon">
+                N
+            </span>
+
+            <span class="brand-text">
+                NUBE • TREINAMENTO COMERCIAL
+            </span>
+
+        </div>
+
+        <div style="
+            color:{TEXT};
+            font-size:32px;
+            font-weight:800;
+            letter-spacing:-.04em;
+            line-height:1.1;
+            margin-top:8px;
+        ">
+            Dashboard de Monitorias
+        </div>
+
+        <div style="
+            color:{SECONDARY};
+            font-size:14px;
+            margin-top:8px;
+        ">
+            Acompanhamento das aplicações de monitoria
+        </div>
+
+    </div>
+    """
 )
-st.sidebar.divider()
-st.sidebar.caption("Painel de acompanhamento das monitorias")
-
-
-col_header, col_update = st.columns([5, 1])
-with col_header:
-    st.html("""<div class="topbar"><div><div class="eyebrow">Nube • Treinamento Comercial</div><div class="page-title">Dashboard de Monitorias</div><div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div></div></div>""")
-with col_update:
-    st.write("")
-    if st.button("↻ Atualizar", use_container_width=True):
-        st.cache_data.clear()
-        st.rerun()
-    st.caption(f"Atualizado em {data_consulta}")
 
 
 # =========================================================
 # FILTROS
 # =========================================================
 
-st.html(
-    """
-    <div class="filter-panel">
-        <div class="panel-title">Filtros</div>
-        <div class="panel-subtitle">Use os filtros para atualizar todos os indicadores e gráficos.</div>
-    </div>
-    """
+st.subheader("Filtros")
+
+
+col_filtro_praca, col_filtro_supervisao, col_filtro_status = (
+    st.columns(3)
 )
 
-col_filtro_praca, col_filtro_supervisao, col_filtro_status = st.columns(3)
 
-opcoes_praca = ["Todas"] + list(pracas.keys())
+opcoes_praca = [
+    "Todas"
+] + list(pracas.keys())
+
 
 with col_filtro_praca:
-    praca_selecionada = st.selectbox("Praça", opcoes_praca)
+
+    praca_selecionada = st.selectbox(
+        "Praça",
+        opcoes_praca
+    )
+
 
 if praca_selecionada == "Todas":
+
     supervisoes_disponiveis = sorted(
-        {
-            supervisao_canonica_por_primeiro_nome.get(
-                primeiro_nome(supervisao),
-                str(supervisao).strip().split()[0]
-            )
-            for supervisao in monitorias_google["Supervisão"].dropna().astype(str).tolist()
-            if primeiro_nome(supervisao)
-        },
-        key=normalizar_texto
-    )
-else:
-    supervisoes_da_praca = {
-        primeiro_nome(nome)
-        for nome in pracas[praca_selecionada]["supervisores"]
-    }
-    supervisoes_disponiveis = sorted(
-        {
-            supervisao_canonica_por_primeiro_nome.get(
-                primeiro_nome(supervisao),
-                str(supervisao).strip().split()[0]
-            )
-            for supervisao in monitorias_google["Supervisão"].dropna().astype(str).tolist()
-            if primeiro_nome(supervisao) in supervisoes_da_praca
-        },
-        key=normalizar_texto
+        monitorias_google[
+            "Supervisão"
+        ]
+        .dropna()
+        .astype(str)
+        .unique()
+        .tolist()
     )
 
-opcoes_supervisao = ["Todas"] + supervisoes_disponiveis
+else:
+
+    supervisoes_da_praca = [
+        primeiro_nome(nome)
+        for nome in pracas[
+            praca_selecionada
+        ]["supervisores"]
+    ]
+
+    supervisoes_disponiveis = sorted(
+        [
+            supervisao
+            for supervisao in (
+                monitorias_google[
+                    "Supervisão"
+                ]
+                .dropna()
+                .astype(str)
+                .unique()
+                .tolist()
+            )
+            if primeiro_nome(supervisao)
+            in supervisoes_da_praca
+        ]
+    )
+
+
+opcoes_supervisao = [
+    "Todas"
+] + supervisoes_disponiveis
+
 
 with col_filtro_supervisao:
-    supervisao_selecionada = st.selectbox("Supervisão", opcoes_supervisao)
+
+    supervisao_selecionada = st.selectbox(
+        "Supervisão",
+        opcoes_supervisao
+    )
+
 
 with col_filtro_status:
-    status_selecionado = st.selectbox("Status", ["Todos", "Realizadas", "Pendentes"])
 
+    status_selecionado = st.selectbox(
+        "Status",
+        [
+            "Todos",
+            "Realizadas",
+            "Pendentes"
+        ]
+    )
+
+
+# =========================================================
+# FILTROS PRINCIPAIS
+# STATUS NÃO ENTRA AQUI
+# =========================================================
 
 df_filtrado = monitorias_google.copy()
 
-if praca_selecionada != "Todas":
-    df_filtrado = df_filtrado[df_filtrado["Praça"] == praca_selecionada].copy()
 
-if supervisao_selecionada != "Todas":
+if praca_selecionada != "Todas":
+
     df_filtrado = df_filtrado[
-        df_filtrado["Supervisão"].astype(str).map(primeiro_nome)
-        == primeiro_nome(supervisao_selecionada)
+        df_filtrado["Praça"]
+        == praca_selecionada
     ].copy()
 
-# Status controla somente o que é exibido nas listas.
-# Os indicadores e gráficos continuam mostrando o conjunto completo
-# da Praça/Supervisão selecionada.
-df_ativo = df_filtrado.copy()
+
+if supervisao_selecionada != "Todas":
+
+    df_filtrado = df_filtrado[
+        df_filtrado["Supervisão"]
+        .astype(str)
+        .map(primeiro_nome)
+        ==
+        primeiro_nome(
+            supervisao_selecionada
+        )
+    ].copy()
+
+
+# =========================================================
+# LISTA COM FILTRO DE STATUS
+# =========================================================
 
 if status_selecionado == "Realizadas":
-    df_lista = df_ativo[df_ativo["Realizada"]].copy()
+
+    df_lista = df_filtrado[
+        df_filtrado["Realizada"]
+    ].copy()
+
 elif status_selecionado == "Pendentes":
-    df_lista = df_ativo[~df_ativo["Realizada"]].copy()
+
+    df_lista = df_filtrado[
+        ~df_filtrado["Realizada"]
+    ].copy()
+
 else:
-    df_lista = df_ativo.copy()
+
+    df_lista = df_filtrado.copy()
+
+
+# =========================================================
+# RESUMO DOS FILTROS
+# =========================================================
 
 filtros_ativos = []
+
+
 if praca_selecionada != "Todas":
-    filtros_ativos.append(f"<strong>Praça:</strong> {html.escape(praca_selecionada)}")
+
+    filtros_ativos.append(
+        f"<strong>Praça:</strong> "
+        f"{html.escape(praca_selecionada)}"
+    )
+
+
 if supervisao_selecionada != "Todas":
-    filtros_ativos.append(f"<strong>Supervisão:</strong> {html.escape(supervisao_selecionada)}")
+
+    filtros_ativos.append(
+        f"<strong>Supervisão:</strong> "
+        f"{html.escape(supervisao_selecionada)}"
+    )
+
+
 if status_selecionado != "Todos":
-    filtros_ativos.append(f"<strong>Status:</strong> {html.escape(status_selecionado)}")
+
+    filtros_ativos.append(
+        f"<strong>Status das listas:</strong> "
+        f"{html.escape(status_selecionado)}"
+    )
+
 
 if filtros_ativos:
-    st.html('<div class="filter-summary">' + " &nbsp; • &nbsp; ".join(filtros_ativos) + '</div>')
 
+    st.html(
+        '<div class="filter-summary">'
+        + " &nbsp; • &nbsp; ".join(filtros_ativos)
+        + "</div>"
+    )
 
-st.html('<div id="indicadores"></div>')
 
 # =========================================================
-# INDICADORES
+# DESEMPENHO GERAL
+# USA df_filtrado, NÃO df_lista
 # =========================================================
 
-total_colaboradores = len(df_ativo)
-total_realizadas = int(df_ativo["Realizada"].sum())
-total_pendentes = total_colaboradores - total_realizadas
-percentual_concluido = (
-    total_realizadas / total_colaboradores * 100
-    if total_colaboradores else 0
+st.subheader("Desempenho geral")
+
+
+st.markdown(
+    '<div class="section-caption">'
+    'Média das notas das monitorias'
+    '</div>',
+    unsafe_allow_html=True
 )
-notas_validas = df_ativo.loc[df_ativo["Média"].notna(), "Média"]
-media_geral = notas_validas.mean() if not notas_validas.empty else None
 
-col1, col2, col3, col4, col5 = st.columns(5)
 
-metricas = [
-    ("COLABORADORES", total_colaboradores, "no acompanhamento"),
-    ("REALIZADAS", total_realizadas, "monitorias concluídas"),
-    ("PENDENTES", total_pendentes, "monitorias a realizar"),
-    ("CONCLUSÃO", f"{percentual_concluido:.1f}%", "do total"),
-    ("MÉDIA", f"{media_geral:.1f}%" if media_geral is not None else "—", "notas registradas")
-]
+col_grafico, col_score = st.columns([1, 1])
 
-for coluna, (titulo, valor, subtitulo) in zip([col1, col2, col3, col4, col5], metricas):
+
+notas_validas = (
+    df_filtrado[
+        df_filtrado["Média"].notna()
+    ]["Média"]
+)
+
+
+if len(notas_validas) > 0:
+
+    media_geral = notas_validas.mean()
+
+else:
+
+    media_geral = None
+
+
+with col_grafico:
+
+    if media_geral is not None:
+
+        restante = max(
+            0,
+            100 - media_geral
+        )
+
+        fig = go.Figure(
+            go.Pie(
+                values=[
+                    media_geral,
+                    restante
+                ],
+                labels=[
+                    "Média",
+                    "Restante"
+                ],
+                hole=0.76,
+                marker=dict(
+                    colors=[
+                        PRIMARY,
+                        "#E9EDF5"
+                    ]
+                ),
+                textinfo="none",
+                hoverinfo="skip"
+            )
+        )
+
+        fig.update_layout(
+            showlegend=False,
+            margin=dict(
+                l=10,
+                r=10,
+                t=10,
+                b=10
+            ),
+            height=250,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            annotations=[
+                dict(
+                    text=f"<b>{media_geral:.1f}%</b>",
+                    x=0.5,
+                    y=0.5,
+                    font=dict(
+                        size=27,
+                        color=TEXT,
+                        family="Inter, sans-serif"
+                    ),
+                    showarrow=False
+                )
+            ]
+        )
+
+    else:
+
+        fig = go.Figure()
+
+        fig.update_layout(
+            showlegend=False,
+            margin=dict(
+                l=10,
+                r=10,
+                t=10,
+                b=10
+            ),
+            height=250,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            annotations=[
+                dict(
+                    text="<b>—</b>",
+                    x=0.5,
+                    y=0.5,
+                    font=dict(
+                        size=34,
+                        color=TEXT
+                    ),
+                    showarrow=False
+                )
+            ]
+        )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        config={
+            "displayModeBar": False
+        }
+    )
+
+
+with col_score:
+
+    quantidade_com_nota = (
+        df_filtrado[
+            df_filtrado["Média"].notna()
+        ].shape[0]
+    )
+
+    st.html(
+        f"""
+        <div class="score-card">
+
+            <div class="score-label">
+                COLABORADORES COM NOTA REGISTRADA
+            </div>
+
+            <div class="score-value">
+                {quantidade_com_nota}
+            </div>
+
+            <div class="score-description">
+                Média calculada a partir das notas
+                disponíveis nas monitorias.
+            </div>
+
+        </div>
+        """
+    )
+
+
+# =========================================================
+# RESUMO
+# USA df_filtrado, NÃO df_lista
+# =========================================================
+
+st.subheader("Resumo")
+
+
+total_colaboradores = len(
+    df_filtrado
+)
+
+
+total_realizadas = int(
+    df_filtrado["Realizada"].sum()
+)
+
+
+total_pendentes = (
+    total_colaboradores
+    - total_realizadas
+)
+
+
+percentual_concluido = (
+    total_realizadas
+    / total_colaboradores
+    * 100
+    if total_colaboradores > 0
+    else 0
+)
+
+
+col1, col2, col3, col4 = st.columns(4)
+
+
+with col1:
+
+    st.html(
+        html_card(
+            "COLABORADORES",
+            total_colaboradores,
+            "no acompanhamento"
+        )
+    )
+
+
+with col2:
+
+    st.html(
+        html_card(
+            "REALIZADAS",
+            total_realizadas,
+            "monitorias concluídas"
+        )
+    )
+
+
+with col3:
+
+    st.html(
+        html_card(
+            "PENDENTES",
+            total_pendentes,
+            "monitorias a realizar"
+        )
+    )
+
+
+with col4:
+
+    st.html(
+        html_card(
+            "% CONCLUÍDO",
+            f"{percentual_concluido:.1f}%",
+            "do total"
+        )
+    )
+
+
+# =========================================================
+# PRAÇAS
+# =========================================================
+
+st.subheader("Praças e equipes")
+
+
+colunas_pracas = st.columns(4)
+
+
+for coluna, (
+    nome_praca,
+    dados_praca
+) in zip(
+    colunas_pracas,
+    pracas.items()
+):
+
     with coluna:
+
+        quantidade_supervisoes = len(
+            dados_praca["supervisores"]
+        )
+
         st.html(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">{titulo}</div>
-                <div class="metric-value">{valor}</div>
-                <div class="metric-foot">{subtitulo}</div>
+            html_praca(
+                nome_praca,
+                quantidade_supervisoes,
+                dados_praca["responsavel"]
+            )
+        )
+
+
+# =========================================================
+# ACOMPANHAMENTO POR EQUIPE
+# USA df_filtrado
+# =========================================================
+
+st.subheader(
+    "Acompanhamento por equipe"
+)
+
+
+if supervisao_selecionada == "Todas":
+
+    nomes_supervisoes = sorted(
+        df_filtrado[
+            "Supervisão"
+        ]
+        .dropna()
+        .astype(str)
+        .unique()
+        .tolist()
+    )
+
+
+    if not nomes_supervisoes:
+
+        st.html(
+            """
+            <div class="list-card">
+
+                <div class="empty-message">
+                    Nenhuma equipe encontrada
+                    para os filtros selecionados.
+                </div>
+
             </div>
             """
         )
 
 
+    for inicio in range(
+        0,
+        len(nomes_supervisoes),
+        4
+    ):
+
+        grupo = nomes_supervisoes[
+            inicio:inicio + 4
+        ]
+
+        colunas = st.columns(4)
+
+
+        for coluna, supervisao in zip(
+            colunas,
+            grupo
+        ):
+
+            df_supervisao = (
+                df_filtrado[
+                    df_filtrado["Supervisão"]
+                    == supervisao
+                ]
+            )
+
+            total = len(
+                df_supervisao
+            )
+
+            realizadas = int(
+                df_supervisao[
+                    "Realizada"
+                ].sum()
+            )
+
+            pendentes = (
+                total
+                - realizadas
+            )
+
+
+            with coluna:
+
+                st.html(
+                    html_team(
+                        supervisao,
+                        total,
+                        realizadas,
+                        pendentes
+                    )
+                )
+
+
+else:
+
+    df_supervisao = (
+        df_filtrado[
+            df_filtrado["Supervisão"]
+            .astype(str)
+            .map(normalizar_texto)
+            ==
+            normalizar_texto(
+                supervisao_selecionada
+            )
+        ].copy()
+    )
+
+
+    realizadas_df = (
+        df_supervisao[
+            df_supervisao["Realizada"]
+        ].copy()
+    )
+
+
+    pendentes_df = (
+        df_supervisao[
+            ~df_supervisao["Realizada"]
+        ].copy()
+    )
+
+
+    total_supervisao = len(
+        df_supervisao
+    )
+
+
+    total_realizadas_supervisao = int(
+        df_supervisao["Realizada"].sum()
+    )
+
+
+    total_pendentes_supervisao = (
+        total_supervisao
+        - total_realizadas_supervisao
+    )
+
+
+    col_team, col_info = st.columns([1, 2])
+
+
+    with col_team:
+
+        st.html(
+            html_team(
+                supervisao_selecionada,
+                total_supervisao,
+                total_realizadas_supervisao,
+                total_pendentes_supervisao
+            )
+        )
+
+
+    with col_info:
+
+        if status_selecionado == "Realizadas":
+
+            st.html(
+                html_lista(
+                    f"Realizadas · {len(realizadas_df)}",
+                    realizadas_df,
+                    mostrar_nota=True
+                )
+            )
+
+        elif status_selecionado == "Pendentes":
+
+            st.html(
+                html_lista(
+                    f"Pendentes · {len(pendentes_df)}",
+                    pendentes_df,
+                    mostrar_nota=False
+                )
+            )
+
+        else:
+
+            col_realizadas, col_pendentes = (
+                st.columns(2)
+            )
+
+            with col_realizadas:
+
+                st.html(
+                    html_lista(
+                        f"Realizadas · {len(realizadas_df)}",
+                        realizadas_df,
+                        mostrar_nota=True
+                    )
+                )
+
+            with col_pendentes:
+
+                st.html(
+                    html_lista(
+                        f"Pendentes · {len(pendentes_df)}",
+                        pendentes_df,
+                        mostrar_nota=False
+                    )
+                )
+
+
+# =========================================================
+# PENDÊNCIAS
+# LISTA ÚNICA + DOWNLOAD
+# =========================================================
+
+st.subheader("Pendências")
+
+
+pendencias = df_filtrado[
+    ~df_filtrado["Realizada"]
+].copy()
+
+
+pendencias = pendencias.sort_values(
+    by=[
+        "Supervisão",
+        "Colaborador"
+    ],
+    na_position="last"
+)
+
+
+if pendencias.empty:
+
+    st.html(
+        """
+        <div class="list-card">
+
+            <div class="list-title">
+                Nenhuma pendência
+            </div>
+
+            <div class="empty-message">
+                Não há colaboradores pendentes
+                nos filtros selecionados.
+            </div>
+
+        </div>
+        """
+    )
+
+else:
+
+    st.html(
+        html_lista(
+            f"Colaboradores pendentes · {len(pendencias)}",
+            pendencias,
+            mostrar_nota=False
+        )
+    )
+
+
+    pendencias_csv = pendencias[
+        [
+            "Colaborador",
+            "Função",
+            "Supervisão",
+            "Praça"
+        ]
+    ].copy()
+
+
+    pendencias_csv = pendencias_csv.rename(
+        columns={
+            "Colaborador": "Colaborador",
+            "Função": "Função",
+            "Supervisão": "Supervisão",
+            "Praça": "Praça"
+        }
+    )
+
+
+    csv = pendencias_csv.to_csv(
+        index=False,
+        encoding="utf-8-sig"
+    )
+
+
+    st.download_button(
+        label="Baixar pendências em CSV",
+        data=csv,
+        file_name="pendencias_monitorias.csv",
+        mime="text/csv"
+    )
+
+
+# =========================================================
+# EVOLUÇÃO
+# USA df_filtrado, NÃO df_lista
+# =========================================================
+
+st.subheader(
+    "Evolução das Monitorias"
+)
+
+
+datas_validas = (
+    df_filtrado[
+        df_filtrado["Data Monitoria"].notna()
+    ]["Data Monitoria"]
+)
+
+
+if not datas_validas.empty:
+
+    primeiro_mes = (
+        datas_validas
+        .min()
+        .to_period("M")
+    )
+
+    ultimo_mes = max(
+        datas_validas
+        .max()
+        .to_period("M"),
+        pd.Timestamp.now()
+        .to_period("M")
+    )
+
+    meses = pd.period_range(
+        primeiro_mes,
+        ultimo_mes,
+        freq="M"
+    )
+
+else:
+
+    meses = pd.period_range(
+        pd.Timestamp.now()
+        .to_period("M"),
+        pd.Timestamp.now()
+        .to_period("M"),
+        freq="M"
+    )
+
+
 MESES = [
-    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez"
 ]
 
 
-st.html('<div id="visao-geral"></div>')
-st.html('<div id="evolucao"></div>')
+quantidades = []
+nomes_meses = []
 
-# =========================================================
-# GRÁFICOS PRINCIPAIS
-# =========================================================
 
-st.write("")
-col_evolucao, col_status = st.columns([2.1, 1])
+for periodo in meses:
 
-with col_evolucao:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Evolução das monitorias</div>
-            <div class="panel-card-subtitle">Quantidade de monitorias realizadas por mês</div>
-        </div>
-        """
+    inicio_mes = periodo.start_time
+    fim_mes = periodo.end_time
+
+    quantidade = (
+        df_filtrado[
+            (
+                df_filtrado[
+                    "Data Monitoria"
+                ] >= inicio_mes
+            )
+            &
+            (
+                df_filtrado[
+                    "Data Monitoria"
+                ] <= fim_mes
+            )
+        ]
+        .shape[0]
     )
 
-    datas_validas = df_ativo.loc[df_ativo["Data Monitoria"].notna(), "Data Monitoria"]
-
-    if not datas_validas.empty:
-        primeiro_mes = datas_validas.min().to_period("M")
-        ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"))
-        meses = pd.period_range(primeiro_mes, ultimo_mes, freq="M")
-    else:
-        meses = pd.period_range(pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), freq="M")
-
-    nomes_meses = []
-    quantidades = []
-    for periodo in meses:
-        quantidade = df_ativo[
-            (df_ativo["Data Monitoria"] >= periodo.start_time)
-            & (df_ativo["Data Monitoria"] <= periodo.end_time)
-        ].shape[0]
-        nomes_meses.append(f"{MESES[periodo.month - 1]}/{str(periodo.year)[2:]}")
-        quantidades.append(quantidade)
-
-    fig_evolucao = go.Figure()
-    fig_evolucao.add_trace(
-        go.Scatter(
-            x=nomes_meses,
-            y=quantidades,
-            mode="lines+markers",
-            line=dict(color=PRIMARY, width=3),
-            marker=dict(color=PRIMARY, size=7),
-            hovertemplate="%{x}: %{y} monitorias<extra></extra>"
-        )
-    )
-    fig_evolucao.update_layout(
-        height=270,
-        margin=dict(l=8, r=8, t=12, b=8),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=TEXT),
-        xaxis=dict(showgrid=False, title=None),
-        yaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-        showlegend=False
-    )
-    st.plotly_chart(fig_evolucao, use_container_width=True, config={"displayModeBar": False})
-
-with col_status:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Status das monitorias</div>
-            <div class="panel-card-subtitle">Distribuição do acompanhamento atual</div>
-        </div>
-        """
+    quantidades.append(
+        quantidade
     )
 
-    fig_status = go.Figure(
-        go.Pie(
-            values=[total_realizadas, total_pendentes],
-            labels=["Realizadas", "Pendentes"],
-            hole=.70,
-            marker=dict(colors=[SUCCESS, WARNING]),
-            textinfo="none",
-            hovertemplate="%{label}: %{value}<extra></extra>"
-        )
-    )
-    fig_status.update_layout(
-        height=220,
-        margin=dict(l=8, r=8, t=8, b=0),
-        paper_bgcolor="rgba(0,0,0,0)",
-        showlegend=False,
-        annotations=[dict(text=f"<b>{percentual_concluido:.0f}%</b><br><span style='font-size:10px'>concluído</span>", x=.5, y=.5, showarrow=False, font=dict(size=22, color=TEXT))]
-    )
-    st.plotly_chart(fig_status, use_container_width=True, config={"displayModeBar": False})
-
-    st.html(
-        f"""
-        <div class="status-list">
-            <div class="status-row"><span class="status-name">Realizadas</span><span class="status-number">{total_realizadas}</span></div>
-            <div class="status-row"><span class="status-name">Pendentes</span><span class="status-number">{total_pendentes}</span></div>
-        </div>
-        """
+    nomes_meses.append(
+        f"{MESES[periodo.month - 1]}/"
+        f"{str(periodo.year)[2:]}"
     )
 
 
-st.html('<div id="supervisores"></div>')
+fig_evolucao = go.Figure()
 
-# =========================================================
-# PRAÇAS E SUPERVISORES
-# =========================================================
 
-st.write("")
-col_pracas, col_supervisores = st.columns(2)
-
-with col_pracas:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Monitorias por praça</div>
-            <div class="panel-card-subtitle">Volume de colaboradores no acompanhamento</div>
-        </div>
-        """
-    )
-
-    dados_pracas = (
-        df_ativo.groupby("Praça", dropna=False)
-        .size().reset_index(name="Quantidade")
-    )
-    dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
-    dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
-
-    fig_pracas = go.Figure(go.Bar(
-        x=dados_pracas["Quantidade"],
-        y=dados_pracas["Praça"],
-        orientation="h",
+fig_evolucao.add_trace(
+    go.Bar(
+        x=nomes_meses,
+        y=quantidades,
         marker_color=PRIMARY,
-        text=dados_pracas["Quantidade"],
+        text=quantidades,
         textposition="outside",
-        hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
-    ))
-    fig_pracas.update_layout(
-        height=280,
-        margin=dict(l=8, r=30, t=12, b=8),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=TEXT),
-        xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-        yaxis=dict(showgrid=False, title=None),
-        showlegend=False
-    )
-    st.plotly_chart(fig_pracas, use_container_width=True, config={"displayModeBar": False})
-
-with col_supervisores:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Monitorias por supervisão</div>
-            <div class="panel-card-subtitle">Quantidade de colaboradores por equipe</div>
-        </div>
-        """
-    )
-
-    dados_supervisores = (
-        df_ativo.assign(
-            SupervisaoExibicao=df_ativo["Supervisão"].astype(str).map(
-                lambda x: supervisao_canonica_por_primeiro_nome.get(primeiro_nome(x), x.strip().split()[0] if x.strip() else "")
-            )
+        hovertemplate=(
+            "%{x}: %{y} monitorias"
+            "<extra></extra>"
         )
-        .groupby("SupervisaoExibicao", dropna=False)
-        .size().reset_index(name="Quantidade")
-        .sort_values("Quantidade", ascending=True)
     )
-
-    fig_supervisores = go.Figure(go.Bar(
-        x=dados_supervisores["Quantidade"],
-        y=dados_supervisores["SupervisaoExibicao"],
-        orientation="h",
-        marker_color="#6680F2",
-        text=dados_supervisores["Quantidade"],
-        textposition="outside",
-        hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
-    ))
-    fig_supervisores.update_layout(
-        height=280,
-        margin=dict(l=8, r=30, t=12, b=8),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=TEXT),
-        xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-        yaxis=dict(showgrid=False, title=None),
-        showlegend=False
-    )
-    st.plotly_chart(fig_supervisores, use_container_width=True, config={"displayModeBar": False})
+)
 
 
-st.html('<div id="pendencias"></div>')
+fig_evolucao.update_layout(
+    height=360,
+    margin=dict(
+        l=10,
+        r=10,
+        t=25,
+        b=10
+    ),
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(
+        family="Inter, sans-serif",
+        color=TEXT
+    ),
+    xaxis=dict(
+        title=None,
+        showgrid=False
+    ),
+    yaxis=dict(
+        title=None,
+        showgrid=True,
+        gridcolor=BORDER,
+        zeroline=False
+    ),
+    showlegend=False
+)
+
+
+st.plotly_chart(
+    fig_evolucao,
+    use_container_width=True,
+    config={
+        "displayModeBar": False
+    }
+)
+
 
 # =========================================================
-# PENDÊNCIAS E OUTRAS ETAPAS
+# OUTRAS ETAPAS
+# USA df_filtrado
 # =========================================================
 
-st.write("")
-col_pendencias, col_etapas = st.columns([1.7, 1])
+st.subheader(
+    "Outras etapas"
+)
 
-with col_pendencias:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Pendências</div>
-            <div class="panel-card-subtitle">Colaboradores que ainda não possuem data de monitoria</div>
-        </div>
-        """
+
+col_lado, col_offline = (
+    st.columns(2)
+)
+
+
+total_lado_a_lado = int(
+    df_filtrado[
+        "Data Lado a Lado"
+    ].notna().sum()
+)
+
+
+total_offline = int(
+    df_filtrado[
+        "Data Monitoria Offline"
+    ].notna().sum()
+)
+
+
+with col_lado:
+
+    status_lado = (
+        f"{total_lado_a_lado} realizados"
+        if total_lado_a_lado > 0
+        else "Ainda não iniciado"
     )
-
-    realizadas = df_ativo[df_ativo["Realizada"]].copy()
-    pendencias = df_ativo[~df_ativo["Realizada"]].copy()
-
-    realizadas = realizadas.sort_values(["Supervisão", "Colaborador"], na_position="last")
-    pendencias = pendencias.sort_values(["Supervisão", "Colaborador"], na_position="last")
-
-    if status_selecionado == "Realizadas":
-        lista_exibida = realizadas
-        titulo_lista = f"Monitorias realizadas · {len(lista_exibida)}"
-    elif status_selecionado == "Pendentes":
-        lista_exibida = pendencias
-        titulo_lista = f"Pendências · {len(lista_exibida)}"
-    else:
-        # Em "Todos", mostra os dois grupos, sem esconder nenhum.
-        lista_exibida = None
-
-    if status_selecionado == "Todos":
-        if realizadas.empty and pendencias.empty:
-            st.html('<div class="panel-card"><div class="pending-meta">Nenhum registro nos filtros selecionados.</div></div>')
-        else:
-            if not realizadas.empty:
-                with st.expander(f"Ver monitorias realizadas · {len(realizadas)}", expanded=False):
-                    st.dataframe(
-                        realizadas[["Colaborador", "Função", "Supervisão", "Praça"]],
-                        use_container_width=True, hide_index=True
-                    )
-            if not pendencias.empty:
-                with st.expander(f"Ver pendências · {len(pendencias)}", expanded=False):
-                    st.dataframe(
-                        pendencias[["Colaborador", "Função", "Supervisão", "Praça"]],
-                        use_container_width=True, hide_index=True
-                    )
-
-    else:
-        if lista_exibida.empty:
-            st.html('<div class="panel-card"><div class="pending-meta">Nenhum colaborador nesta categoria.</div></div>')
-        else:
-            with st.expander(f"Ver lista · {len(lista_exibida)}", expanded=False):
-                st.dataframe(
-                    lista_exibida[["Colaborador", "Função", "Supervisão", "Praça"]],
-                    use_container_width=True, hide_index=True
-                )
-
-            lista_csv = lista_exibida[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
-            st.download_button(
-                "Baixar lista em CSV",
-                data=lista_csv.to_csv(index=False).encode("utf-8-sig"),
-                file_name="monitorias_lista.csv",
-                mime="text/csv"
-            )
-
-with col_etapas:
-    st.html('<div id="etapas"></div>')
-    total_lado_a_lado = int(df_ativo["Data Lado a Lado"].notna().sum())
-    total_offline = int(df_ativo["Data Monitoria Offline"].notna().sum())
 
     st.html(
         f"""
-        <div class="panel-card">
-            <div class="panel-card-title">Outras etapas</div>
-            <div class="panel-card-subtitle">Acompanhamento complementar</div>
-            <div class="status-list" style="margin-top:12px;">
-                <div class="status-row"><span class="status-name">Lado a lado</span><span class="status-number">{total_lado_a_lado}</span></div>
-                <div class="status-row"><span class="status-name">Monitoria offline</span><span class="status-number">{total_offline}</span></div>
+        <div class="custom-card">
+
+            <div class="custom-card-title">
+                LADO A LADO
             </div>
+
+            <div class="custom-card-value">
+                {total_lado_a_lado}
+            </div>
+
+            <div class="custom-card-subtitle">
+                {status_lado}
+            </div>
+
         </div>
         """
     )
 
 
-# =========================================================
-# DETALHE DA SUPERVISÃO
-# =========================================================
+with col_offline:
 
-if supervisao_selecionada != "Todas":
-    st.write("")
+    status_offline = (
+        f"{total_offline} realizados"
+        if total_offline > 0
+        else "Ainda não iniciado"
+    )
+
     st.html(
         f"""
-        <div class="panel-card">
-            <div class="panel-card-title">Detalhamento • {html.escape(supervisao_selecionada)}</div>
-            <div class="panel-card-subtitle">Colaboradores associados à supervisão selecionada</div>
+        <div class="custom-card">
+
+            <div class="custom-card-title">
+                MONITORIA OFFLINE
+            </div>
+
+            <div class="custom-card-value">
+                {total_offline}
+            </div>
+
+            <div class="custom-card-subtitle">
+                {status_offline}
+            </div>
+
         </div>
         """
     )
-
-    df_detalhe = df_ativo[["Colaborador", "Função", "Realizada", "Média"]].copy()
-    df_detalhe["Status"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
-    df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
-    df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
-    st.dataframe(df_detalhe, use_container_width=True, hide_index=True)
