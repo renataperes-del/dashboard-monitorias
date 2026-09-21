@@ -64,7 +64,7 @@ st.markdown(
 
     .block-container {{
         max-width: none;
-        padding: 1.25rem 2rem 3rem 250px;
+        padding: 1.25rem 2rem 3rem;
     }}
 
     #MainMenu, footer {{ visibility: hidden; }}
@@ -109,7 +109,7 @@ st.markdown(
         bottom:0;
         width:218px;
         padding:25px 18px;
-        background:linear-gradient(180deg,#617BAA 0%,#536D9C 100%);
+        background:{PRIMARY};
         color:white;
         box-sizing:border-box;
     }}
@@ -141,7 +141,7 @@ st.markdown(
 
     .nav-label {{
         color:rgba(255,255,255,.55);
-        font-size:9px;
+        font-size:11px;
         font-weight:700;
         text-transform:uppercase;
         letter-spacing:.12em;
@@ -150,10 +150,12 @@ st.markdown(
     }}
 
     .nav-item {{
+        text-decoration: none;
+        display: block;
         display:flex;
         align-items:center;
         gap:11px;
-        padding:10px 10px;
+            padding:10px 10px;
         margin:3px 0;
         border-radius:9px;
         color:rgba(255,255,255,.86);
@@ -183,7 +185,7 @@ st.markdown(
         border-radius:10px;
         background:rgba(255,255,255,.07);
         color:rgba(255,255,255,.68);
-        font-size:10px;
+        font-size:11px;
         line-height:1.5;
     }}
 
@@ -305,7 +307,7 @@ st.markdown(
         background:{WARNING_SOFT};
         border-radius:20px;
         padding:4px 7px;
-        font-size:9px;
+        font-size:11px;
         font-weight:700;
         white-space:nowrap;
         height:max-content;
@@ -403,20 +405,6 @@ def carregar_dados():
 
 
 # =========================================================
-# ATUALIZAÇÃO
-# =========================================================
-
-col_data, col_botao = st.columns([6, 1])
-
-with col_botao:
-
-    if st.button("↻ Atualizar"):
-
-        st.cache_data.clear()
-        st.rerun()
-
-
-# =========================================================
 # CARREGAMENTO
 # =========================================================
 
@@ -428,13 +416,6 @@ except RuntimeError as erro:
 
     st.error(str(erro))
     st.stop()
-
-
-with col_data:
-
-    st.caption(
-        f"Última atualização dos dados: {data_consulta}"
-    )
 
 
 # =========================================================
@@ -456,52 +437,45 @@ if len(dados_aplicacao) <= 3:
 # =========================================================
 
 COLUNAS_ESPERADAS = [
-    "Colaborador",
-    "Supervisão",
-    "Data Monitoria",
-    "Quem Aplicou Monitoria",
-    "Ligação 1",
-    "Ligação 2",
-    "Data Lado a Lado",
-    "Quem Aplicou Lado a Lado",
-    "Observação Lado a Lado",
-    "Data Monitoria Offline",
-    "Quem Aplicou Offline",
-    "Percentual Offline",
-    "Observações Gerais"
+    "Colaborador", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria",
+    "Ligação 1", "Ligação 2", "Data Lado a Lado", "Quem Aplicou Lado a Lado",
+    "Observação Lado a Lado", "Data Monitoria Offline", "Quem Aplicou Offline",
+    "Percentual Offline", "Observações Gerais"
 ]
 
+# Localiza o cabeçalho pelo nome das colunas, em vez de depender de uma posição fixa.
+normalizados_esperados = {" ".join(c.split()).casefold(): c for c in COLUNAS_ESPERADAS}
+indice_cabecalho = None
+mapa_colunas = {}
+for i, linha in enumerate(dados_aplicacao[:15]):
+    candidatos = {" ".join(str(v).strip().split()).casefold(): j for j, v in enumerate(linha) if str(v).strip()}
+    encontrados = {k: j for k, j in candidatos.items() if k in normalizados_esperados}
+    if len(encontrados) >= 8 and "colaborador" in encontrados and "supervisão" in encontrados:
+        indice_cabecalho = i
+        mapa_colunas = encontrados
+        break
 
-linhas_dados = []
-
-for linha in dados_aplicacao[3:]:
-
-    if len(linha) < len(COLUNAS_ESPERADAS):
-        linha = linha + (
-            [""] *
-            (len(COLUNAS_ESPERADAS) - len(linha))
-        )
-
-    linhas_dados.append(
-        linha[:len(COLUNAS_ESPERADAS)]
-    )
-
-
-if not linhas_dados:
-
-    st.error(
-        "Não foram encontradas linhas de colaboradores "
-        "na aba 'Aplicação'."
-    )
-
+if indice_cabecalho is None:
+    st.error("Não foi possível localizar a linha de cabeçalho da aba 'Aplicação'. Verifique os nomes das colunas.")
     st.stop()
 
+colunas_encontradas = {normalizados_esperados[k]: j for k, j in mapa_colunas.items()}
+faltantes = [c for c in COLUNAS_ESPERADAS if c not in colunas_encontradas]
+if faltantes:
+    st.error("A aba 'Aplicação' está sem estas colunas obrigatórias: " + ", ".join(faltantes))
+    st.stop()
 
-monitorias_google = pd.DataFrame(
-    linhas_dados,
-    columns=COLUNAS_ESPERADAS
-)
+linhas_dados = []
+for numero_planilha, linha in enumerate(dados_aplicacao[indice_cabecalho + 1:], start=indice_cabecalho + 2):
+    registro = {c: (linha[j] if j < len(linha) else "") for c, j in colunas_encontradas.items()}
+    registro["_Linha Planilha"] = numero_planilha
+    linhas_dados.append(registro)
 
+if not linhas_dados:
+    st.error("Não foram encontradas linhas de colaboradores na aba 'Aplicação'.")
+    st.stop()
+
+monitorias_google = pd.DataFrame(linhas_dados)
 
 # =========================================================
 # FUNÇÃO DE NORMALIZAÇÃO
@@ -622,14 +596,7 @@ for coluna in COLUNAS_DATA:
 
     if falhas.any():
 
-        datas_invalidas[coluna] = (
-            monitorias_google.loc[
-                falhas,
-                "Colaborador"
-            ]
-            .astype(str)
-            .tolist()
-        )
+        datas_invalidas[coluna] = monitorias_google.loc[falhas, ["Colaborador", coluna, "_Linha Planilha"]].copy()
 
     monitorias_google[coluna] = convertida
 
@@ -637,8 +604,8 @@ for coluna in COLUNAS_DATA:
 if datas_invalidas:
 
     quantidade_datas_invalidas = sum(
-        len(nomes)
-        for nomes in datas_invalidas.values()
+        len(linhas)
+        for linhas in datas_invalidas.values()
     )
 
     st.warning(
@@ -649,17 +616,10 @@ if datas_invalidas:
 
     with st.expander("Ver colaboradores com data inválida"):
 
-        for coluna, nomes in datas_invalidas.items():
-
-            st.markdown(
-                f"**{coluna}:**"
-            )
-
-            for nome in nomes:
-
-                st.write(
-                    f"- {nome}"
-                )
+        for coluna, linhas_invalidas in datas_invalidas.items():
+            st.markdown(f"**{coluna}:**")
+            for _, linha in linhas_invalidas.iterrows():
+                st.write(f"- Linha {int(linha['_Linha Planilha'])}: {linha['Colaborador']} | valor: {linha[coluna]}")
 
 
 # =========================================================
@@ -668,8 +628,12 @@ if datas_invalidas:
 
 duplicados = (
     monitorias_google
-    .groupby("Colaborador")
-    .size()
+    .groupby("Nome Normalizado")
+    .agg(
+        Colaborador=("Colaborador", "first"),
+        Registros=("Colaborador", "size")
+    )
+    .query("Registros > 1")
 )
 
 duplicados = duplicados[
@@ -688,11 +652,15 @@ if not duplicados.empty:
             "Os registros não foram removidos automaticamente."
         )
 
-        for nome, quantidade in duplicados.items():
+        for _, linha in duplicados.iterrows():
+            st.write(f"- {linha['Colaborador']}: {int(linha['Registros'])} registros")
 
-            st.write(
-                f"- {nome}: {quantidade} registros"
-            )
+
+# Mantém apenas um registro por colaborador normalizado.
+# Se houver duplicidade, ela é sinalizada acima para correção na origem.
+monitorias_google = monitorias_google.drop_duplicates(
+    subset=["Nome Normalizado"], keep="first"
+).copy()
 
 
 # =========================================================
@@ -1303,57 +1271,27 @@ def html_lista(titulo, dataframe, mostrar_nota=True):
 # INTERFACE DA DASHBOARD
 # =========================================================
 
-st.html(
-    """
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <div class="sidebar-logo">N</div>
-            <div class="sidebar-title">DASHBOARD</div>
-        </div>
-
-        <div class="nav-label">Monitorias</div>
-        <div class="nav-item active"><span class="nav-icon">⌂</span> Visão geral</div>
-        <div class="nav-item"><span class="nav-icon">▥</span> Indicadores</div>
-        <div class="nav-item"><span class="nav-icon">●</span> Supervisores</div>
-        <div class="nav-item"><span class="nav-icon">☷</span> Pendências</div>
-
-        <div class="nav-label" style="margin-top:20px;">Acompanhamento</div>
-        <div class="nav-item"><span class="nav-icon">◷</span> Evolução</div>
-        <div class="nav-item"><span class="nav-icon">✓</span> Etapas</div>
-
-        <div class="sidebar-note">
-            Nube • Treinamento Comercial<br>
-            Painel de acompanhamento das monitorias
-        </div>
-    </aside>
-    """
+st.sidebar.markdown("### NUBE")
+st.sidebar.caption("Treinamento Comercial")
+st.sidebar.markdown("**Monitorias**")
+nav_secao = st.sidebar.radio(
+    "",
+    ["Visão geral", "Indicadores", "Supervisores", "Pendências", "Evolução", "Etapas"],
+    label_visibility="collapsed"
 )
+st.sidebar.divider()
+st.sidebar.caption("Painel de acompanhamento das monitorias")
 
 
 col_header, col_update = st.columns([5, 1])
-
 with col_header:
-    st.html(
-        """
-        <div class="topbar">
-            <div>
-                <div class="eyebrow">Nube • Treinamento Comercial</div>
-                <div class="page-title">Dashboard de Monitorias</div>
-                <div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div>
-            </div>
-        </div>
-        """
-    )
-
+    st.html("""<div class="topbar"><div><div class="eyebrow">Nube • Treinamento Comercial</div><div class="page-title">Dashboard de Monitorias</div><div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div></div></div>""")
 with col_update:
     st.write("")
     if st.button("↻ Atualizar", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
-
-st.html(
-    f'<div class="update-info">Dados atualizados em {html.escape(data_consulta)}</div>'
-)
+    st.caption(f"Atualizado em {data_consulta}")
 
 
 # =========================================================
@@ -1432,6 +1370,9 @@ elif status_selecionado == "Pendentes":
 else:
     df_lista = df_filtrado.copy()
 
+# df_lista é a base efetivamente exibida quando o filtro Status está ativo.
+df_ativo = df_lista.copy()
+
 filtros_ativos = []
 if praca_selecionada != "Todas":
     filtros_ativos.append(f"<strong>Praça:</strong> {html.escape(praca_selecionada)}")
@@ -1444,18 +1385,20 @@ if filtros_ativos:
     st.html('<div class="filter-summary">' + " &nbsp; • &nbsp; ".join(filtros_ativos) + '</div>')
 
 
+st.html('<div id="indicadores"></div>')
+
 # =========================================================
 # INDICADORES
 # =========================================================
 
-total_colaboradores = len(df_filtrado)
-total_realizadas = int(df_filtrado["Realizada"].sum())
+total_colaboradores = len(df_ativo)
+total_realizadas = int(df_ativo["Realizada"].sum())
 total_pendentes = total_colaboradores - total_realizadas
 percentual_concluido = (
     total_realizadas / total_colaboradores * 100
     if total_colaboradores else 0
 )
-notas_validas = df_filtrado.loc[df_filtrado["Média"].notna(), "Média"]
+notas_validas = df_ativo.loc[df_ativo["Média"].notna(), "Média"]
 media_geral = notas_validas.mean() if not notas_validas.empty else None
 
 col1, col2, col3, col4, col5 = st.columns(5)
@@ -1487,6 +1430,9 @@ MESES = [
 ]
 
 
+st.html('<div id="visao-geral"></div>')
+st.html('<div id="evolucao"></div>')
+
 # =========================================================
 # GRÁFICOS PRINCIPAIS
 # =========================================================
@@ -1504,21 +1450,21 @@ with col_evolucao:
         """
     )
 
-    datas_validas = df_filtrado.loc[df_filtrado["Data Monitoria"].notna(), "Data Monitoria"]
+    datas_validas = df_ativo.loc[df_ativo["Data Monitoria"].notna(), "Data Monitoria"]
 
     if not datas_validas.empty:
         primeiro_mes = datas_validas.min().to_period("M")
-        ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now().to_period("M"))
+        ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"))
         meses = pd.period_range(primeiro_mes, ultimo_mes, freq="M")
     else:
-        meses = pd.period_range(pd.Timestamp.now().to_period("M"), pd.Timestamp.now().to_period("M"), freq="M")
+        meses = pd.period_range(pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), freq="M")
 
     nomes_meses = []
     quantidades = []
     for periodo in meses:
-        quantidade = df_filtrado[
-            (df_filtrado["Data Monitoria"] >= periodo.start_time)
-            & (df_filtrado["Data Monitoria"] <= periodo.end_time)
+        quantidade = df_ativo[
+            (df_ativo["Data Monitoria"] >= periodo.start_time)
+            & (df_ativo["Data Monitoria"] <= periodo.end_time)
         ].shape[0]
         nomes_meses.append(f"{MESES[periodo.month - 1]}/{str(periodo.year)[2:]}")
         quantidades.append(quantidade)
@@ -1585,6 +1531,8 @@ with col_status:
     )
 
 
+st.html('<div id="supervisores"></div>')
+
 # =========================================================
 # PRAÇAS E SUPERVISORES
 # =========================================================
@@ -1603,10 +1551,11 @@ with col_pracas:
     )
 
     dados_pracas = (
-        df_filtrado.groupby("Praça", dropna=False)
+        df_ativo.groupby("Praça", dropna=False)
         .size().reset_index(name="Quantidade")
     )
-    dados_pracas = dados_pracas[dados_pracas["Praça"].notna()]
+    dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
+    dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
 
     fig_pracas = go.Figure(go.Bar(
         x=dados_pracas["Quantidade"],
@@ -1640,8 +1589,8 @@ with col_supervisores:
     )
 
     dados_supervisores = (
-        df_filtrado.assign(
-            SupervisaoExibicao=df_filtrado["Supervisão"].astype(str).map(
+        df_ativo.assign(
+            SupervisaoExibicao=df_ativo["Supervisão"].astype(str).map(
                 lambda x: supervisao_canonica_por_primeiro_nome.get(primeiro_nome(x), x.strip().split()[0] if x.strip() else "")
             )
         )
@@ -1672,6 +1621,8 @@ with col_supervisores:
     st.plotly_chart(fig_supervisores, use_container_width=True, config={"displayModeBar": False})
 
 
+st.html('<div id="pendencias"></div>')
+
 # =========================================================
 # PENDÊNCIAS E OUTRAS ETAPAS
 # =========================================================
@@ -1689,42 +1640,28 @@ with col_pendencias:
         """
     )
 
-    pendencias = df_filtrado[~df_filtrado["Realizada"]].copy()
+    pendencias = df_ativo[~df_ativo["Realizada"]].copy()
     pendencias = pendencias.sort_values(["Supervisão", "Colaborador"], na_position="last")
 
     if pendencias.empty:
         st.html('<div class="panel-card"><div class="pending-meta">Nenhuma pendência nos filtros selecionados.</div></div>')
     else:
-        limite = 8
-        itens = ""
-        for _, row in pendencias.head(limite).iterrows():
-            nome = html.escape(str(row["Colaborador"]))
-            supervisao = html.escape(str(row["Supervisão"]))
-            funcao = html.escape(str(row["Função"]))
-            itens += f"""
-            <div class="pending-row">
-                <div>
-                    <div class="pending-name">{nome}</div>
-                    <div class="pending-meta">{supervisao} • {funcao}</div>
-                </div>
-                <div class="pending-badge">Pendente</div>
-            </div>
-            """
-        restante = max(0, len(pendencias) - limite)
-        extra = f'<div class="pending-meta" style="padding-top:9px;">+ {restante} outras pendências</div>' if restante else ''
-        st.html(f'<div class="panel-card">{itens}{extra}</div>')
+        with st.expander(f"Ver todas as {len(pendencias)} pendências", expanded=False):
+            tabela_pendencias = pendencias[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
+            st.dataframe(tabela_pendencias, use_container_width=True, hide_index=True)
 
         pendencias_csv = pendencias[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
         st.download_button(
             "Baixar pendências em CSV",
-            data=pendencias_csv.to_csv(index=False, encoding="utf-8-sig"),
+            data=pendencias_csv.to_csv(index=False).encode("utf-8-sig"),
             file_name="pendencias_monitorias.csv",
             mime="text/csv"
         )
 
 with col_etapas:
-    total_lado_a_lado = int(df_filtrado["Data Lado a Lado"].notna().sum())
-    total_offline = int(df_filtrado["Data Monitoria Offline"].notna().sum())
+    st.html('<div id="etapas"></div>')
+    total_lado_a_lado = int(df_ativo["Data Lado a Lado"].notna().sum())
+    total_offline = int(df_ativo["Data Monitoria Offline"].notna().sum())
 
     st.html(
         f"""
@@ -1755,7 +1692,7 @@ if supervisao_selecionada != "Todas":
         """
     )
 
-    df_detalhe = df_filtrado[["Colaborador", "Função", "Realizada", "Média"]].copy()
+    df_detalhe = df_ativo[["Colaborador", "Função", "Realizada", "Média"]].copy()
     df_detalhe["Status"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
     df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
     df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
