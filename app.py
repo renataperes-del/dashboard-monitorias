@@ -436,6 +436,15 @@ if len(dados_aplicacao) <= 3:
 # ESTRUTURA DA PLANILHA
 # =========================================================
 
+# A aba "Aplicação" possui 3 linhas de cabeçalho.
+# Os nomes das colunas ficam distribuídos entre essas linhas,
+# então não devemos tentar localizar um único cabeçalho pelo nome.
+# O mapeamento abaixo corresponde à estrutura real da planilha:
+# A=Colaborador, B=Supervisão, C=Data Monitoria, D=Quem Aplicou Monitoria,
+# E=Ligação 1, F=Ligação 2, G=Data Lado a Lado, H=Quem Aplicou Lado a Lado,
+# I=Observação Lado a Lado, J=Data Monitoria Offline, K=Quem Aplicou Offline,
+# L=Percentual Offline, M=Observações Gerais.
+
 COLUNAS_ESPERADAS = [
     "Colaborador", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria",
     "Ligação 1", "Ligação 2", "Data Lado a Lado", "Quem Aplicou Lado a Lado",
@@ -443,31 +452,34 @@ COLUNAS_ESPERADAS = [
     "Percentual Offline", "Observações Gerais"
 ]
 
-# Localiza o cabeçalho pelo nome das colunas, em vez de depender de uma posição fixa.
-normalizados_esperados = {" ".join(c.split()).casefold(): c for c in COLUNAS_ESPERADAS}
-indice_cabecalho = None
-mapa_colunas = {}
-for i, linha in enumerate(dados_aplicacao[:15]):
-    candidatos = {" ".join(str(v).strip().split()).casefold(): j for j, v in enumerate(linha) if str(v).strip()}
-    encontrados = {k: j for k, j in candidatos.items() if k in normalizados_esperados}
-    if len(encontrados) >= 8 and "colaborador" in encontrados and "supervisão" in encontrados:
-        indice_cabecalho = i
-        mapa_colunas = encontrados
-        break
+mapa_colunas = {
+    "Colaborador": 0,
+    "Supervisão": 1,
+    "Data Monitoria": 2,
+    "Quem Aplicou Monitoria": 3,
+    "Ligação 1": 4,
+    "Ligação 2": 5,
+    "Data Lado a Lado": 6,
+    "Quem Aplicou Lado a Lado": 7,
+    "Observação Lado a Lado": 8,
+    "Data Monitoria Offline": 9,
+    "Quem Aplicou Offline": 10,
+    "Percentual Offline": 11,
+    "Observações Gerais": 12,
+}
 
-if indice_cabecalho is None:
-    st.error("Não foi possível localizar a linha de cabeçalho da aba 'Aplicação'. Verifique os nomes das colunas.")
-    st.stop()
-
-colunas_encontradas = {normalizados_esperados[k]: j for k, j in mapa_colunas.items()}
-faltantes = [c for c in COLUNAS_ESPERADAS if c not in colunas_encontradas]
-if faltantes:
-    st.error("A aba 'Aplicação' está sem estas colunas obrigatórias: " + ", ".join(faltantes))
-    st.stop()
+# Os dados começam na linha 4 da planilha.
+LINHA_INICIAL_DADOS = 4
 
 linhas_dados = []
-for numero_planilha, linha in enumerate(dados_aplicacao[indice_cabecalho + 1:], start=indice_cabecalho + 2):
-    registro = {c: (linha[j] if j < len(linha) else "") for c, j in colunas_encontradas.items()}
+for numero_planilha, linha in enumerate(
+    dados_aplicacao[LINHA_INICIAL_DADOS - 1:],
+    start=LINHA_INICIAL_DADOS
+):
+    registro = {
+        coluna: (linha[indice] if indice < len(linha) else "")
+        for coluna, indice in mapa_colunas.items()
+    }
     registro["_Linha Planilha"] = numero_planilha
     linhas_dados.append(registro)
 
