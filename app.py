@@ -436,43 +436,63 @@ if len(dados_aplicacao) <= 3:
 # ESTRUTURA DA PLANILHA
 # =========================================================
 
-COLUNAS_ESPERADAS = [
-    "Colaborador", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria",
-    "Ligação 1", "Ligação 2", "Data Lado a Lado", "Quem Aplicou Lado a Lado",
-    "Observação Lado a Lado", "Data Monitoria Offline", "Quem Aplicou Offline",
-    "Percentual Offline", "Observações Gerais"
-]
+# A aba "Aplicação" usa 3 linhas de cabeçalho:
+# linha 1 = grupos (MONITORIA, LADO A LADO, etc.)
+# linha 2 = campos principais
+# linha 3 = Ligação 1 / Ligação 2
+# linha 4 em diante = colaboradores.
+#
+# O dashboard trabalha com nomes internos padronizados para não
+# depender dos textos exibidos no cabeçalho da planilha.
 
-# Localiza o cabeçalho pelo nome das colunas, em vez de depender de uma posição fixa.
-normalizados_esperados = {" ".join(c.split()).casefold(): c for c in COLUNAS_ESPERADAS}
-indice_cabecalho = None
-mapa_colunas = {}
-for i, linha in enumerate(dados_aplicacao[:15]):
-    candidatos = {" ".join(str(v).strip().split()).casefold(): j for j, v in enumerate(linha) if str(v).strip()}
-    encontrados = {k: j for k, j in candidatos.items() if k in normalizados_esperados}
-    if len(encontrados) >= 8 and "colaborador" in encontrados and "supervisão" in encontrados:
-        indice_cabecalho = i
-        mapa_colunas = encontrados
-        break
+MAPEAMENTO_COLUNAS = {
+    0: "Colaborador",
+    1: "Supervisão",
+    2: "Data Monitoria",
+    3: "Quem Aplicou Monitoria",
+    4: "Ligação 1",
+    5: "Ligação 2",
+    6: "Data Lado a Lado",
+    7: "Quem Aplicou Lado a Lado",
+    8: "Observação Lado a Lado",
+    9: "Data Monitoria Offline",
+    10: "Quem Aplicou Offline",
+    11: "Percentual Offline",
+    12: "Observações Gerais",
+}
 
-if indice_cabecalho is None:
-    st.error("Não foi possível localizar a linha de cabeçalho da aba 'Aplicação'. Verifique os nomes das colunas.")
-    st.stop()
-
-colunas_encontradas = {normalizados_esperados[k]: j for k, j in mapa_colunas.items()}
-faltantes = [c for c in COLUNAS_ESPERADAS if c not in colunas_encontradas]
-if faltantes:
-    st.error("A aba 'Aplicação' está sem estas colunas obrigatórias: " + ", ".join(faltantes))
+# Validação simples da estrutura real da aba.
+# Mantemos os índices porque a planilha tem cabeçalhos mesclados
+# em três linhas e não existe uma única linha contendo todos os nomes.
+if len(dados_aplicacao) <= 3:
+    st.error(
+        "A aba 'Aplicação' não possui linhas de colaboradores."
+    )
     st.stop()
 
 linhas_dados = []
-for numero_planilha, linha in enumerate(dados_aplicacao[indice_cabecalho + 1:], start=indice_cabecalho + 2):
-    registro = {c: (linha[j] if j < len(linha) else "") for c, j in colunas_encontradas.items()}
+
+for numero_planilha, linha in enumerate(
+    dados_aplicacao[3:],
+    start=4
+):
+    registro = {}
+
+    for indice_coluna, nome_coluna in MAPEAMENTO_COLUNAS.items():
+        registro[nome_coluna] = (
+            linha[indice_coluna]
+            if indice_coluna < len(linha)
+            else ""
+        )
+
     registro["_Linha Planilha"] = numero_planilha
     linhas_dados.append(registro)
 
 if not linhas_dados:
-    st.error("Não foram encontradas linhas de colaboradores na aba 'Aplicação'.")
+    st.error(
+        "Não foram encontradas linhas de colaboradores "
+        "na aba 'Aplicação'."
+    )
     st.stop()
 
 monitorias_google = pd.DataFrame(linhas_dados)
@@ -551,6 +571,13 @@ monitorias_google["Supervisão"] = (
     monitorias_google["Supervisão"]
     .astype("string")
     .str.strip()
+)
+
+# Normalização usada para identificar a mesma pessoa mesmo quando
+# houver diferenças de acentuação, maiúsculas/minúsculas ou espaços.
+monitorias_google["Nome Normalizado"] = (
+    monitorias_google["Colaborador"]
+    .apply(normalizar_texto)
 )
 
 
@@ -636,30 +663,26 @@ duplicados = (
     .query("Registros > 1")
 )
 
-duplicados = duplicados[
-    duplicados > 1
-]
-
-
 if not duplicados.empty:
 
     with st.expander(
-        f"⚠️ {len(duplicados)} colaborador(es) "
-        "com mais de um registro"
+        f"⚠️ {len(duplicados)} colaborador(es) com mais de um registro"
     ):
-
         st.write(
-            "Os registros não foram removidos automaticamente."
+            "Os registros duplicados foram sinalizados. "
+            "O dashboard mantém apenas um registro por colaborador."
         )
 
         for _, linha in duplicados.iterrows():
-            st.write(f"- {linha['Colaborador']}: {int(linha['Registros'])} registros")
-
+            st.write(
+                f"- {linha['Colaborador']}: "
+                f"{int(linha['Registros'])} registros"
+            )
 
 # Mantém apenas um registro por colaborador normalizado.
-# Se houver duplicidade, ela é sinalizada acima para correção na origem.
 monitorias_google = monitorias_google.drop_duplicates(
-    subset=["Nome Normalizado"], keep="first"
+    subset=["Nome Normalizado"],
+    keep="first"
 ).copy()
 
 
@@ -820,12 +843,6 @@ for nome in apoio_adm:
     funcao_por_nome_normalizada[
         normalizar_texto(nome)
     ] = "Apoio ADM"
-
-
-monitorias_google["Nome Normalizado"] = (
-    monitorias_google["Colaborador"]
-    .apply(normalizar_texto)
-)
 
 
 monitorias_google["Função"] = (
