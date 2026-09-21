@@ -1194,6 +1194,23 @@ pracas = {
 # MAPEAMENTO PRAÇA -> SUPERVISÃO
 # =========================================================
 
+# Usa os nomes cadastrados em `pracas` como padrão de exibição.
+# Assim, diferenças como "Júlio" e "Julio" na planilha
+# não criam duas opções diferentes no dashboard.
+supervisao_canonica_por_primeiro_nome = {}
+
+for dados_praca in pracas.values():
+
+    for supervisor in dados_praca["supervisores"]:
+
+        primeiro_original = str(supervisor).strip().split()[0]
+        primeiro_normalizado = primeiro_nome(supervisor)
+
+        supervisao_canonica_por_primeiro_nome[
+            primeiro_normalizado
+        ] = primeiro_original
+
+
 praca_por_primeiro_nome_supervisao = {}
 
 
@@ -1513,14 +1530,24 @@ with col_filtro_praca:
 
 if praca_selecionada == "Todas":
 
+    # A planilha pode ter variações de acentuação/capitalização
+    # no mesmo supervisor. Deduplicamos pelo nome normalizado,
+    # mas exibimos o nome padrão cadastrado em `pracas`.
     supervisoes_disponiveis = sorted(
-        monitorias_google[
-            "Supervisão"
-        ]
-        .dropna()
-        .astype(str)
-        .unique()
-        .tolist()
+        {
+            supervisao_canonica_por_primeiro_nome.get(
+                primeiro_nome(supervisao),
+                str(supervisao).strip().split()[0]
+            )
+            for supervisao in (
+                monitorias_google["Supervisão"]
+                .dropna()
+                .astype(str)
+                .tolist()
+            )
+            if primeiro_nome(supervisao)
+        },
+        key=normalizar_texto
     )
 
 else:
@@ -1533,20 +1560,21 @@ else:
     ]
 
     supervisoes_disponiveis = sorted(
-        [
-            supervisao
+        {
+            supervisao_canonica_por_primeiro_nome.get(
+                primeiro_nome(supervisao),
+                str(supervisao).strip().split()[0]
+            )
             for supervisao in (
-                monitorias_google[
-                    "Supervisão"
-                ]
+                monitorias_google["Supervisão"]
                 .dropna()
                 .astype(str)
-                .unique()
                 .tolist()
             )
             if primeiro_nome(supervisao)
             in supervisoes_da_praca
-        ]
+        },
+        key=normalizar_texto
     )
 
 
@@ -1950,14 +1978,23 @@ st.subheader(
 
 if supervisao_selecionada == "Todas":
 
+    # Agrupa também as variações do mesmo nome no acompanhamento
+    # (ex.: "Júlio" e "Julio" passam a ser uma única equipe).
     nomes_supervisoes = sorted(
-        df_filtrado[
-            "Supervisão"
-        ]
-        .dropna()
-        .astype(str)
-        .unique()
-        .tolist()
+        {
+            supervisao_canonica_por_primeiro_nome.get(
+                primeiro_nome(supervisao),
+                str(supervisao).strip().split()[0]
+            )
+            for supervisao in (
+                df_filtrado["Supervisão"]
+                .dropna()
+                .astype(str)
+                .tolist()
+            )
+            if primeiro_nome(supervisao)
+        },
+        key=normalizar_texto
     )
 
 
@@ -1998,7 +2035,9 @@ if supervisao_selecionada == "Todas":
             df_supervisao = (
                 df_filtrado[
                     df_filtrado["Supervisão"]
-                    == supervisao
+                    .astype(str)
+                    .map(normalizar_texto)
+                    == normalizar_texto(supervisao)
                 ]
             )
 
