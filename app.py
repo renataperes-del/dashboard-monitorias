@@ -399,9 +399,9 @@ st.markdown(
     #supervisores,
     #pendencias,
     #evolucao,
-    #etapas {
+    #etapas {{
         scroll-margin-top: 24px;
-    }
+    }}
 
     /* =====================================================
        BOTÕES / TABELAS / EXPANDERS
