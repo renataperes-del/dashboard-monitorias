@@ -1355,7 +1355,7 @@ st.html(
     """
 )
 
-col_filtro_praca, col_filtro_supervisao, col_filtro_status = st.columns(3)
+col_filtro_praca, col_filtro_supervisao = st.columns(2)
 
 opcoes_praca = ["Todas"] + list(pracas.keys())
 
@@ -1396,10 +1396,8 @@ opcoes_supervisao = ["Todas"] + supervisoes_disponiveis
 with col_filtro_supervisao:
     supervisao_selecionada = st.selectbox("Supervisão", opcoes_supervisao)
 
-with col_filtro_status:
-    status_selecionado = st.selectbox("Status", ["Todos", "Realizadas", "Pendentes"])
-
-
+# Primeiro aplicamos Praça e Supervisão. Depois, a situação define qual
+# conjunto de registros será usado no restante do dashboard.
 df_filtrado = monitorias_google.copy()
 
 if praca_selecionada != "Todas":
@@ -1411,20 +1409,33 @@ if supervisao_selecionada != "Todas":
         == normalizar_texto(supervisao_selecionada)
     ].copy()
 
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+st.html(
+    """
+    <div class="panel-title" style="margin-bottom:2px;">Visualizar</div>
+    <div class="panel-subtitle" style="margin-bottom:4px;">Escolha quais monitorias devem aparecer no dashboard.</div>
+    """
+)
+
+status_selecionado = st.radio(
+    "Situação da monitoria",
+    ["Todas", "Realizadas", "Pendentes"],
+    horizontal=True,
+    label_visibility="collapsed"
+)
+
 if status_selecionado == "Realizadas":
-    df_lista = df_filtrado[df_filtrado["Realizada"]].copy()
+    df_filtrado = df_filtrado[df_filtrado["Realizada"]].copy()
 elif status_selecionado == "Pendentes":
-    df_lista = df_filtrado[~df_filtrado["Realizada"]].copy()
-else:
-    df_lista = df_filtrado.copy()
+    df_filtrado = df_filtrado[~df_filtrado["Realizada"]].copy()
 
 filtros_ativos = []
 if praca_selecionada != "Todas":
     filtros_ativos.append(f"<strong>Praça:</strong> {html.escape(praca_selecionada)}")
 if supervisao_selecionada != "Todas":
     filtros_ativos.append(f"<strong>Supervisão:</strong> {html.escape(supervisao_selecionada)}")
-if status_selecionado != "Todos":
-    filtros_ativos.append(f"<strong>Status:</strong> {html.escape(status_selecionado)}")
+if status_selecionado != "Todas":
+    filtros_ativos.append(f"<strong>Situação:</strong> {html.escape(status_selecionado)}")
 
 if filtros_ativos:
     st.html('<div class="filter-summary">' + " &nbsp; • &nbsp; ".join(filtros_ativos) + '</div>')
