@@ -47,6 +47,7 @@ CRITICAL_SOFT = "#FEF2F2"
 GRAY = "#CBD5E1"
 
 
+
 # =========================================================
 # CSS
 # =========================================================
@@ -56,305 +57,396 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-    .stApp {{
-        background: {BG};
-        color: {TEXT};
+    :root {{
+        --bg: {BG};
+        --card: {CARD};
+        --border: {BORDER};
+        --text: {TEXT};
+        --secondary: {SECONDARY};
+        --primary: {PRIMARY};
+    }}
+
+    html, body, [class*="css"] {{
         font-family: 'Inter', sans-serif;
     }}
 
+    .stApp {{
+        background: {BG};
+        color: {TEXT};
+    }}
+
+    /* Esconde o chrome padrão do Streamlit sem mexer no conteúdo */
+    #MainMenu, footer, [data-testid="stToolbar"] {{
+        visibility: hidden;
+    }}
+
+    [data-testid="stHeader"] {{
+        background: transparent !important;
+    }}
+
+    /* Área principal alinhada ao modelo do dashboard */
     .block-container {{
+        width: calc(100vw - 260px);
         max-width: none;
-        padding: 1.25rem 2rem 3rem;
+        margin-left: 230px;
+        margin-right: 0;
+        padding: 28px 48px 56px 32px;
+        box-sizing: border-box;
     }}
 
-    #MainMenu, footer {{ visibility: hidden; }}
-    [data-testid="stHeader"] {{ background: transparent !important; }}
-
-    .topbar {{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:20px;
-        margin-bottom:18px;
-    }}
-
-    .eyebrow {{
-        color:{PRIMARY};
-        font-size:11px;
-        font-weight:800;
-        letter-spacing:.10em;
-        text-transform:uppercase;
-    }}
-
-    .page-title {{
-        color:{TEXT};
-        font-size:28px;
-        line-height:1.1;
-        font-weight:800;
-        letter-spacing:-.04em;
-        margin-top:5px;
-    }}
-
-    .page-subtitle {{
-        color:{SECONDARY};
-        font-size:12px;
-        margin-top:6px;
-    }}
+    /* =====================================================
+       SIDEBAR
+       ===================================================== */
 
     .sidebar {{
-        position:fixed;
-        z-index:999999;
-        left:0;
-        top:0;
-        bottom:0;
-        width:218px;
-        padding:25px 18px;
-        background:{PRIMARY};
-        color:white;
-        box-sizing:border-box;
+        position: fixed;
+        z-index: 999999;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 230px;
+        padding: 30px 16px 22px;
+        background: linear-gradient(180deg, #607EAF 0%, #5A78A8 100%);
+        color: white;
+        box-sizing: border-box;
+        box-shadow: 6px 0 24px rgba(35, 53, 82, .08);
     }}
 
     .sidebar-brand {{
-        display:flex;
-        align-items:center;
-        gap:10px;
-        padding:3px 8px 28px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 8px 34px;
     }}
 
     .sidebar-logo {{
-        width:34px;
-        height:34px;
-        border-radius:10px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        background:rgba(255,255,255,.16);
-        font-weight:800;
-        font-size:15px;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,.17);
+        border: 1px solid rgba(255,255,255,.10);
+        font-weight: 800;
+        font-size: 15px;
     }}
 
     .sidebar-title {{
-        font-size:12px;
-        font-weight:800;
-        letter-spacing:.08em;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .07em;
     }}
 
     .nav-label {{
-        color:rgba(255,255,255,.55);
-        font-size:11px;
-        font-weight:700;
-        text-transform:uppercase;
-        letter-spacing:.12em;
-        padding:0 10px 8px;
-        margin-top:6px;
+        color: rgba(255,255,255,.58);
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        padding: 0 10px 8px;
+        margin-top: 5px;
     }}
 
     .nav-item {{
-        text-decoration: none;
-        display: block;
-        display:flex;
-        align-items:center;
-        gap:11px;
-            padding:10px 10px;
-        margin:3px 0;
-        border-radius:9px;
-        color:rgba(255,255,255,.86);
-        font-size:12px;
-        font-weight:500;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 11px 10px;
+        margin: 3px 0;
+        border-radius: 9px;
+        color: rgba(255,255,255,.88);
+        font-size: 12px;
+        font-weight: 500;
+        transition: background .15s ease, transform .15s ease;
+    }}
+
+    .nav-item:hover {{
+        background: rgba(255,255,255,.09);
     }}
 
     .nav-item.active {{
-        background:rgba(255,255,255,.16);
-        color:#fff;
-        font-weight:700;
+        background: rgba(255,255,255,.18);
+        color: #fff;
+        font-weight: 700;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
     }}
 
     .nav-icon {{
-        width:17px;
-        text-align:center;
-        font-size:13px;
+        width: 17px;
+        text-align: center;
+        font-size: 13px;
+        opacity: .95;
     }}
 
     .sidebar-note {{
-        position:absolute;
-        left:18px;
-        right:18px;
-        bottom:24px;
-        padding:12px;
-        border:1px solid rgba(255,255,255,.12);
-        border-radius:10px;
-        background:rgba(255,255,255,.07);
-        color:rgba(255,255,255,.68);
-        font-size:11px;
-        line-height:1.5;
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 22px;
+        padding: 12px 12px;
+        border: 1px solid rgba(255,255,255,.13);
+        border-radius: 10px;
+        background: rgba(255,255,255,.07);
+        color: rgba(255,255,255,.68);
+        font-size: 10px;
+        line-height: 1.5;
     }}
 
-    .filter-panel {{
-        background:{CARD};
-        border:1px solid {BORDER};
-        border-radius:14px;
-        padding:14px 16px 4px;
-        box-shadow:0 4px 18px rgba(31,41,55,.035);
-        margin-bottom:16px;
+    /* =====================================================
+       CABEÇALHO
+       ===================================================== */
+
+    .topbar {{
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 26px;
     }}
 
-    .panel-title {{
-        color:{TEXT};
-        font-size:12px;
-        font-weight:800;
-        letter-spacing:.04em;
-        margin-bottom:3px;
+    .eyebrow {{
+        color: {PRIMARY};
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .10em;
+        text-transform: uppercase;
     }}
 
-    .panel-subtitle {{
-        color:{SECONDARY};
-        font-size:11px;
-        margin-bottom:8px;
+    .page-title {{
+        color: {TEXT};
+        font-size: 30px;
+        line-height: 1.08;
+        font-weight: 800;
+        letter-spacing: -.045em;
+        margin-top: 6px;
     }}
 
-    div[data-baseweb="select"] > div {{
-        background:{CARD};
-        border:1px solid {BORDER};
-        border-radius:9px;
-        min-height:40px;
-        box-shadow:none;
+    .page-subtitle {{
+        color: {SECONDARY};
+        font-size: 12px;
+        margin-top: 7px;
     }}
 
-    div[data-baseweb="select"] > div:hover {{
-        border-color:{PRIMARY};
-    }}
-
-    .metric-card {{
-        background:{CARD};
-        border:1px solid {BORDER};
-        border-radius:13px;
-        padding:16px 17px;
-        min-height:105px;
-        box-shadow:0 4px 15px rgba(31,41,55,.035);
-    }}
-
-    .metric-label {{
-        color:{SECONDARY};
-        font-size:10px;
-        font-weight:800;
-        letter-spacing:.08em;
-        text-transform:uppercase;
-    }}
-
-    .metric-value {{
-        color:{TEXT};
-        font-size:27px;
-        font-weight:800;
-        line-height:1;
-        margin-top:11px;
-        font-variant-numeric:tabular-nums;
-    }}
-
-    .metric-foot {{
-        color:{SECONDARY};
-        font-size:10px;
-        margin-top:8px;
-    }}
-
-    .panel-card {{
-        background:{CARD};
-        border:1px solid {BORDER};
-        border-radius:14px;
-        padding:15px 17px 10px;
-        box-shadow:0 4px 15px rgba(31,41,55,.035);
-        height:100%;
-        box-sizing:border-box;
-    }}
-
-    .panel-card-title {{
-        color:{TEXT};
-        font-size:13px;
-        font-weight:800;
-    }}
-
-    .panel-card-subtitle {{
-        color:{SECONDARY};
-        font-size:10px;
-        margin-top:3px;
-        margin-bottom:4px;
-    }}
-
-    .status-list {{ margin-top:4px; }}
-    .status-row {{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:9px 0;
-        border-bottom:1px solid {BORDER};
-        font-size:11px;
-    }}
-    .status-row:last-child {{ border-bottom:0; }}
-    .status-name {{ color:{SECONDARY}; }}
-    .status-number {{ color:{TEXT}; font-weight:800; }}
-
-    .pending-row {{
-        display:flex;
-        justify-content:space-between;
-        gap:15px;
-        padding:9px 0;
-        border-bottom:1px solid {BORDER};
-    }}
-    .pending-row:last-child {{ border-bottom:0; }}
-    .pending-name {{ color:{TEXT}; font-size:11px; font-weight:700; }}
-    .pending-meta {{ color:{SECONDARY}; font-size:10px; margin-top:2px; }}
-    .pending-badge {{
-        color:{WARNING};
-        background:{WARNING_SOFT};
-        border-radius:20px;
-        padding:4px 7px;
-        font-size:11px;
-        font-weight:700;
-        white-space:nowrap;
-        height:max-content;
-    }}
-
-    .filter-summary {{
-        background:{PRIMARY_SOFT};
-        border:1px solid #DCE4FF;
-        border-radius:9px;
-        padding:8px 12px;
-        margin:0 0 14px;
-        color:{TEXT};
-        font-size:10px;
+    .header-date {{
+        color: #7B8494;
+        font-size: 10px;
+        margin-bottom: 12px;
     }}
 
     .update-info {{
-        color:{SECONDARY};
-        font-size:10px;
-        text-align:right;
-        margin-top:3px;
+        color: {SECONDARY};
+        font-size: 9px;
+        text-align: right;
+        margin-top: 8px;
     }}
 
-    .stButton > button {{
-        border:1px solid {BORDER};
-        border-radius:9px;
-        background:{CARD};
-        color:{TEXT};
-        font-weight:700;
-        min-height:40px;
-    }}
-    .stButton > button:hover {{
-        border-color:{PRIMARY};
-        color:{PRIMARY};
+    /* =====================================================
+       FILTROS
+       ===================================================== */
+
+    .filter-panel {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 15px;
+        padding: 17px 18px 8px;
+        box-shadow: 0 5px 20px rgba(31,41,55,.035);
+        margin-bottom: 14px;
     }}
 
+    .panel-title {{
+        color: {TEXT};
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: -.01em;
+        margin-bottom: 4px;
+    }}
+
+    .panel-subtitle {{
+        color: {SECONDARY};
+        font-size: 10px;
+        margin-bottom: 8px;
+    }}
+
+    label[data-testid="stWidgetLabel"] p {{
+        color: #374151 !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+    }}
+
+    div[data-baseweb="select"] > div {{
+        background: {CARD};
+        border: 1px solid #E0E4EC;
+        border-radius: 9px;
+        min-height: 42px;
+        box-shadow: none;
+    }}
+
+    div[data-baseweb="select"] > div:hover {{
+        border-color: #AFC0EE;
+        box-shadow: 0 0 0 3px rgba(67,97,238,.06);
+    }}
+
+    div[data-baseweb="select"] [data-baseweb="select-value"] {{
+        font-size: 12px;
+    }}
+
+    .filter-summary {{
+        background: {PRIMARY_SOFT};
+        border: 1px solid #DCE4FF;
+        border-radius: 9px;
+        padding: 9px 12px;
+        margin: 0 0 14px;
+        color: {TEXT};
+        font-size: 10px;
+    }}
+
+    /* =====================================================
+       CARDS DE MÉTRICAS
+       ===================================================== */
+
+    .metric-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 14px;
+        padding: 17px 18px;
+        min-height: 104px;
+        box-shadow: 0 5px 18px rgba(31,41,55,.035);
+        box-sizing: border-box;
+    }}
+
+    .metric-label {{
+        color: #697386;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }}
+
+    .metric-value {{
+        color: {TEXT};
+        font-size: 29px;
+        font-weight: 800;
+        line-height: 1;
+        margin-top: 12px;
+        letter-spacing: -.035em;
+        font-variant-numeric: tabular-nums;
+    }}
+
+    .metric-foot {{
+        color: #7B8494;
+        font-size: 10px;
+        margin-top: 8px;
+    }}
+
+    /* =====================================================
+       PAINÉIS / GRÁFICOS
+       ===================================================== */
+
+    .panel-card {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 15px;
+        padding: 16px 18px 10px;
+        box-shadow: 0 5px 18px rgba(31,41,55,.035);
+        height: 100%;
+        box-sizing: border-box;
+    }}
+
+    .panel-card-title {{
+        color: {TEXT};
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: -.01em;
+    }}
+
+    .panel-card-subtitle {{
+        color: {SECONDARY};
+        font-size: 10px;
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }}
+
+    .status-list {{
+        margin-top: 5px;
+    }}
+
+    .status-row {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 0;
+        border-bottom: 1px solid {BORDER};
+        font-size: 11px;
+    }}
+
+    .status-row:last-child {{
+        border-bottom: 0;
+    }}
+
+    .status-name {{
+        color: {SECONDARY};
+    }}
+
+    .status-number {{
+        color: {TEXT};
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }}
+
+    /* =====================================================
+       BOTÕES / TABELAS / EXPANDERS
+       ===================================================== */
+
+    .stButton > button,
     .stDownloadButton > button {{
-        border:1px solid {BORDER};
-        border-radius:9px;
-        background:{CARD};
-        font-size:11px;
+        border: 1px solid {BORDER};
+        border-radius: 9px;
+        background: {CARD};
+        color: {TEXT};
+        font-weight: 700;
+        min-height: 40px;
+        transition: all .15s ease;
     }}
 
+    .stButton > button:hover,
+    .stDownloadButton > button:hover {{
+        border-color: #AFC0EE;
+        color: {PRIMARY};
+        box-shadow: 0 4px 12px rgba(67,97,238,.08);
+    }}
+
+    [data-testid="stDataFrame"] {{
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        overflow: hidden;
+    }}
+
+    [data-testid="stExpander"] {{
+        border: 1px solid {BORDER};
+        border-radius: 11px;
+        background: {CARD};
+    }}
+
+    /* =====================================================
+       RESPONSIVO
+       ===================================================== */
+
+    @media (max-width: 1100px) {{
+        .block-container {{
+            width: 100%;
+            margin-left: 0;
+            padding: 24px 24px 40px;
+        }}
+
+        .sidebar {{
+            display: none;
+        }}
+    }}
     </style>
     """,
     unsafe_allow_html=True
 )
-
 
 # =========================================================
 # GOOGLE SHEETS
@@ -1285,7 +1377,7 @@ with col_header:
             <div>
                 <div class="eyebrow">Nube • Treinamento Comercial</div>
                 <div class="page-title">Dashboard de Monitorias</div>
-                <div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div>
+                <div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div><div class="header-date">Última atualização dos dados: {data_consulta}</div>
             </div>
         </div>"""
     )
