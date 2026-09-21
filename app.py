@@ -394,6 +394,15 @@ st.markdown(
         font-variant-numeric: tabular-nums;
     }}
 
+    #visao-geral,
+    #indicadores,
+    #supervisores,
+    #pendencias,
+    #evolucao,
+    #etapas {
+        scroll-margin-top: 24px;
+    }
+
     /* =====================================================
        BOTÕES / TABELAS / EXPANDERS
        ===================================================== */
@@ -1355,13 +1364,13 @@ st.html(
             <div class="sidebar-title">DASHBOARD</div>
         </div>
         <div class="nav-label">Monitorias</div>
-        <div class="nav-item active"><span class="nav-icon">⌂</span> Visão geral</div>
-        <div class="nav-item"><span class="nav-icon">▥</span> Indicadores</div>
-        <div class="nav-item"><span class="nav-icon">●</span> Supervisores</div>
-        <div class="nav-item"><span class="nav-icon">☷</span> Pendências</div>
+        <a class="nav-item active" href="#visao-geral"><span class="nav-icon">⌂</span> Visão geral</a>
+        <a class="nav-item" href="#indicadores"><span class="nav-icon">▥</span> Indicadores</a>
+        <a class="nav-item" href="#supervisores"><span class="nav-icon">●</span> Supervisores</a>
+        <a class="nav-item" href="#pendencias"><span class="nav-icon">☷</span> Pendências</a>
         <div class="nav-label" style="margin-top:20px;">Acompanhamento</div>
-        <div class="nav-item"><span class="nav-icon">◷</span> Evolução</div>
-        <div class="nav-item"><span class="nav-icon">✓</span> Etapas</div>
+        <a class="nav-item" href="#evolucao"><span class="nav-icon">◷</span> Evolução</a>
+        <a class="nav-item" href="#etapas"><span class="nav-icon">✓</span> Etapas</a>
         <div class="sidebar-note">
             Nube • Treinamento Comercial<br>
             Painel de acompanhamento das monitorias
