@@ -1424,10 +1424,9 @@ status_selecionado = st.radio(
     label_visibility="collapsed"
 )
 
-if status_selecionado == "Realizadas":
-    df_filtrado = df_filtrado[df_filtrado["Realizada"]].copy()
-elif status_selecionado == "Pendentes":
-    df_filtrado = df_filtrado[~df_filtrado["Realizada"]].copy()
+# A situação é uma VISUALIZAÇÃO, não altera a base dos indicadores.
+# Assim, ao escolher "Realizadas", o total de pendentes continua visível
+# no resumo; a seleção controla quais listas de status são exibidas.
 
 filtros_ativos = []
 if praca_selecionada != "Todas":
@@ -1687,23 +1686,35 @@ col_pendencias, col_etapas = st.columns([1.7, 1])
 
 with col_pendencias:
     st.html(
-        """
+        f"""
         <div class="panel-card">
-            <div class="panel-card-title">Pendências</div>
-            <div class="panel-card-subtitle">Colaboradores que ainda não possuem data de monitoria</div>
+            <div class="panel-card-title">{titulo_lista}</div>
+            <div class="panel-card-subtitle">{("Colaboradores com monitoria realizada" if status_selecionado == "Realizadas" else "Colaboradores que ainda não possuem data de monitoria")}</div>
         </div>
         """
     )
 
-    pendencias = df_filtrado[~df_filtrado["Realizada"]].copy()
-    pendencias = pendencias.sort_values(["Supervisão", "Colaborador"], na_position="last")
+    # A lista de pendências respeita a visualização selecionada.
+    # "Realizadas" = mostra a lista de realizadas no lugar das pendências.
+    # "Pendentes" = mostra a lista de pendências.
+    # "Todas" = mostra as pendências normalmente.
+    if status_selecionado == "Realizadas":
+        lista_status = df_filtrado[df_filtrado["Realizada"]].copy()
+        titulo_lista = "Monitorias realizadas"
+        badge = "Realizada"
+    else:
+        lista_status = df_filtrado[~df_filtrado["Realizada"]].copy()
+        titulo_lista = "Pendências"
+        badge = "Pendente"
 
-    if pendencias.empty:
-        st.html('<div class="panel-card"><div class="pending-meta">Nenhuma pendência nos filtros selecionados.</div></div>')
+    lista_status = lista_status.sort_values(["Supervisão", "Colaborador"], na_position="last")
+
+    if lista_status.empty:
+        st.html(f'<div class="panel-card"><div class="pending-meta">Nenhum registro para a visualização selecionada.</div></div>')
     else:
         limite = 8
         itens = ""
-        for _, row in pendencias.head(limite).iterrows():
+        for _, row in lista_status.head(limite).iterrows():
             nome = html.escape(str(row["Colaborador"]))
             supervisao = html.escape(str(row["Supervisão"]))
             funcao = html.escape(str(row["Função"]))
@@ -1713,20 +1724,21 @@ with col_pendencias:
                     <div class="pending-name">{nome}</div>
                     <div class="pending-meta">{supervisao} • {funcao}</div>
                 </div>
-                <div class="pending-badge">Pendente</div>
+                <div class="pending-badge">{badge}</div>
             </div>
             """
-        restante = max(0, len(pendencias) - limite)
-        extra = f'<div class="pending-meta" style="padding-top:9px;">+ {restante} outras pendências</div>' if restante else ''
+        restante = max(0, len(lista_status) - limite)
+        extra = f'<div class="pending-meta" style="padding-top:9px;">+ {restante} outros registros</div>' if restante else ''
         st.html(f'<div class="panel-card">{itens}{extra}</div>')
 
-        pendencias_csv = pendencias[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
-        st.download_button(
-            "Baixar pendências em CSV",
-            data=pendencias_csv.to_csv(index=False, encoding="utf-8-sig"),
-            file_name="pendencias_monitorias.csv",
-            mime="text/csv"
-        )
+        if status_selecionado != "Realizadas":
+            pendencias_csv = lista_status[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
+            st.download_button(
+                "Baixar pendências em CSV",
+                data=pendencias_csv.to_csv(index=False, encoding="utf-8-sig"),
+                file_name="pendencias_monitorias.csv",
+                mime="text/csv"
+            )
 
 with col_etapas:
     st.html('<div id="etapas"></div>')
