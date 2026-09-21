@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import gspread
 import html
 import unicodedata
+import hmac
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -456,6 +457,105 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# =========================================================
+# SEGURANÇA / LOGIN
+# =========================================================
+
+def tela_login():
+    st.markdown(
+        """
+        <style>
+        .login-wrap {
+            min-height: 78vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            width: 390px;
+            background: #FFFFFF;
+            border: 1px solid #E5E8F0;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 12px 35px rgba(31,41,55,.08);
+        }
+        .login-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #EEF2FF;
+            color: #4361EE;
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+        .login-title {
+            color: #1F2937;
+            font-size: 23px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+        .login-subtitle {
+            color: #6B7280;
+            font-size: 12px;
+            margin-top: 7px;
+            margin-bottom: 22px;
+        }
+        .login-error {
+            color: #B91C1C;
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 9px;
+            padding: 9px 11px;
+            font-size: 11px;
+            margin-bottom: 12px;
+        }
+        </style>
+        <div class="login-wrap">
+            <div class="login-card">
+                <div class="login-logo">N</div>
+                <div class="login-title">Acesso ao dashboard</div>
+                <div class="login-subtitle">Nube • Treinamento Comercial<br>Informe a senha para continuar.</div>
+            </div>
+        </div>
+        """
+    )
+
+    # Mantém o formulário alinhado visualmente ao card acima.
+    _, coluna_login, _ = st.columns([1, 2, 1])
+    with coluna_login:
+        senha = st.text_input("Senha de acesso", type="password")
+        entrar = st.button("Entrar", type="primary", use_container_width=True)
+
+        if entrar:
+            senha_configurada = st.secrets.get("DASHBOARD_PASSWORD", "")
+
+            if not senha_configurada:
+                st.error(
+                    "A senha do dashboard ainda não foi configurada nos Secrets do Streamlit."
+                )
+                return False
+
+            if hmac.compare_digest(senha, str(senha_configurada)):
+                st.session_state["autenticado"] = True
+                st.rerun()
+            else:
+                st.markdown(
+                    '<div class="login-error">Senha incorreta. Tente novamente.</div>',
+                    unsafe_allow_html=True
+                )
+
+    return False
+
+
+if not st.session_state.get("autenticado", False):
+    tela_login()
+    st.stop()
+
 
 # =========================================================
 # GOOGLE SHEETS
