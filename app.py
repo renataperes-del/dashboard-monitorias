@@ -467,10 +467,15 @@ def tela_login():
         """
         <style>
         .login-wrap {
-            min-height: 78vh;
+            min-height: 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: 35px;
+        }
+
+        .login-form {
+            margin-top: -145px;
         }
         .login-card {
             width: 390px;
@@ -529,6 +534,7 @@ def tela_login():
     # Mantém o formulário alinhado visualmente ao card acima.
     _, coluna_login, _ = st.columns([1, 2, 1])
     with coluna_login:
+        st.markdown('<div class="login-form">', unsafe_allow_html=True)
         senha = st.text_input("Senha de acesso", type="password")
         entrar = st.button("Entrar", type="primary", use_container_width=True)
 
@@ -549,6 +555,8 @@ def tela_login():
                     '<div class="login-error">Senha incorreta. Tente novamente.</div>',
                     unsafe_allow_html=True
                 )
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     return False
 
