@@ -467,15 +467,21 @@ def tela_login():
         """
         <style>
         .login-wrap {
-            min-height: 0;
+            width: 100%;
             display: flex;
-            align-items: center;
             justify-content: center;
             margin-top: 35px;
         }
 
+        .login-card {
+            width: 390px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
         .login-form {
-            margin-top: -145px;
+            width: 390px;
+            margin: -22px auto 0;
         }
         .login-card {
             width: 390px;
@@ -531,7 +537,7 @@ def tela_login():
         unsafe_allow_html=True
     )
 
-    # Mantém o formulário alinhado visualmente ao card acima.
+    # Centraliza o formulário exatamente abaixo do card de acesso.
     _, coluna_login, _ = st.columns([1, 2, 1])
     with coluna_login:
         st.markdown('<div class="login-form">', unsafe_allow_html=True)
