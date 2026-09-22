@@ -522,7 +522,8 @@ def tela_login():
                 <div class="login-subtitle">Nube • Treinamento Comercial<br>Informe a senha para continuar.</div>
             </div>
         </div>
-        """
+        """,
+        unsafe_allow_html=True
     )
 
     # Mantém o formulário alinhado visualmente ao card acima.
