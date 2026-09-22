@@ -6,7 +6,7 @@ import html
 import unicodedata
 import hmac
 
-from datetime import datetimeF
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from google.oauth2.service_account import Credentials
 
@@ -472,17 +472,19 @@ def tela_login():
             justify-content: center;
             margin-top: 35px;
         }
-.login-card {
-    width: 390px;
-    box-sizing: border-box;
-    margin: 0 auto;
-    text-align: left;
-    background: #FFFFFF;
-    border: 1px solid #E5E8F0;
-    border-radius: 18px;
-    padding: 30px;
-    box-shadow: 0 12px 35px rgba(31,41,55,.08);
-}
+
+        .login-card {
+            width: 390px;
+            box-sizing: border-box;
+            margin: 0 auto;
+            text-align: left;
+            background: #FFFFFF;
+            border: 1px solid #E5E8F0;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 12px 35px rgba(31,41,55,.08);
+        }
+
         .login-logo {
             width: 46px;
             height: 46px;
@@ -496,18 +498,21 @@ def tela_login():
             font-weight: 800;
             margin-bottom: 18px;
         }
+
         .login-title {
             color: #1F2937;
             font-size: 23px;
             font-weight: 800;
             letter-spacing: -.03em;
         }
+
         .login-subtitle {
             color: #6B7280;
             font-size: 12px;
             margin-top: 7px;
             margin-bottom: 22px;
         }
+
         .login-error {
             color: #B91C1C;
             background: #FEF2F2;
@@ -518,33 +523,39 @@ def tela_login():
             margin-bottom: 12px;
         }
         </style>
+
         <div class="login-wrap">
             <div class="login-card">
                 <div class="login-logo">N</div>
                 <div class="login-title">Acesso ao dashboard</div>
-                <div class="login-subtitle">Nube • Treinamento Comercial<br>Informe a senha para continuar.</div>
+                <div class="login-subtitle">
+                    Nube • Treinamento Comercial<br>
+                    Informe a senha para continuar.
+                </div>
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-       # Formulário centralizado abaixo do card
-    st.markdown('<div style="height: 22px;"></div>', unsafe_allow_html=True)
-
-  with st.container(width=390):
-    senha = st.text_input(
-        "Senha de acesso",
-        type="password",
-        key="senha_login"
+    st.markdown(
+        '<div style="height: 22px;"></div>',
+        unsafe_allow_html=True
     )
 
-    entrar = st.button(
-        "Entrar",
-        type="primary",
-        use_container_width=True,
-        key="botao_login"
-    )
+    with st.container(width=390):
+        senha = st.text_input(
+            "Senha de acesso",
+            type="password",
+            key="senha_login"
+        )
+
+        entrar = st.button(
+            "Entrar",
+            type="primary",
+            use_container_width=True,
+            key="botao_login"
+        )
 
         if entrar:
             senha_configurada = st.secrets.get("DASHBOARD_PASSWORD", "")
