@@ -479,10 +479,6 @@ def tela_login():
             text-align: left;
         }
 
-        .login-form {
-            width: 390px;
-            margin: -22px auto 0;
-        }
         .login-card {
             width: 390px;
             background: #FFFFFF;
@@ -537,12 +533,24 @@ def tela_login():
         unsafe_allow_html=True
     )
 
-    # Centraliza o formulário exatamente abaixo do card de acesso.
-    _, coluna_login, _ = st.columns([1, 2, 1])
-    with coluna_login:
-        st.markdown('<div class="login-form">', unsafe_allow_html=True)
-        senha = st.text_input("Senha de acesso", type="password")
-        entrar = st.button("Entrar", type="primary", use_container_width=True)
+       # Formulário centralizado abaixo do card
+    st.markdown('<div style="height: 22px;"></div>', unsafe_allow_html=True)
+
+    col_esq, col_login, col_dir = st.columns([1, 2, 1])
+
+    with col_login:
+        senha = st.text_input(
+            "Senha de acesso",
+            type="password",
+            key="senha_login"
+        )
+
+        entrar = st.button(
+            "Entrar",
+            type="primary",
+            use_container_width=True,
+            key="botao_login"
+        )
 
         if entrar:
             senha_configurada = st.secrets.get("DASHBOARD_PASSWORD", "")
@@ -561,8 +569,6 @@ def tela_login():
                     '<div class="login-error">Senha incorreta. Tente novamente.</div>',
                     unsafe_allow_html=True
                 )
-
-        st.markdown('</div>', unsafe_allow_html=True)
 
     return False
 
