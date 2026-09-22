@@ -522,6 +522,19 @@ def tela_login():
             font-size: 11px;
             margin-bottom: 12px;
         }
+
+        /* Centraliza os widgets do login na mesma largura do card */
+        .stTextInput,
+        .stButton {
+            width: min(390px, 100%) !important;
+            max-width: 390px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+
+        .stTextInput > div {
+            width: 100% !important;
+        }
         </style>
 
         <div class="login-wrap">
@@ -543,37 +556,36 @@ def tela_login():
         unsafe_allow_html=True
     )
 
-    with st.container(width=390):
-        senha = st.text_input(
-            "Senha de acesso",
-            type="password",
-            key="senha_login"
-        )
+    senha = st.text_input(
+        "Senha de acesso",
+        type="password",
+        key="senha_login"
+    )
 
-        entrar = st.button(
-            "Entrar",
-            type="primary",
-            use_container_width=True,
-            key="botao_login"
-        )
+    entrar = st.button(
+        "Entrar",
+        type="primary",
+        use_container_width=True,
+        key="botao_login"
+    )
 
-        if entrar:
-            senha_configurada = st.secrets.get("DASHBOARD_PASSWORD", "")
+    if entrar:
+        senha_configurada = st.secrets.get("DASHBOARD_PASSWORD", "")
 
-            if not senha_configurada:
-                st.error(
-                    "A senha do dashboard ainda não foi configurada nos Secrets do Streamlit."
-                )
-                return False
+        if not senha_configurada:
+            st.error(
+                "A senha do dashboard ainda não foi configurada nos Secrets do Streamlit."
+            )
+            return False
 
-            if hmac.compare_digest(senha, str(senha_configurada)):
-                st.session_state["autenticado"] = True
-                st.rerun()
-            else:
-                st.markdown(
-                    '<div class="login-error">Senha incorreta. Tente novamente.</div>',
-                    unsafe_allow_html=True
-                )
+        if hmac.compare_digest(senha, str(senha_configurada)):
+            st.session_state["autenticado"] = True
+            st.rerun()
+        else:
+            st.markdown(
+                '<div class="login-error">Senha incorreta. Tente novamente.</div>',
+                unsafe_allow_html=True
+            )
 
     return False
 
