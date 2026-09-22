@@ -6,7 +6,7 @@ import html
 import unicodedata
 import hmac
 
-from datetime import datetime
+from datetime import datetimeF
 from zoneinfo import ZoneInfo
 from google.oauth2.service_account import Credentials
 
@@ -472,21 +472,17 @@ def tela_login():
             justify-content: center;
             margin-top: 35px;
         }
-
-        .login-card {
-            width: 390px;
-            margin: 0 auto;
-            text-align: left;
-        }
-
-        .login-card {
-            width: 390px;
-            background: #FFFFFF;
-            border: 1px solid #E5E8F0;
-            border-radius: 18px;
-            padding: 30px;
-            box-shadow: 0 12px 35px rgba(31,41,55,.08);
-        }
+.login-card {
+    width: 390px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    text-align: left;
+    background: #FFFFFF;
+    border: 1px solid #E5E8F0;
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: 0 12px 35px rgba(31,41,55,.08);
+}
         .login-logo {
             width: 46px;
             height: 46px;
@@ -536,21 +532,19 @@ def tela_login():
        # Formulário centralizado abaixo do card
     st.markdown('<div style="height: 22px;"></div>', unsafe_allow_html=True)
 
-    col_esq, col_login, col_dir = st.columns([1, 2, 1])
+  with st.container(width=390):
+    senha = st.text_input(
+        "Senha de acesso",
+        type="password",
+        key="senha_login"
+    )
 
-    with col_login:
-        senha = st.text_input(
-            "Senha de acesso",
-            type="password",
-            key="senha_login"
-        )
-
-        entrar = st.button(
-            "Entrar",
-            type="primary",
-            use_container_width=True,
-            key="botao_login"
-        )
+    entrar = st.button(
+        "Entrar",
+        type="primary",
+        use_container_width=True,
+        key="botao_login"
+    )
 
         if entrar:
             senha_configurada = st.secrets.get("DASHBOARD_PASSWORD", "")
