@@ -2093,7 +2093,7 @@ if supervisao_selecionada != "Todas":
         """
     )
 
-    df_detalhe = df_lista[["Colaborador", "Função", "Realizada", "Média"]].copy()
+    df_detalhe = df_filtrado[["Colaborador", "Função", "Realizada", "Média"]].copy()
     df_detalhe["Status"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
     df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
     df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
