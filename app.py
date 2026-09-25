@@ -1763,36 +1763,6 @@ with col_filtro_supervisao:
 with col_filtro_status:
     status_selecionado = st.selectbox("Status", ["Todos", "Realizadas", "Pendentes"])
 
-# Quando o status for selecionado, transforma o filtro em um atalho de navegação.
-# A página continua com os indicadores gerais no topo, mas desce para o detalhe correspondente.
-if status_selecionado == "Pendentes":
-    st.html(
-        """
-        <script>
-        setTimeout(function() {
-            const alvo = document.getElementById("pendencias");
-            if (alvo) {
-                alvo.scrollIntoView({behavior: "smooth", block: "start"});
-            }
-        }, 150);
-        </script>
-        """
-    )
-elif status_selecionado == "Realizadas":
-    st.html(
-        """
-        <script>
-        setTimeout(function() {
-            const alvo = document.getElementById("detalhamento");
-            if (alvo) {
-                alvo.scrollIntoView({behavior: "smooth", block: "start"});
-            }
-        }, 150);
-        </script>
-        """
-    )
-
-
 df_filtrado = monitorias_google.copy()
 
 if praca_selecionada != "Todas":
@@ -2141,3 +2111,35 @@ if supervisao_selecionada != "Todas":
     df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
     df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
     st.dataframe(df_detalhe, use_container_width=True, hide_index=True)
+
+
+# =========================================================
+# NAVEGAÇÃO PELO FILTRO DE STATUS
+# =========================================================
+# Este script fica no final da página para garantir que o destino já foi renderizado.
+if status_selecionado == "Pendentes":
+    st.html(
+        """
+        <script>
+        setTimeout(function() {
+            const alvo = document.getElementById("pendencias");
+            if (alvo) {
+                alvo.scrollIntoView({behavior: "smooth", block: "start"});
+            }
+        }, 300);
+        </script>
+        """
+    )
+elif status_selecionado == "Realizadas" and supervisao_selecionada != "Todas":
+    st.html(
+        """
+        <script>
+        setTimeout(function() {
+            const alvo = document.getElementById("detalhamento");
+            if (alvo) {
+                alvo.scrollIntoView({behavior: "smooth", block: "start"});
+            }
+        }, 300);
+        </script>
+        """
+    )
