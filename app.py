@@ -1641,3 +1641,671 @@ supervisoes_planilha = set(
     monitorias_google["Supervisão"]
     .dropna()
     .astype(str)
+    .map(normalizar_texto)
+    .unique()
+)
+
+
+supervisoes_mapeadas = set(
+    praca_por_primeiro_nome_supervisao.keys()
+)
+
+
+supervisoes_nao_mapeadas = sorted(
+    [
+        supervisao
+        for supervisao in (
+            monitorias_google["Supervisão"]
+            .dropna()
+            .astype(str)
+            .unique()
+        )
+        if primeiro_nome(supervisao)
+        not in supervisoes_mapeadas
+    ]
+)
+
+
+if supervisoes_nao_mapeadas:
+
+    st.warning(
+        "⚠️ Há supervisão(ões) na planilha que não estão "
+        "mapeadas para uma praça: "
+        + ", ".join(supervisoes_nao_mapeadas)
+    )
+
+
+# =========================================================
+# FUNÇÕES VISUAIS
+# =========================================================
+
+def html_card(titulo, valor, subtitulo=""):
+
+    titulo = html.escape(str(titulo))
+    valor = html.escape(str(valor))
+    subtitulo = html.escape(str(subtitulo))
+
+    return f"""
+    <div class="custom-card">
+
+        <div class="custom-card-title">
+            {titulo}
+        </div>
+
+        <div class="custom-card-value">
+            {valor}
+        </div>
+
+        <div class="custom-card-subtitle">
+            {subtitulo}
+        </div>
+
+    </div>
+    """
+
+
+def html_praca(nome, quantidade, responsavel):
+
+    nome = html.escape(str(nome))
+    responsavel = html.escape(str(responsavel))
+
+    return f"""
+    <div class="praca-card">
+
+        <div class="praca-name">
+            <span class="praca-dot"></span>{nome}
+        </div>
+
+        <div class="praca-info">
+            {quantidade} supervisões
+            <br>
+            Responsável: {responsavel}
+        </div>
+
+    </div>
+    """
+
+
+def html_team(nome, total, realizadas, pendentes):
+
+    nome = html.escape(str(nome))
+
+    percentual = (
+        realizadas / total * 100
+        if total > 0
+        else 0
+    )
+
+    return f"""
+    <div class="team-card">
+
+        <div class="team-name">
+            {nome}
+        </div>
+
+        <div class="team-number">
+            {total}
+        </div>
+
+        <div class="team-label">
+            colaboradores
+        </div>
+
+        <div class="team-progress">
+            <div
+                class="team-progress-fill"
+                style="width: {percentual:.1f}%"
+            ></div>
+        </div>
+
+        <div class="team-status">
+
+            <span class="team-realizada">
+                {realizadas} realizadas
+            </span>
+
+            <span class="team-pendente">
+                {pendentes} pendentes
+            </span>
+
+        </div>
+
+    </div>
+    """
+
+
+def html_lista(titulo, dataframe, mostrar_nota=True):
+
+    titulo = html.escape(str(titulo))
+
+    if dataframe.empty:
+
+        return f"""
+        <div class="list-card">
+
+            <div class="list-title">
+                {titulo}
+            </div>
+
+            <div class="empty-message">
+                Nenhum colaborador nesta categoria.
+            </div>
+
+        </div>
+        """
+
+    itens = ""
+
+    for _, row in dataframe.iterrows():
+
+        nome = html.escape(
+            str(row["Colaborador"])
+        )
+
+        funcao = html.escape(
+            str(row["Função"])
+        )
+
+        nota_html = ""
+
+        media = row["Média"]
+
+        if mostrar_nota and pd.notna(media):
+
+            nota_html = f"""
+            <div class="list-score">
+                Média: {media:.2f}%
+            </div>
+            """
+
+        itens += f"""
+        <div class="list-item">
+
+            <div class="list-name">
+                {nome}
+            </div>
+
+            <div class="list-function">
+                {funcao}
+            </div>
+
+            {nota_html}
+
+        </div>
+        """
+
+    return f"""
+    <div class="list-card">
+
+        <div class="list-title">
+            {titulo}
+        </div>
+
+        {itens}
+
+    </div>
+    """
+
+
+# =========================================================
+# INTERFACE DA DASHBOARD
+# =========================================================
+
+st.html(
+    """
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-logo">N</div>
+            <div class="sidebar-title">DASHBOARD</div>
+        </div>
+        <div class="nav-label">Monitorias</div>
+        <a class="nav-item active" href="#visao-geral"><span class="nav-icon">⌂</span> Visão geral</a>
+        <a class="nav-item" href="#indicadores"><span class="nav-icon">▥</span> Indicadores</a>
+        <a class="nav-item" href="#supervisores"><span class="nav-icon">●</span> Supervisores</a>
+        <a class="nav-item" href="#pendencias"><span class="nav-icon">☷</span> Pendências</a>
+        <div class="nav-label" style="margin-top:20px;">Acompanhamento</div>
+        <a class="nav-item" href="#evolucao"><span class="nav-icon">◷</span> Evolução</a>
+        <a class="nav-item" href="#etapas"><span class="nav-icon">✓</span> Etapas</a>
+        <div class="sidebar-note">
+            Nube • Treinamento Comercial<br>
+            Painel de acompanhamento das monitorias
+        </div>
+    </aside>
+    """
+)
+
+col_header, col_update, col_sair = st.columns([5, 0.85, 0.65])
+with col_header:
+    st.html(
+        f"""<div class="topbar">
+            <div>
+                <div class="eyebrow">Nube • Treinamento Comercial</div>
+                <div class="page-title">Dashboard de Monitorias</div>
+                <div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div>
+                <div style="color:#4361EE;font-size:15px;font-weight:700;margin-top:11px;">Olá, {html.escape(primeiro_nome(NOME_ACESSO).title())}!</div>
+            </div>
+        </div>"""
+    )
+
+with col_update:
+    st.write("")
+    if st.button("↻ Atualizar", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
+    st.html(f'<div class="update-info">Atualizado em {data_consulta}</div>')
+
+with col_sair:
+    st.write("")
+    if st.button("Sair", use_container_width=True):
+        st.session_state["usuario_logado"] = None
+        st.session_state["perfil_acesso"] = None
+        st.session_state["nome_acesso"] = None
+        st.session_state["supervisao_acesso"] = None
+        st.session_state["criando_senha"] = False
+        st.session_state["usuario_novo"] = None
+        st.rerun()
+
+
+# =========================================================
+# FILTROS
+# =========================================================
+
+st.html(
+    """
+    <div class="filter-panel">
+        <div class="panel-title">Filtros</div>
+        <div class="panel-subtitle">Use os filtros para atualizar todos os indicadores e gráficos.</div>
+    </div>
+    """
+)
+
+col_filtro_praca, col_filtro_supervisao, col_filtro_status = st.columns(3)
+
+opcoes_praca = ["Todas"] + list(pracas.keys())
+
+with col_filtro_praca:
+    praca_selecionada = st.selectbox("Praça", opcoes_praca)
+
+if praca_selecionada == "Todas":
+    supervisoes_disponiveis = sorted(
+        {
+            supervisao_canonica_por_primeiro_nome.get(
+                primeiro_nome(supervisao),
+                str(supervisao).strip().split()[0]
+            )
+            for supervisao in monitorias_google["Supervisão"].dropna().astype(str).tolist()
+            if primeiro_nome(supervisao)
+        },
+        key=normalizar_texto
+    )
+else:
+    supervisoes_da_praca = {
+        primeiro_nome(nome)
+        for nome in pracas[praca_selecionada]["supervisores"]
+    }
+    supervisoes_disponiveis = sorted(
+        {
+            supervisao_canonica_por_primeiro_nome.get(
+                primeiro_nome(supervisao),
+                str(supervisao).strip().split()[0]
+            )
+            for supervisao in monitorias_google["Supervisão"].dropna().astype(str).tolist()
+            if primeiro_nome(supervisao) in supervisoes_da_praca
+        },
+        key=normalizar_texto
+    )
+
+opcoes_supervisao = ["Todas"] + supervisoes_disponiveis
+
+with col_filtro_supervisao:
+    supervisao_selecionada = st.selectbox("Supervisão", opcoes_supervisao)
+
+with col_filtro_status:
+    status_selecionado = st.selectbox("Status", ["Todos", "Realizadas", "Pendentes"])
+
+
+df_filtrado = monitorias_google.copy()
+
+if praca_selecionada != "Todas":
+    df_filtrado = df_filtrado[df_filtrado["Praça"] == praca_selecionada].copy()
+
+if supervisao_selecionada != "Todas":
+    df_filtrado = df_filtrado[
+        df_filtrado["Supervisão"].astype(str).map(primeiro_nome)
+        == primeiro_nome(supervisao_selecionada)
+    ].copy()
+
+if status_selecionado == "Realizadas":
+    df_lista = df_filtrado[df_filtrado["Realizada"]].copy()
+elif status_selecionado == "Pendentes":
+    df_lista = df_filtrado[~df_filtrado["Realizada"]].copy()
+else:
+    df_lista = df_filtrado.copy()
+
+# Status filtra as listas, mas não altera os indicadores e gráficos principais.
+df_ativo = df_filtrado.copy()
+
+filtros_ativos = []
+if praca_selecionada != "Todas":
+    filtros_ativos.append(f"<strong>Praça:</strong> {html.escape(praca_selecionada)}")
+if supervisao_selecionada != "Todas":
+    filtros_ativos.append(f"<strong>Supervisão:</strong> {html.escape(supervisao_selecionada)}")
+if status_selecionado != "Todos":
+    filtros_ativos.append(f"<strong>Status:</strong> {html.escape(status_selecionado)}")
+
+if filtros_ativos:
+    st.html('<div class="filter-summary">' + " &nbsp; • &nbsp; ".join(filtros_ativos) + '</div>')
+
+
+st.html('<div id="indicadores"></div>')
+
+# =========================================================
+# INDICADORES
+# =========================================================
+
+total_colaboradores = len(df_ativo)
+total_realizadas = int(df_ativo["Realizada"].sum())
+total_pendentes = total_colaboradores - total_realizadas
+percentual_concluido = (
+    total_realizadas / total_colaboradores * 100
+    if total_colaboradores else 0
+)
+notas_validas = df_ativo.loc[df_ativo["Média"].notna(), "Média"]
+media_geral = notas_validas.mean() if not notas_validas.empty else None
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
+metricas = [
+    ("COLABORADORES", total_colaboradores, "no acompanhamento"),
+    ("REALIZADAS", total_realizadas, "monitorias concluídas"),
+    ("PENDENTES", total_pendentes, "monitorias a realizar"),
+    ("CONCLUSÃO", f"{percentual_concluido:.1f}%", "do total"),
+    ("MÉDIA", f"{media_geral:.1f}%" if media_geral is not None else "—", "notas registradas")
+]
+
+for coluna, (titulo, valor, subtitulo) in zip([col1, col2, col3, col4, col5], metricas):
+    with coluna:
+        st.html(
+            f"""
+            <div class="metric-card">
+                <div class="metric-label">{titulo}</div>
+                <div class="metric-value">{valor}</div>
+                <div class="metric-foot">{subtitulo}</div>
+            </div>
+            """
+        )
+
+
+MESES = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+]
+
+
+st.html('<div id="visao-geral"></div>')
+st.html('<div id="evolucao"></div>')
+
+# =========================================================
+# GRÁFICOS PRINCIPAIS
+# =========================================================
+
+st.write("")
+col_evolucao, col_status = st.columns([2.1, 1])
+
+with col_evolucao:
+    st.html(
+        """
+        <div class="panel-card">
+            <div class="panel-card-title">Evolução das monitorias</div>
+            <div class="panel-card-subtitle">Quantidade de monitorias realizadas por mês</div>
+        </div>
+        """
+    )
+
+    datas_validas = df_ativo.loc[df_ativo["Data Monitoria"].notna(), "Data Monitoria"]
+
+    if not datas_validas.empty:
+        primeiro_mes = datas_validas.min().to_period("M")
+        ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"))
+        meses = pd.period_range(primeiro_mes, ultimo_mes, freq="M")
+    else:
+        meses = pd.period_range(pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), freq="M")
+
+    nomes_meses = []
+    quantidades = []
+    for periodo in meses:
+        quantidade = df_ativo[
+            (df_ativo["Data Monitoria"] >= periodo.start_time)
+            & (df_ativo["Data Monitoria"] <= periodo.end_time)
+        ].shape[0]
+        nomes_meses.append(f"{MESES[periodo.month - 1]}/{str(periodo.year)[2:]}")
+        quantidades.append(quantidade)
+
+    fig_evolucao = go.Figure()
+    fig_evolucao.add_trace(
+        go.Scatter(
+            x=nomes_meses,
+            y=quantidades,
+            mode="lines+markers",
+            line=dict(color=PRIMARY, width=3),
+            marker=dict(color=PRIMARY, size=7),
+            hovertemplate="%{x}: %{y} monitorias<extra></extra>"
+        )
+    )
+    fig_evolucao.update_layout(
+        height=270,
+        margin=dict(l=8, r=8, t=12, b=8),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color=TEXT),
+        xaxis=dict(showgrid=False, title=None),
+        yaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
+        showlegend=False
+    )
+    st.plotly_chart(fig_evolucao, use_container_width=True, config={"displayModeBar": False})
+
+with col_status:
+    st.html(
+        """
+        <div class="panel-card">
+            <div class="panel-card-title">Status das monitorias</div>
+            <div class="panel-card-subtitle">Distribuição do acompanhamento atual</div>
+        </div>
+        """
+    )
+
+    fig_status = go.Figure(
+        go.Pie(
+            values=[total_realizadas, total_pendentes],
+            labels=["Realizadas", "Pendentes"],
+            hole=.70,
+            marker=dict(colors=[SUCCESS, WARNING]),
+            textinfo="none",
+            hovertemplate="%{label}: %{value}<extra></extra>"
+        )
+    )
+    fig_status.update_layout(
+        height=220,
+        margin=dict(l=8, r=8, t=8, b=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+        annotations=[dict(text=f"<b>{percentual_concluido:.0f}%</b><br><span style='font-size:10px'>concluído</span>", x=.5, y=.5, showarrow=False, font=dict(size=22, color=TEXT))]
+    )
+    st.plotly_chart(fig_status, use_container_width=True, config={"displayModeBar": False})
+
+    st.html(
+        f"""
+        <div class="status-list">
+            <div class="status-row"><span class="status-name">Realizadas</span><span class="status-number">{total_realizadas}</span></div>
+            <div class="status-row"><span class="status-name">Pendentes</span><span class="status-number">{total_pendentes}</span></div>
+        </div>
+        """
+    )
+
+
+st.html('<div id="supervisores"></div>')
+
+# =========================================================
+# PRAÇAS E SUPERVISORES
+# =========================================================
+
+st.write("")
+col_pracas, col_supervisores = st.columns(2)
+
+with col_pracas:
+    st.html(
+        """
+        <div class="panel-card">
+            <div class="panel-card-title">Monitorias por praça</div>
+            <div class="panel-card-subtitle">Volume de colaboradores no acompanhamento</div>
+        </div>
+        """
+    )
+
+    dados_pracas = (
+        df_ativo.groupby("Praça", dropna=False)
+        .size().reset_index(name="Quantidade")
+    )
+    dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
+    dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
+
+    fig_pracas = go.Figure(go.Bar(
+        x=dados_pracas["Quantidade"],
+        y=dados_pracas["Praça"],
+        orientation="h",
+        marker_color=PRIMARY,
+        text=dados_pracas["Quantidade"],
+        textposition="outside",
+        hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
+    ))
+    fig_pracas.update_layout(
+        height=280,
+        margin=dict(l=8, r=30, t=12, b=8),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color=TEXT),
+        xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
+        yaxis=dict(showgrid=False, title=None),
+        showlegend=False
+    )
+    st.plotly_chart(fig_pracas, use_container_width=True, config={"displayModeBar": False})
+
+with col_supervisores:
+    st.html(
+        """
+        <div class="panel-card">
+            <div class="panel-card-title">Monitorias por supervisão</div>
+            <div class="panel-card-subtitle">Quantidade de colaboradores por equipe</div>
+        </div>
+        """
+    )
+
+    dados_supervisores = (
+        df_ativo.assign(
+            SupervisaoExibicao=df_ativo["Supervisão"].astype(str).map(
+                lambda x: supervisao_canonica_por_primeiro_nome.get(primeiro_nome(x), x.strip().split()[0] if x.strip() else "")
+            )
+        )
+        .groupby("SupervisaoExibicao", dropna=False)
+        .size().reset_index(name="Quantidade")
+        .sort_values("Quantidade", ascending=True)
+    )
+
+    fig_supervisores = go.Figure(go.Bar(
+        x=dados_supervisores["Quantidade"],
+        y=dados_supervisores["SupervisaoExibicao"],
+        orientation="h",
+        marker_color="#6680F2",
+        text=dados_supervisores["Quantidade"],
+        textposition="outside",
+        hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
+    ))
+    fig_supervisores.update_layout(
+        height=280,
+        margin=dict(l=8, r=30, t=12, b=8),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color=TEXT),
+        xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
+        yaxis=dict(showgrid=False, title=None),
+        showlegend=False
+    )
+    st.plotly_chart(fig_supervisores, use_container_width=True, config={"displayModeBar": False})
+
+
+st.html('<div id="pendencias"></div>')
+
+# =========================================================
+# PENDÊNCIAS E OUTRAS ETAPAS
+# =========================================================
+
+st.write("")
+col_pendencias, col_etapas = st.columns([1.7, 1])
+
+with col_pendencias:
+    st.html(
+        """
+        <div class="panel-card">
+            <div class="panel-card-title">Pendências</div>
+            <div class="panel-card-subtitle">Colaboradores que ainda não possuem data de monitoria</div>
+        </div>
+        """
+    )
+
+    pendencias = df_ativo[~df_ativo["Realizada"]].copy()
+    pendencias = pendencias.sort_values(["Supervisão", "Colaborador"], na_position="last")
+
+    if pendencias.empty:
+        st.html('<div class="panel-card"><div class="pending-meta">Nenhuma pendência nos filtros selecionados.</div></div>')
+    else:
+        with st.expander(f"Ver todas as {len(pendencias)} pendências", expanded=False):
+            tabela_pendencias = pendencias[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
+            st.dataframe(tabela_pendencias, use_container_width=True, hide_index=True)
+
+        pendencias_csv = pendencias[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
+        st.download_button(
+            "Baixar pendências em CSV",
+            data=pendencias_csv.to_csv(index=False).encode("utf-8-sig"),
+            file_name="pendencias_monitorias.csv",
+            mime="text/csv"
+        )
+
+with col_etapas:
+    st.html('<div id="etapas"></div>')
+    total_lado_a_lado = int(df_ativo["Data Lado a Lado"].notna().sum())
+    total_offline = int(df_ativo["Data Monitoria Offline"].notna().sum())
+
+    st.html(
+        f"""
+        <div class="panel-card">
+            <div class="panel-card-title">Outras etapas</div>
+            <div class="panel-card-subtitle">Acompanhamento complementar</div>
+            <div class="status-list" style="margin-top:12px;">
+                <div class="status-row"><span class="status-name">Lado a lado</span><span class="status-number">{total_lado_a_lado}</span></div>
+                <div class="status-row"><span class="status-name">Monitoria offline</span><span class="status-number">{total_offline}</span></div>
+            </div>
+        </div>
+        """
+    )
+
+
+# =========================================================
+# DETALHE DA SUPERVISÃO
+# =========================================================
+
+if supervisao_selecionada != "Todas":
+    st.write("")
+    st.html(
+        f"""
+        <div class="panel-card">
+            <div class="panel-card-title">Detalhamento • {html.escape(supervisao_selecionada)}</div>
+            <div class="panel-card-subtitle">Colaboradores associados à supervisão selecionada</div>
+        </div>
+        """
+    )
+
+    df_detalhe = df_ativo[["Colaborador", "Função", "Realizada", "Média"]].copy()
+    df_detalhe["Status"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
+    df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
+    df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
+    st.dataframe(df_detalhe, use_container_width=True, hide_index=True)
