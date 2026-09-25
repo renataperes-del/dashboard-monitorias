@@ -2130,7 +2130,7 @@ with col_pendencias:
         """
     )
 
-    pendencias = df_ativo[~df_ativo["Realizada"]].copy()
+    pendencias = df_lista[~df_lista["Realizada"]].copy()
     pendencias = pendencias.sort_values(["Supervisão", "Colaborador"], na_position="last")
 
     if pendencias.empty:
@@ -2182,7 +2182,7 @@ if supervisao_selecionada != "Todas":
         """
     )
 
-    df_detalhe = df_ativo[["Colaborador", "Função", "Realizada", "Média"]].copy()
+    df_detalhe = df_lista[["Colaborador", "Função", "Realizada", "Média"]].copy()
     df_detalhe["Status"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
     df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
     df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
