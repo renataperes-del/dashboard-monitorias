@@ -739,31 +739,49 @@ if not st.session_state["usuario_logado"]:
         if st.session_state["recuperando_senha"]:
 
             st.subheader("Recuperar senha")
-            st.caption("Informe seu usuário para redefinir o acesso.")
+            st.caption("Selecione seu nome para redefinir o acesso.")
 
-            with st.form("form_recuperar_senha"):
+            nomes_recuperacao = (
+                df_acessos[["Usuário", "Nome"]]
+                .dropna()
+                .drop_duplicates()
+            )
 
-                usuario_recuperacao = st.text_input("Usuário").strip().casefold()
-                recuperar = st.form_submit_button(
-                    "Recuperar acesso",
-                    use_container_width=True
-                )
+            nomes_recuperacao = nomes_recuperacao[
+                nomes_recuperacao["Nome"].astype(str).str.strip() != ""
+            ]
 
-            if recuperar:
+            opcoes_recuperacao = {
+                str(row["Nome"]).strip(): str(row["Usuário"]).strip().casefold()
+                for _, row in nomes_recuperacao.iterrows()
+            }
 
-                if usuario_recuperacao == "treinamento":
-                    st.info("O acesso de Treinamento usa uma senha compartilhada definida nos Secrets. Procure a área de Treinamento para recuperar esse acesso.")
+            nome_selecionado = st.selectbox(
+                "Nome",
+                ["Selecione seu nome"] + list(opcoes_recuperacao.keys())
+            )
 
-                elif usuario_recuperacao in df_acessos["Usuário"].values:
+            if st.button("Recuperar acesso", use_container_width=True):
+
+                if nome_selecionado == "Selecione seu nome":
+                    st.warning("Selecione seu nome para continuar.")
+
+                else:
+                    usuario_recuperacao = opcoes_recuperacao[nome_selecionado]
+
                     if recuperar_senha(usuario_recuperacao):
-                        st.success("Acesso redefinido! Use sua senha provisória para entrar e crie uma nova senha.")
+                        st.success(
+                            "Acesso redefinido! Use sua senha provisória para entrar e crie uma nova senha."
+                        )
                         st.session_state["recuperando_senha"] = False
                         st.rerun()
                     else:
                         st.error("Não foi possível redefinir o acesso.")
 
-                else:
-                    st.error("Usuário não encontrado.")
+            st.info(
+                "O acesso de Treinamento utiliza uma senha compartilhada. "
+                "Para recuperar esse acesso, procure a área de Treinamento Comercial."
+            )
 
             if st.button("Voltar para o login", use_container_width=True):
                 st.session_state["recuperando_senha"] = False
