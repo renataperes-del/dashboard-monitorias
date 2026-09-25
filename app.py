@@ -531,6 +531,8 @@ usuarios_secrets = st.secrets.get("usuarios", {})
 senhas_supervisores = usuarios_secrets.get("supervisores", {})
 senhas_gerentes = usuarios_secrets.get("gerentes", {})
 senha_treinamento = usuarios_secrets.get("treinamento", "")
+if not senha_treinamento:
+    senha_treinamento = senhas_gerentes.get("treinamento", "")
 
 if "usuario_logado" not in st.session_state:
     st.session_state["usuario_logado"] = None
