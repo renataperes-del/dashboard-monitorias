@@ -1799,7 +1799,6 @@ if filtros_ativos:
 
 
 if status_selecionado == "Pendentes":
-    if status_selecionado != "Pendentes":
     st.html('<div id="pendencias"></div>')
         st.write("")
         col_pendencias_top, _ = st.columns([1.7, 1])
