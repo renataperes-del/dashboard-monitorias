@@ -2057,6 +2057,7 @@ with col_supervisores:
     
     
     
+col_etapas = st.container()
 with col_etapas:
     st.html('<div id="etapas"></div>')
     total_lado_a_lado = int(df_ativo["Data Lado a Lado"].notna().sum())
