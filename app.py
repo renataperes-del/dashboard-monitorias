@@ -1798,279 +1798,266 @@ if filtros_ativos:
     st.html('<div class="filter-summary">' + " &nbsp; • &nbsp; ".join(filtros_ativos) + '</div>')
 
 
-st.html('<div id="indicadores"></div>')
-
-# =========================================================
-# INDICADORES
-# =========================================================
-
-total_colaboradores = len(df_ativo)
-total_realizadas = int(df_ativo["Realizada"].sum())
-total_pendentes = total_colaboradores - total_realizadas
-percentual_concluido = (
-    total_realizadas / total_colaboradores * 100
-    if total_colaboradores else 0
-)
-notas_validas = df_ativo.loc[df_ativo["Média"].notna(), "Média"]
-media_geral = notas_validas.mean() if not notas_validas.empty else None
-
-col1, col2, col3, col4, col5 = st.columns(5)
-
-metricas = [
-    ("COLABORADORES", total_colaboradores, "no acompanhamento"),
-    ("REALIZADAS", total_realizadas, "monitorias concluídas"),
-    ("PENDENTES", total_pendentes, "monitorias a realizar"),
-    ("CONCLUSÃO", f"{percentual_concluido:.1f}%", "do total"),
-    ("MÉDIA", f"{media_geral:.1f}%" if media_geral is not None else "—", "notas registradas")
-]
-
-for coluna, (titulo, valor, subtitulo) in zip([col1, col2, col3, col4, col5], metricas):
-    with coluna:
+if status_selecionado == "Pendentes":
+    if status_selecionado != "Pendentes":
+    st.html('<div id="pendencias"></div>')
+        st.write("")
+        col_pendencias_top, _ = st.columns([1.7, 1])
+        with col_pendencias_top:
+            st.html(
+                """
+                <div class="panel-card">
+                    <div class="panel-card-title">Pendências</div>
+                    <div class="panel-card-subtitle">Colaboradores que ainda não possuem data de monitoria</div>
+                </div>
+                """
+            )
+            pendencias_top = df_lista[~df_lista["Realizada"]].copy()
+            pendencias_top = pendencias_top.sort_values(["Supervisão", "Colaborador"], na_position="last")
+            if pendencias_top.empty:
+                st.html('<div class="panel-card"><div class="pending-meta">Nenhuma pendência nos filtros selecionados.</div></div>')
+            else:
+                tabela_pendencias_top = pendencias_top[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
+                st.dataframe(tabela_pendencias_top, use_container_width=True, hide_index=True)
+        st.write("")
+    
+    st.html('<div id="indicadores"></div>')
+    
+    # =========================================================
+    # INDICADORES
+    # =========================================================
+    
+    total_colaboradores = len(df_ativo)
+    total_realizadas = int(df_ativo["Realizada"].sum())
+    total_pendentes = total_colaboradores - total_realizadas
+    percentual_concluido = (
+        total_realizadas / total_colaboradores * 100
+        if total_colaboradores else 0
+    )
+    notas_validas = df_ativo.loc[df_ativo["Média"].notna(), "Média"]
+    media_geral = notas_validas.mean() if not notas_validas.empty else None
+    
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    metricas = [
+        ("COLABORADORES", total_colaboradores, "no acompanhamento"),
+        ("REALIZADAS", total_realizadas, "monitorias concluídas"),
+        ("PENDENTES", total_pendentes, "monitorias a realizar"),
+        ("CONCLUSÃO", f"{percentual_concluido:.1f}%", "do total"),
+        ("MÉDIA", f"{media_geral:.1f}%" if media_geral is not None else "—", "notas registradas")
+    ]
+    
+    for coluna, (titulo, valor, subtitulo) in zip([col1, col2, col3, col4, col5], metricas):
+        with coluna:
+            st.html(
+                f"""
+                <div class="metric-card">
+                    <div class="metric-label">{titulo}</div>
+                    <div class="metric-value">{valor}</div>
+                    <div class="metric-foot">{subtitulo}</div>
+                </div>
+                """
+            )
+    
+    
+    MESES = [
+        "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+        "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+    ]
+    
+    
+    st.html('<div id="visao-geral"></div>')
+    st.html('<div id="evolucao"></div>')
+    
+    # =========================================================
+    # GRÁFICOS PRINCIPAIS
+    # =========================================================
+    
+    st.write("")
+    col_evolucao, col_status = st.columns([2.1, 1])
+    
+    with col_evolucao:
         st.html(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">{titulo}</div>
-                <div class="metric-value">{valor}</div>
-                <div class="metric-foot">{subtitulo}</div>
+            """
+            <div class="panel-card">
+                <div class="panel-card-title">Evolução das monitorias</div>
+                <div class="panel-card-subtitle">Quantidade de monitorias realizadas por mês</div>
             </div>
             """
         )
-
-
-MESES = [
-    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-    "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-]
-
-
-st.html('<div id="visao-geral"></div>')
-st.html('<div id="evolucao"></div>')
-
-# =========================================================
-# GRÁFICOS PRINCIPAIS
-# =========================================================
-
-st.write("")
-col_evolucao, col_status = st.columns([2.1, 1])
-
-with col_evolucao:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Evolução das monitorias</div>
-            <div class="panel-card-subtitle">Quantidade de monitorias realizadas por mês</div>
-        </div>
-        """
-    )
-
-    datas_validas = df_ativo.loc[df_ativo["Data Monitoria"].notna(), "Data Monitoria"]
-
-    if not datas_validas.empty:
-        primeiro_mes = datas_validas.min().to_period("M")
-        ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"))
-        meses = pd.period_range(primeiro_mes, ultimo_mes, freq="M")
-    else:
-        meses = pd.period_range(pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), freq="M")
-
-    nomes_meses = []
-    quantidades = []
-    for periodo in meses:
-        quantidade = df_ativo[
-            (df_ativo["Data Monitoria"] >= periodo.start_time)
-            & (df_ativo["Data Monitoria"] <= periodo.end_time)
-        ].shape[0]
-        nomes_meses.append(f"{MESES[periodo.month - 1]}/{str(periodo.year)[2:]}")
-        quantidades.append(quantidade)
-
-    fig_evolucao = go.Figure()
-    fig_evolucao.add_trace(
-        go.Scatter(
-            x=nomes_meses,
-            y=quantidades,
-            mode="lines+markers",
-            line=dict(color=PRIMARY, width=3),
-            marker=dict(color=PRIMARY, size=7),
-            hovertemplate="%{x}: %{y} monitorias<extra></extra>"
-        )
-    )
-    fig_evolucao.update_layout(
-        height=270,
-        margin=dict(l=8, r=8, t=12, b=8),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=TEXT),
-        xaxis=dict(showgrid=False, title=None),
-        yaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-        showlegend=False
-    )
-    st.plotly_chart(fig_evolucao, use_container_width=True, config={"displayModeBar": False})
-
-with col_status:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Status das monitorias</div>
-            <div class="panel-card-subtitle">Distribuição do acompanhamento atual</div>
-        </div>
-        """
-    )
-
-    fig_status = go.Figure(
-        go.Pie(
-            values=[total_realizadas, total_pendentes],
-            labels=["Realizadas", "Pendentes"],
-            hole=.70,
-            marker=dict(colors=[SUCCESS, WARNING]),
-            textinfo="none",
-            hovertemplate="%{label}: %{value}<extra></extra>"
-        )
-    )
-    fig_status.update_layout(
-        height=220,
-        margin=dict(l=8, r=8, t=8, b=0),
-        paper_bgcolor="rgba(0,0,0,0)",
-        showlegend=False,
-        annotations=[dict(text=f"<b>{percentual_concluido:.0f}%</b><br><span style='font-size:10px'>concluído</span>", x=.5, y=.5, showarrow=False, font=dict(size=22, color=TEXT))]
-    )
-    st.plotly_chart(fig_status, use_container_width=True, config={"displayModeBar": False})
-
-    st.html(
-        f"""
-        <div class="status-list">
-            <div class="status-row"><span class="status-name">Realizadas</span><span class="status-number">{total_realizadas}</span></div>
-            <div class="status-row"><span class="status-name">Pendentes</span><span class="status-number">{total_pendentes}</span></div>
-        </div>
-        """
-    )
-
-
-st.html('<div id="supervisores"></div>')
-
-# =========================================================
-# PRAÇAS E SUPERVISORES
-# =========================================================
-
-st.write("")
-col_pracas, col_supervisores = st.columns(2)
-
-with col_pracas:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Monitorias por praça</div>
-            <div class="panel-card-subtitle">Volume de colaboradores no acompanhamento</div>
-        </div>
-        """
-    )
-
-    dados_pracas = (
-        df_ativo.groupby("Praça", dropna=False)
-        .size().reset_index(name="Quantidade")
-    )
-    dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
-    dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
-
-    fig_pracas = go.Figure(go.Bar(
-        x=dados_pracas["Quantidade"],
-        y=dados_pracas["Praça"],
-        orientation="h",
-        marker_color=PRIMARY,
-        text=dados_pracas["Quantidade"],
-        textposition="outside",
-        hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
-    ))
-    fig_pracas.update_layout(
-        height=280,
-        margin=dict(l=8, r=30, t=12, b=8),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=TEXT),
-        xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-        yaxis=dict(showgrid=False, title=None),
-        showlegend=False
-    )
-    st.plotly_chart(fig_pracas, use_container_width=True, config={"displayModeBar": False})
-
-with col_supervisores:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Monitorias por supervisão</div>
-            <div class="panel-card-subtitle">Progresso das equipes no acompanhamento</div>
-        </div>
-        """
-    )
-
-    dados_supervisores = (
-        df_ativo.assign(
-            SupervisaoExibicao=df_ativo["Supervisão"].astype(str).map(
-                lambda x: supervisao_canonica_por_primeiro_nome.get(
-                    primeiro_nome(x),
-                    x.strip().split()[0] if x.strip() else ""
-                )
+    
+        datas_validas = df_ativo.loc[df_ativo["Data Monitoria"].notna(), "Data Monitoria"]
+    
+        if not datas_validas.empty:
+            primeiro_mes = datas_validas.min().to_period("M")
+            ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"))
+            meses = pd.period_range(primeiro_mes, ultimo_mes, freq="M")
+        else:
+            meses = pd.period_range(pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), freq="M")
+    
+        nomes_meses = []
+        quantidades = []
+        for periodo in meses:
+            quantidade = df_ativo[
+                (df_ativo["Data Monitoria"] >= periodo.start_time)
+                & (df_ativo["Data Monitoria"] <= periodo.end_time)
+            ].shape[0]
+            nomes_meses.append(f"{MESES[periodo.month - 1]}/{str(periodo.year)[2:]}")
+            quantidades.append(quantidade)
+    
+        fig_evolucao = go.Figure()
+        fig_evolucao.add_trace(
+            go.Scatter(
+                x=nomes_meses,
+                y=quantidades,
+                mode="lines+markers",
+                line=dict(color=PRIMARY, width=3),
+                marker=dict(color=PRIMARY, size=7),
+                hovertemplate="%{x}: %{y} monitorias<extra></extra>"
             )
         )
-        .groupby("SupervisaoExibicao", dropna=False)
-        .agg(
-            Total=("Colaborador", "size"),
-            Realizadas=("Realizada", "sum")
+        fig_evolucao.update_layout(
+            height=270,
+            margin=dict(l=8, r=8, t=12, b=8),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter, sans-serif", color=TEXT),
+            xaxis=dict(showgrid=False, title=None),
+            yaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
+            showlegend=False
         )
-        .reset_index()
-        .sort_values("Total", ascending=False)
-    )
-
-    cards = ""
-    for _, row in dados_supervisores.iterrows():
-        total = int(row["Total"])
-        realizadas = int(row["Realizadas"])
-        pendentes = total - realizadas
-        cards += html_team(
-            row["SupervisaoExibicao"],
-            total,
-            realizadas,
-            pendentes
+        st.plotly_chart(fig_evolucao, use_container_width=True, config={"displayModeBar": False})
+    
+    with col_status:
+        st.html(
+            """
+            <div class="panel-card">
+                <div class="panel-card-title">Status das monitorias</div>
+                <div class="panel-card-subtitle">Distribuição do acompanhamento atual</div>
+            </div>
+            """
         )
-
-    st.html(f'<div class="team-grid">{cards}</div>')
-
-
-st.html('<div id="pendencias"></div>')
-
-# =========================================================
-# PENDÊNCIAS E OUTRAS ETAPAS
-# =========================================================
-
-st.write("")
-col_pendencias, col_etapas = st.columns([1.7, 1])
-
-with col_pendencias:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Pendências</div>
-            <div class="panel-card-subtitle">Colaboradores que ainda não possuem data de monitoria</div>
-        </div>
-        """
-    )
-
-    pendencias = df_lista[~df_lista["Realizada"]].copy()
-    pendencias = pendencias.sort_values(["Supervisão", "Colaborador"], na_position="last")
-
-    if pendencias.empty:
-        st.html('<div class="panel-card"><div class="pending-meta">Nenhuma pendência nos filtros selecionados.</div></div>')
-    else:
-        with st.expander(f"Ver todas as {len(pendencias)} pendências", expanded=False):
-            tabela_pendencias = pendencias[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
-            st.dataframe(tabela_pendencias, use_container_width=True, hide_index=True)
-
-        pendencias_csv = pendencias[["Colaborador", "Função", "Supervisão", "Praça"]].copy()
-        st.download_button(
-            "Baixar pendências em CSV",
-            data=pendencias_csv.to_csv(index=False).encode("utf-8-sig"),
-            file_name="pendencias_monitorias.csv",
-            mime="text/csv"
+    
+        fig_status = go.Figure(
+            go.Pie(
+                values=[total_realizadas, total_pendentes],
+                labels=["Realizadas", "Pendentes"],
+                hole=.70,
+                marker=dict(colors=[SUCCESS, WARNING]),
+                textinfo="none",
+                hovertemplate="%{label}: %{value}<extra></extra>"
+            )
         )
-
+        fig_status.update_layout(
+            height=220,
+            margin=dict(l=8, r=8, t=8, b=0),
+            paper_bgcolor="rgba(0,0,0,0)",
+            showlegend=False,
+            annotations=[dict(text=f"<b>{percentual_concluido:.0f}%</b><br><span style='font-size:10px'>concluído</span>", x=.5, y=.5, showarrow=False, font=dict(size=22, color=TEXT))]
+        )
+        st.plotly_chart(fig_status, use_container_width=True, config={"displayModeBar": False})
+    
+        st.html(
+            f"""
+            <div class="status-list">
+                <div class="status-row"><span class="status-name">Realizadas</span><span class="status-number">{total_realizadas}</span></div>
+                <div class="status-row"><span class="status-name">Pendentes</span><span class="status-number">{total_pendentes}</span></div>
+            </div>
+            """
+        )
+    
+    
+    st.html('<div id="supervisores"></div>')
+    
+    # =========================================================
+    # PRAÇAS E SUPERVISORES
+    # =========================================================
+    
+    st.write("")
+    col_pracas, col_supervisores = st.columns(2)
+    
+    with col_pracas:
+        st.html(
+            """
+            <div class="panel-card">
+                <div class="panel-card-title">Monitorias por praça</div>
+                <div class="panel-card-subtitle">Volume de colaboradores no acompanhamento</div>
+            </div>
+            """
+        )
+    
+        dados_pracas = (
+            df_ativo.groupby("Praça", dropna=False)
+            .size().reset_index(name="Quantidade")
+        )
+        dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
+        dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
+    
+        fig_pracas = go.Figure(go.Bar(
+            x=dados_pracas["Quantidade"],
+            y=dados_pracas["Praça"],
+            orientation="h",
+            marker_color=PRIMARY,
+            text=dados_pracas["Quantidade"],
+            textposition="outside",
+            hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
+        ))
+        fig_pracas.update_layout(
+            height=280,
+            margin=dict(l=8, r=30, t=12, b=8),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter, sans-serif", color=TEXT),
+            xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
+            yaxis=dict(showgrid=False, title=None),
+            showlegend=False
+        )
+        st.plotly_chart(fig_pracas, use_container_width=True, config={"displayModeBar": False})
+    
+    with col_supervisores:
+        st.html(
+            """
+            <div class="panel-card">
+                <div class="panel-card-title">Monitorias por supervisão</div>
+                <div class="panel-card-subtitle">Progresso das equipes no acompanhamento</div>
+            </div>
+            """
+        )
+    
+        dados_supervisores = (
+            df_ativo.assign(
+                SupervisaoExibicao=df_ativo["Supervisão"].astype(str).map(
+                    lambda x: supervisao_canonica_por_primeiro_nome.get(
+                        primeiro_nome(x),
+                        x.strip().split()[0] if x.strip() else ""
+                    )
+                )
+            )
+            .groupby("SupervisaoExibicao", dropna=False)
+            .agg(
+                Total=("Colaborador", "size"),
+                Realizadas=("Realizada", "sum")
+            )
+            .reset_index()
+            .sort_values("Total", ascending=False)
+        )
+    
+        cards = ""
+        for _, row in dados_supervisores.iterrows():
+            total = int(row["Total"])
+            realizadas = int(row["Realizadas"])
+            pendentes = total - realizadas
+            cards += html_team(
+                row["SupervisaoExibicao"],
+                total,
+                realizadas,
+                pendentes
+            )
+    
+        st.html(f'<div class="team-grid">{cards}</div>')
+    
+    
+    
 with col_etapas:
     st.html('<div id="etapas"></div>')
     total_lado_a_lado = int(df_ativo["Data Lado a Lado"].notna().sum())
@@ -2111,35 +2098,3 @@ if supervisao_selecionada != "Todas":
     df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
     df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
     st.dataframe(df_detalhe, use_container_width=True, hide_index=True)
-
-
-# =========================================================
-# NAVEGAÇÃO PELO FILTRO DE STATUS
-# =========================================================
-# Este script fica no final da página para garantir que o destino já foi renderizado.
-if status_selecionado == "Pendentes":
-    st.html(
-        """
-        <script>
-        setTimeout(function() {
-            const alvo = document.getElementById("pendencias");
-            if (alvo) {
-                alvo.scrollIntoView({behavior: "smooth", block: "start"});
-            }
-        }, 300);
-        </script>
-        """
-    )
-elif status_selecionado == "Realizadas" and supervisao_selecionada != "Todas":
-    st.html(
-        """
-        <script>
-        setTimeout(function() {
-            const alvo = document.getElementById("detalhamento");
-            if (alvo) {
-                alvo.scrollIntoView({behavior: "smooth", block: "start"});
-            }
-        }, 300);
-        </script>
-        """
-    )
