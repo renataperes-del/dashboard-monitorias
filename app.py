@@ -861,7 +861,6 @@ if not st.session_state["usuario_logado"]:
 
                     if usuario_recuperacao == "treinamento":
                         email_treinamento = "treinamento.comercial@nube.com.br"
-                        senha_provisoria = gerar_senha_provisoria()
 
                         mensagem = EmailMessage()
                         mensagem["Subject"] = "Recuperação de acesso | Dashboard de Monitorias"
@@ -874,7 +873,7 @@ if not st.session_state["usuario_logado"]:
                             "Olá!\n\n"
                             "Foi solicitada a recuperação do acesso de Treinamento Comercial "
                             "ao Dashboard de Monitorias.\n\n"
-                            f"Usuário: treinamento\nSenha provisória: {senha_provisoria}\n\n"
+                            f"Usuário: treinamento\nSenha de acesso: {senha_treinamento}\n\n"
                             "Use essa senha para entrar no dashboard.\n"
                         )
 
