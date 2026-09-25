@@ -435,6 +435,84 @@ st.markdown(
     }}
 
     /* =====================================================
+       CARDS DE EQUIPE
+       ===================================================== */
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .team-card {
+        background: #FFFFFF;
+        border: 1px solid #E7EAF1;
+        border-radius: 12px;
+        padding: 13px 14px;
+        box-shadow: 0 4px 14px rgba(31,41,55,.035);
+    }
+
+    .team-card:hover {
+        border-color: #D7DDF0;
+        box-shadow: 0 7px 18px rgba(31,41,55,.055);
+    }
+
+    .team-name {
+        color: #1F2937;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .team-number {
+        color: #1F2937;
+        font-size: 25px;
+        line-height: 1;
+        font-weight: 800;
+        margin-top: 9px;
+        letter-spacing: -.035em;
+    }
+
+    .team-label {
+        color: #7B8494;
+        font-size: 9px;
+        margin-top: 4px;
+    }
+
+    .team-progress {
+        height: 5px;
+        background: #EEF1F6;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 12px;
+    }
+
+    .team-progress-fill {
+        height: 100%;
+        background: #4361EE;
+        border-radius: 999px;
+    }
+
+    .team-status {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 8px;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+    .team-realizada { color: #059669; }
+    .team-pendente { color: #D97706; }
+
+    @media (max-width: 700px) {
+        .team-grid { grid-template-columns: 1fr; }
+    }
+
+    /* =====================================================
        RESPONSIVO
        ===================================================== */
 
@@ -1560,13 +1638,13 @@ st.html(
             <div class="sidebar-title">DASHBOARD</div>
         </div>
         <div class="nav-label">Monitorias</div>
-        <a class="nav-item active" href="#visao-geral"><span class="nav-icon">⌂</span> Visão geral</a>
-        <a class="nav-item" href="#indicadores"><span class="nav-icon">▥</span> Indicadores</a>
-        <a class="nav-item" href="#supervisores"><span class="nav-icon">●</span> Supervisores</a>
-        <a class="nav-item" href="#pendencias"><span class="nav-icon">☷</span> Pendências</a>
+        <a class="nav-item active" href="#visao-geral"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5h5v5"/></svg></span> Visão geral</a>
+        <a class="nav-item" href="#indicadores"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span> Indicadores</a>
+        <a class="nav-item" href="#supervisores"><span class="nav-icon"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-3.5 3.1-5 7-5s6.2 1.5 7 5"/></svg></span> Supervisores</a>
+        <a class="nav-item" href="#pendencias"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12M6 12h12M6 17h8"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></span> Pendências</a>
         <div class="nav-label" style="margin-top:20px;">Acompanhamento</div>
-        <a class="nav-item" href="#evolucao"><span class="nav-icon">◷</span> Evolução</a>
-        <a class="nav-item" href="#etapas"><span class="nav-icon">✓</span> Etapas</a>
+        <a class="nav-item" href="#evolucao"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l5-5 4 3 7-8"/><path d="M16 7h4v4"/></svg></span> Evolução</a>
+        <a class="nav-item" href="#etapas"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span> Etapas</a>
         <div class="sidebar-note">
             Nube • Treinamento Comercial<br>
             Painel de acompanhamento das monitorias
@@ -1917,7 +1995,7 @@ with col_supervisores:
         """
         <div class="panel-card">
             <div class="panel-card-title">Monitorias por supervisão</div>
-            <div class="panel-card-subtitle">Quantidade de colaboradores por equipe</div>
+            <div class="panel-card-subtitle">Progresso das equipes no acompanhamento</div>
         </div>
         """
     )
@@ -1925,34 +2003,34 @@ with col_supervisores:
     dados_supervisores = (
         df_ativo.assign(
             SupervisaoExibicao=df_ativo["Supervisão"].astype(str).map(
-                lambda x: supervisao_canonica_por_primeiro_nome.get(primeiro_nome(x), x.strip().split()[0] if x.strip() else "")
+                lambda x: supervisao_canonica_por_primeiro_nome.get(
+                    primeiro_nome(x),
+                    x.strip().split()[0] if x.strip() else ""
+                )
             )
         )
         .groupby("SupervisaoExibicao", dropna=False)
-        .size().reset_index(name="Quantidade")
-        .sort_values("Quantidade", ascending=True)
+        .agg(
+            Total=("Colaborador", "size"),
+            Realizadas=("Realizada", "sum")
+        )
+        .reset_index()
+        .sort_values("Total", ascending=False)
     )
 
-    fig_supervisores = go.Figure(go.Bar(
-        x=dados_supervisores["Quantidade"],
-        y=dados_supervisores["SupervisaoExibicao"],
-        orientation="h",
-        marker_color="#6680F2",
-        text=dados_supervisores["Quantidade"],
-        textposition="outside",
-        hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
-    ))
-    fig_supervisores.update_layout(
-        height=280,
-        margin=dict(l=8, r=30, t=12, b=8),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=TEXT),
-        xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-        yaxis=dict(showgrid=False, title=None),
-        showlegend=False
-    )
-    st.plotly_chart(fig_supervisores, use_container_width=True, config={"displayModeBar": False})
+    cards = ""
+    for _, row in dados_supervisores.iterrows():
+        total = int(row["Total"])
+        realizadas = int(row["Realizadas"])
+        pendentes = total - realizadas
+        cards += html_team(
+            row["SupervisaoExibicao"],
+            total,
+            realizadas,
+            pendentes
+        )
+
+    st.html(f'<div class="team-grid">{cards}</div>')
 
 
 st.html('<div id="pendencias"></div>')
