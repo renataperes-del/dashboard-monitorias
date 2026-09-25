@@ -1576,7 +1576,7 @@ with col_sair:
         st.session_state["perfil_acesso"] = None
         st.session_state["nome_acesso"] = None
         st.session_state["supervisao_acesso"] = None
-                st.rerun()
+        st.rerun()
 
 
 # =========================================================
