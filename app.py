@@ -539,7 +539,7 @@ def carregar_acessos():
 
     cabecalhos = [str(x).strip() for x in valores[0]]
 
-    for coluna in ["Senha Hash", "Salt"]:
+    for coluna in ["Senha Hash", "Salt", "E-mail"]:
         if coluna not in cabecalhos:
             cabecalhos.append(coluna)
 
@@ -625,39 +625,50 @@ def salvar_nova_senha(usuario, senha):
     return False
 
 
-def enviar_email_recuperacao_treinamento():
+def enviar_email_recuperacao(destinatario, nome, usuario, senha_provisoria):
 
-    smtp_host = st.secrets.get("smtp", {}).get("host", "smtp.office365.com")
-    smtp_port = int(st.secrets.get("smtp", {}).get("port", 587))
-    smtp_usuario = st.secrets.get("smtp", {}).get("usuario", "treinamento.comercial@nube.com.br")
-    smtp_senha = st.secrets.get("smtp", {}).get("senha", "")
-    email_destino = "treinamento.comercial@nube.com.br"
-
-    if not smtp_senha:
-        return False, "O envio de e-mail ainda não está configurado nos Secrets."
+    smtp_config = st.secrets.get("smtp", {})
+    smtp_host = smtp_config.get("host", "smtp.office365.com")
+    smtp_port = int(smtp_config.get("port", 587))
+    smtp_usuario = smtp_config.get(
+        "usuario",
+        "treinamento.comercial@nube.com.br"
+    )
+    smtp_senha = smtp_config.get("senha", "")
 
     mensagem = EmailMessage()
     mensagem["Subject"] = "Recuperação de acesso | Dashboard de Monitorias"
     mensagem["From"] = smtp_usuario
-    mensagem["To"] = email_destino
+    mensagem["To"] = destinatario
     mensagem.set_content(
-        "Olá!\n\n"
-        "Foi solicitada a recuperação do acesso de Treinamento Comercial ao Dashboard de Monitorias.\n\n"
-        f"Usuário: treinamento\nSenha de acesso: {senha_treinamento}\n\n"
+        f"Olá, {nome}!\n\n"
+        "Foi solicitada a recuperação do seu acesso ao Dashboard de Monitorias.\n\n"
+        f"Usuário: {usuario}\n"
+        f"Senha provisória: {senha_provisoria}\n\n"
+        "Use essa senha para entrar e, em seguida, crie uma nova senha pessoal.\n\n"
         "Se você não solicitou esta recuperação, desconsidere este e-mail.\n"
     )
 
     try:
         with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as servidor:
             servidor.starttls()
-            servidor.login(smtp_usuario, smtp_senha)
+
+            if smtp_senha:
+                servidor.login(smtp_usuario, smtp_senha)
+
             servidor.send_message(mensagem)
+
         return True, None
+
     except Exception as erro:
         return False, str(erro)
 
 
-def recuperar_senha(usuario):
+def gerar_senha_provisoria():
+    return secrets.token_urlsafe(9)
+
+
+def redefinir_senha_para_recuperacao(usuario):
 
     gc = get_client()
     planilha = gc.open_by_key(SHEET_ID)
@@ -666,17 +677,22 @@ def recuperar_senha(usuario):
     valores = aba_acessos.get_all_values()
 
     if not valores:
-        return False
+        return None, None, None, "Não foi possível acessar os usuários."
 
     cabecalhos = valores[0]
 
     try:
         idx_usuario = cabecalhos.index("Usuário")
+        idx_nome = cabecalhos.index("Nome")
+        idx_email = cabecalhos.index("E-mail")
         idx_primeiro = cabecalhos.index("Primeiro acesso")
         idx_hash = cabecalhos.index("Senha Hash")
         idx_salt = cabecalhos.index("Salt")
     except ValueError:
-        return False
+        return None, None, None, (
+            "A aba Acessos precisa ter as colunas "
+            "Usuário, Nome, E-mail, Primeiro acesso, Senha Hash e Salt."
+        )
 
     for numero_linha, linha in enumerate(valores[1:], start=2):
 
@@ -688,13 +704,51 @@ def recuperar_senha(usuario):
 
         if usuario_planilha == usuario:
 
-            aba_acessos.update_cell(numero_linha, idx_hash + 1, "")
-            aba_acessos.update_cell(numero_linha, idx_salt + 1, "")
-            aba_acessos.update_cell(numero_linha, idx_primeiro + 1, "Sim")
+            nome = str(linha[idx_nome]).strip()
+            email = (
+                str(linha[idx_email]).strip()
+                if len(linha) > idx_email
+                else ""
+            )
 
-            return True
+            if not email:
+                return None, None, None, (
+                    f"O e-mail de recuperação de {nome or usuario} "
+                    "ainda não está cadastrado na aba Acessos."
+                )
 
-    return False
+            senha_provisoria = gerar_senha_provisoria()
+            hash_senha, salt = gerar_hash_senha(senha_provisoria)
+
+            aba_acessos.update_cell(numero_linha, idx_hash + 1, hash_senha)
+            aba_acessos.update_cell(numero_linha, idx_salt + 1, salt)
+            aba_acessos.update_cell(numero_linha, idx_primeiro + 1, "Não")
+
+            return nome, email, senha_provisoria, None
+
+    return None, None, None, "Usuário não encontrado."
+
+
+def recuperar_senha(usuario):
+
+    nome, email, senha_provisoria, erro = redefinir_senha_para_recuperacao(
+        usuario
+    )
+
+    if erro:
+        return False, erro
+
+    sucesso, erro_email = enviar_email_recuperacao(
+        email,
+        nome,
+        usuario,
+        senha_provisoria
+    )
+
+    if not sucesso:
+        return False, erro_email
+
+    return True, None
 
 
 # =========================================================
@@ -806,24 +860,71 @@ if not st.session_state["usuario_logado"]:
                     usuario_recuperacao = opcoes_recuperacao[nome_selecionado]
 
                     if usuario_recuperacao == "treinamento":
-                        sucesso, erro = enviar_email_recuperacao_treinamento()
+                        email_treinamento = "treinamento.comercial@nube.com.br"
+                        senha_provisoria = gerar_senha_provisoria()
+
+                        mensagem = EmailMessage()
+                        mensagem["Subject"] = "Recuperação de acesso | Dashboard de Monitorias"
+                        mensagem["From"] = st.secrets.get("smtp", {}).get(
+                            "usuario",
+                            email_treinamento
+                        )
+                        mensagem["To"] = email_treinamento
+                        mensagem.set_content(
+                            "Olá!\n\n"
+                            "Foi solicitada a recuperação do acesso de Treinamento Comercial "
+                            "ao Dashboard de Monitorias.\n\n"
+                            f"Usuário: treinamento\nSenha provisória: {senha_provisoria}\n\n"
+                            "Use essa senha para entrar no dashboard.\n"
+                        )
+
+                        try:
+                            smtp_config = st.secrets.get("smtp", {})
+                            smtp_host = smtp_config.get(
+                                "host",
+                                "smtp.office365.com"
+                            )
+                            smtp_port = int(smtp_config.get("port", 587))
+                            smtp_usuario = smtp_config.get(
+                                "usuario",
+                                email_treinamento
+                            )
+                            smtp_senha = smtp_config.get("senha", "")
+
+                            with smtplib.SMTP(
+                                smtp_host,
+                                smtp_port,
+                                timeout=20
+                            ) as servidor:
+                                servidor.starttls()
+                                if smtp_senha:
+                                    servidor.login(smtp_usuario, smtp_senha)
+                                servidor.send_message(mensagem)
+
+                            st.success(
+                                "E-mail de recuperação enviado para "
+                                "treinamento.comercial@nube.com.br."
+                            )
+
+                        except Exception as erro:
+                            st.error(
+                                f"Não foi possível enviar o e-mail de recuperação: {erro}"
+                            )
+
+                    else:
+                        sucesso, erro = recuperar_senha(usuario_recuperacao)
+
                         if sucesso:
                             st.success(
-                                "E-mail de recuperação enviado para treinamento.comercial@nube.com.br."
+                                "E-mail de recuperação enviado para o endereço cadastrado."
                             )
                         else:
-                            st.error(f"Não foi possível enviar o e-mail de recuperação: {erro}")
-                    elif recuperar_senha(usuario_recuperacao):
-                        st.success(
-                            "Acesso redefinido! Use sua senha provisória para entrar e crie uma nova senha."
-                        )
-                        st.session_state["recuperando_senha"] = False
-                        st.rerun()
-                    else:
-                        st.error("Não foi possível redefinir o acesso.")
+                            st.error(
+                                f"Não foi possível enviar o e-mail de recuperação: {erro}"
+                            )
 
             st.info(
-                "Para Treinamento Comercial, a recuperação será enviada por e-mail."
+                "A recuperação será enviada para o e-mail cadastrado no acesso."
             )
 
             if st.button("Voltar para o login", use_container_width=True):
