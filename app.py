@@ -5,6 +5,8 @@ import gspread
 import html
 import unicodedata
 import hmac
+import hashlib
+import secrets
 
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -453,19 +455,152 @@ st.markdown(
 )
 
 # =========================================================
-# CONTROLE DE ACESSO
+# GOOGLE SHEETS / ACESSOS
 # =========================================================
 
-# As senhas ficam nos Secrets do Streamlit, nunca no código/GitHub.
-# Estrutura esperada:
-#
-# [usuarios.supervisores]
-# julio = "senha-do-julio"
-# ...
-#
-# [usuarios.gerentes]
-# danielly = "senha-da-danielly"
-# ...
+SHEET_ID = "1bSYqD9wLkpMxTIGN6kyFh6zuVTixM384oQr8cGskYcM"
+ABA = "Aplicação"
+ABA_ACESSOS = "Acessos"
+ABA_LOG = "Log_Acessos"
+
+
+@st.cache_resource
+def get_client():
+
+    credenciais = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=[
+            "https://www.googleapis.com/auth/spreadsheets"
+        ]
+    )
+
+    return gspread.authorize(credenciais)
+
+
+def gerar_hash_senha(senha, salt=None):
+
+    if salt is None:
+        salt = secrets.token_hex(16)
+
+    hash_senha = hashlib.pbkdf2_hmac(
+        "sha256",
+        senha.encode("utf-8"),
+        salt.encode("utf-8"),
+        120000
+    ).hex()
+
+    return hash_senha, salt
+
+
+def verificar_senha(senha, hash_senha, salt):
+
+    hash_calculado, _ = gerar_hash_senha(senha, salt)
+
+    return hmac.compare_digest(hash_calculado, str(hash_senha))
+
+
+def carregar_acessos():
+
+    gc = get_client()
+    planilha = gc.open_by_key(SHEET_ID)
+    aba_acessos = planilha.worksheet(ABA_ACESSOS)
+
+    valores = aba_acessos.get_all_values()
+
+    if not valores:
+        return pd.DataFrame()
+
+    cabecalhos = [str(x).strip() for x in valores[0]]
+
+    for coluna in ["Senha Hash", "Salt"]:
+        if coluna not in cabecalhos:
+            cabecalhos.append(coluna)
+
+    if cabecalhos != [str(x).strip() for x in valores[0]]:
+        aba_acessos.update("A1", [cabecalhos])
+
+    linhas = []
+
+    for linha in valores[1:]:
+        linha = list(linha)
+        linha += [""] * (len(cabecalhos) - len(linha))
+        linhas.append(linha[:len(cabecalhos)])
+
+    if not linhas:
+        return pd.DataFrame(columns=cabecalhos)
+
+    df = pd.DataFrame(linhas, columns=cabecalhos)
+    df["Usuário"] = df["Usuário"].astype(str).str.strip().str.casefold()
+
+    return df
+
+
+def registrar_acesso(usuario, perfil, nome):
+
+    try:
+
+        gc = get_client()
+        planilha = gc.open_by_key(SHEET_ID)
+        aba_log = planilha.worksheet(ABA_LOG)
+
+        horario = datetime.now(
+            ZoneInfo("America/Sao_Paulo")
+        ).strftime("%d/%m/%Y %H:%M:%S")
+
+        aba_log.append_row(
+            [horario, usuario, perfil, nome],
+            value_input_option="USER_ENTERED"
+        )
+
+    except Exception:
+        pass
+
+
+def salvar_nova_senha(usuario, senha):
+
+    gc = get_client()
+    planilha = gc.open_by_key(SHEET_ID)
+    aba_acessos = planilha.worksheet(ABA_ACESSOS)
+
+    valores = aba_acessos.get_all_values()
+
+    if not valores:
+        return False
+
+    cabecalhos = valores[0]
+
+    try:
+        idx_usuario = cabecalhos.index("Usuário")
+        idx_primeiro = cabecalhos.index("Primeiro acesso")
+        idx_hash = cabecalhos.index("Senha Hash")
+        idx_salt = cabecalhos.index("Salt")
+    except ValueError:
+        return False
+
+    hash_senha, salt = gerar_hash_senha(senha)
+
+    for numero_linha, linha in enumerate(valores[1:], start=2):
+
+        usuario_planilha = (
+            str(linha[idx_usuario]).strip().casefold()
+            if len(linha) > idx_usuario
+            else ""
+        )
+
+        if usuario_planilha == usuario:
+
+            aba_acessos.update_cell(numero_linha, idx_hash + 1, hash_senha)
+            aba_acessos.update_cell(numero_linha, idx_salt + 1, salt)
+            aba_acessos.update_cell(numero_linha, idx_primeiro + 1, "Não")
+
+            return True
+
+    return False
+
+
+# =========================================================
+# CONTROLE DE ACESSO
+# =========================================================
 
 USUARIOS_SUPERVISORES = {
     "julio": "Júlio Castro",
@@ -493,13 +628,26 @@ usuarios_secrets = st.secrets.get("usuarios", {})
 senhas_supervisores = usuarios_secrets.get("supervisores", {})
 senhas_gerentes = usuarios_secrets.get("gerentes", {})
 
+try:
+    df_acessos = carregar_acessos()
+except Exception:
+    st.error(
+        "Não foi possível acessar a aba 'Acessos'. "
+        "Verifique se as abas Acessos e Log_Acessos existem "
+        "e se a conta de serviço está como Editor."
+    )
+    st.stop()
+
 if "usuario_logado" not in st.session_state:
     st.session_state["usuario_logado"] = None
     st.session_state["perfil_acesso"] = None
     st.session_state["nome_acesso"] = None
     st.session_state["supervisao_acesso"] = None
+    st.session_state["criando_senha"] = False
+    st.session_state["usuario_novo"] = None
 
 if not st.session_state["usuario_logado"]:
+
     st.markdown(
         """
         <div style="text-align:center; margin:70px auto 22px;">
@@ -520,37 +668,133 @@ if not st.session_state["usuario_logado"]:
     col_login_esq, col_login, col_login_dir = st.columns([1.3, 1, 1.3])
 
     with col_login:
-        with st.form("form_login"):
-            usuario_digitado = st.text_input("Usuário").strip().casefold()
-            senha_digitada = st.text_input("Senha", type="password")
-            entrar = st.form_submit_button("Entrar", use_container_width=True)
 
-        if entrar:
-            perfil = None
-            nome = None
-            supervisao = None
+        if st.session_state["criando_senha"]:
 
-            if usuario_digitado in USUARIOS_SUPERVISORES:
-                senha_cadastrada = senhas_supervisores.get(usuario_digitado)
-                if senha_cadastrada and hmac.compare_digest(str(senha_digitada), str(senha_cadastrada)):
-                    perfil = "supervisor"
-                    nome = USUARIOS_SUPERVISORES[usuario_digitado]
-                    supervisao = usuario_digitado
+            st.subheader("Crie sua senha")
+            st.caption("Defina uma senha pessoal para os próximos acessos.")
 
-            elif usuario_digitado in USUARIOS_GERENTES:
-                senha_cadastrada = senhas_gerentes.get(usuario_digitado)
-                if senha_cadastrada and hmac.compare_digest(str(senha_digitada), str(senha_cadastrada)):
-                    perfil = "gerente"
-                    nome = USUARIOS_GERENTES[usuario_digitado]
+            with st.form("form_nova_senha"):
 
-            if perfil:
-                st.session_state["usuario_logado"] = usuario_digitado
-                st.session_state["perfil_acesso"] = perfil
-                st.session_state["nome_acesso"] = nome
-                st.session_state["supervisao_acesso"] = supervisao
+                nova_senha = st.text_input("Nova senha", type="password")
+                confirmar_senha = st.text_input("Confirmar nova senha", type="password")
+
+                salvar_senha = st.form_submit_button(
+                    "Salvar senha",
+                    use_container_width=True
+                )
+
+            if salvar_senha:
+
+                if len(nova_senha) < 8:
+                    st.error("A senha deve ter pelo menos 8 caracteres.")
+
+                elif nova_senha != confirmar_senha:
+                    st.error("As senhas não coincidem.")
+
+                elif salvar_nova_senha(
+                    st.session_state["usuario_novo"],
+                    nova_senha
+                ):
+
+                    st.session_state["criando_senha"] = False
+                    st.success("Senha criada com sucesso! Faça seu login novamente.")
+                    st.rerun()
+
+                else:
+                    st.error("Não foi possível salvar sua senha.")
+
+            if st.button("Voltar para o login", use_container_width=True):
+                st.session_state["criando_senha"] = False
                 st.rerun()
-            else:
-                st.error("Usuário ou senha inválidos.")
+
+        else:
+
+            with st.form("form_login"):
+
+                usuario_digitado = st.text_input("Usuário").strip().casefold()
+                senha_digitada = st.text_input("Senha", type="password")
+
+                entrar = st.form_submit_button(
+                    "Entrar",
+                    use_container_width=True
+                )
+
+            if entrar:
+
+                registro = df_acessos[
+                    df_acessos["Usuário"] == usuario_digitado
+                ]
+
+                perfil = None
+                nome = None
+                supervisao = None
+                senha_valida = False
+                precisa_criar_senha = False
+
+                if not registro.empty:
+
+                    linha = registro.iloc[0]
+
+                    perfil = str(linha.get("Perfil", "")).strip().casefold()
+                    nome = str(linha.get("Nome", "")).strip()
+
+                    hash_senha = str(linha.get("Senha Hash", "")).strip()
+                    salt = str(linha.get("Salt", "")).strip()
+
+                    primeiro_acesso = (
+                        str(linha.get("Primeiro acesso", "")).strip().casefold()
+                        == "sim"
+                    )
+
+                    if hash_senha and salt:
+
+                        senha_valida = verificar_senha(
+                            senha_digitada,
+                            hash_senha,
+                            salt
+                        )
+
+                    else:
+
+                        senha_provisoria = (
+                            senhas_supervisores.get(usuario_digitado)
+                            if perfil == "supervisor"
+                            else senhas_gerentes.get(usuario_digitado)
+                        )
+
+                        senha_valida = (
+                            senha_provisoria is not None
+                            and hmac.compare_digest(
+                                str(senha_digitada),
+                                str(senha_provisoria)
+                            )
+                        )
+
+                    precisa_criar_senha = primeiro_acesso or not hash_senha
+
+                if senha_valida and perfil in {"supervisor", "gerente"}:
+
+                    if precisa_criar_senha:
+
+                        st.session_state["usuario_novo"] = usuario_digitado
+                        st.session_state["criando_senha"] = True
+                        st.rerun()
+
+                    if perfil == "supervisor":
+                        supervisao = usuario_digitado
+
+                    st.session_state["usuario_logado"] = usuario_digitado
+                    st.session_state["perfil_acesso"] = perfil
+                    st.session_state["nome_acesso"] = nome
+                    st.session_state["supervisao_acesso"] = supervisao
+
+                    registrar_acesso(usuario_digitado, perfil, nome)
+
+                    st.rerun()
+
+                else:
+                    st.error("Usuário ou senha inválidos.")
 
     st.stop()
 
@@ -561,55 +805,9 @@ SUPERVISAO_ACESSO = st.session_state["supervisao_acesso"]
 
 
 # =========================================================
-# GOOGLE SHEETS
-# =========================================================
-
-SHEET_ID = "1bSYqD9wLkpMxTIGN6kyFh6zuVTixM384oQr8cGskYcM"
-ABA = "Aplicação"
-
-
-@st.cache_resource
-def get_client():
-
-    credenciais = Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=[
-            "https://www.googleapis.com/auth/spreadsheets.readonly"
-        ]
-    )
-
-    return gspread.authorize(credenciais)
-
-
-@st.cache_data(ttl=300)
-def carregar_dados():
-
-    try:
-
-        gc = get_client()
-
-        planilha = gc.open_by_key(SHEET_ID)
-        aba_aplicacao = planilha.worksheet(ABA)
-
-        valores = aba_aplicacao.get_all_values()
-
-        horario_atualizacao = datetime.now(
-            ZoneInfo("America/Sao_Paulo")
-        ).strftime("%d/%m/%Y às %H:%M")
-
-        return valores, horario_atualizacao
-
-    except Exception as erro:
-
-        raise RuntimeError(
-            "Não foi possível carregar os dados da planilha. "
-            "Verifique a conexão com o Google Sheets, as permissões "
-            "da conta de serviço ou tente atualizar novamente."
-        ) from erro
-
-
-# =========================================================
 # CARREGAMENTO
+# =========================================================
+
 # =========================================================
 
 try:
@@ -1526,6 +1724,8 @@ with col_sair:
         st.session_state["perfil_acesso"] = None
         st.session_state["nome_acesso"] = None
         st.session_state["supervisao_acesso"] = None
+        st.session_state["criando_senha"] = False
+        st.session_state["usuario_novo"] = None
         st.rerun()
 
 
