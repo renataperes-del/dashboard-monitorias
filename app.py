@@ -109,7 +109,7 @@ st.markdown(
         bottom: 0;
         width: 230px;
         padding: 30px 16px 22px;
-        background: linear-gradient(180deg, #607EAF 0%, #5A78A8 100%);
+        background: #5F7FAF;
         color: white;
         box-sizing: border-box;
         box-shadow: 6px 0 24px rgba(35, 53, 82, .08);
@@ -119,7 +119,7 @@ st.markdown(
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 0 8px 34px;
+        padding: 0 8px 28px;
     }}
 
     .sidebar-logo {{
@@ -129,7 +129,7 @@ st.markdown(
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255,255,255,.17);
+        background: rgba(255,255,255,.14);
         border: 1px solid rgba(255,255,255,.10);
         font-weight: 800;
         font-size: 15px;
@@ -155,7 +155,7 @@ st.markdown(
         display: flex;
         align-items: center;
         gap: 11px;
-        padding: 11px 10px;
+        padding: 10px 10px;
         margin: 3px 0;
         border-radius: 9px;
         color: rgba(255,255,255,.88);
@@ -172,7 +172,7 @@ st.markdown(
         background: rgba(255,255,255,.18);
         color: #fff;
         font-weight: 700;
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+        box-shadow: inset 3px 0 0 rgba(255,255,255,.72);
     }}
 
     .nav-icon {{
