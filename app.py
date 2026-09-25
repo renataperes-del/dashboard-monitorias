@@ -677,7 +677,23 @@ if not st.session_state["usuario_logado"]:
 
     st.markdown(
         """
-        <div style="text-align:center; margin:70px auto 22px;">
+        <style>
+        .block-container {
+            width: 100vw !important;
+            max-width: none !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding: 0 48px 40px !important;
+            box-sizing: border-box !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """
+        <div style="text-align:center; margin:0 auto 22px; padding-top:18vh;">
             <div style="font-size:11px;font-weight:800;letter-spacing:.10em;color:#4361EE;text-transform:uppercase;">
                 Nube • Treinamento Comercial
             </div>
