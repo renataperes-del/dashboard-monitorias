@@ -1763,6 +1763,35 @@ with col_filtro_supervisao:
 with col_filtro_status:
     status_selecionado = st.selectbox("Status", ["Todos", "Realizadas", "Pendentes"])
 
+# Quando o status for selecionado, transforma o filtro em um atalho de navegação.
+# A página continua com os indicadores gerais no topo, mas desce para o detalhe correspondente.
+if status_selecionado == "Pendentes":
+    st.html(
+        """
+        <script>
+        setTimeout(function() {
+            const alvo = document.getElementById("pendencias");
+            if (alvo) {
+                alvo.scrollIntoView({behavior: "smooth", block: "start"});
+            }
+        }, 150);
+        </script>
+        """
+    )
+elif status_selecionado == "Realizadas":
+    st.html(
+        """
+        <script>
+        setTimeout(function() {
+            const alvo = document.getElementById("detalhamento");
+            if (alvo) {
+                alvo.scrollIntoView({behavior: "smooth", block: "start"});
+            }
+        }, 150);
+        </script>
+        """
+    )
+
 
 df_filtrado = monitorias_google.copy()
 
@@ -2096,6 +2125,7 @@ with col_etapas:
 # =========================================================
 
 if supervisao_selecionada != "Todas":
+    st.html('<div id="detalhamento"></div>')
     st.write("")
     st.html(
         f"""
