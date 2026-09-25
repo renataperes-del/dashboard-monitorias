@@ -501,6 +501,27 @@ def carregar_dados():
         ) from erro
 
 
+def registrar_acesso(usuario, perfil, nome):
+
+    try:
+        gc = get_client()
+        planilha = gc.open_by_key(SHEET_ID)
+        aba_log = planilha.worksheet(ABA_LOG)
+
+        aba_log.append_row(
+            [
+                datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y %H:%M:%S"),
+                usuario,
+                perfil,
+                nome,
+            ],
+            value_input_option="USER_ENTERED"
+        )
+
+    except Exception:
+        pass
+
+
 # =========================================================
 # CONTROLE DE ACESSO
 # =========================================================
