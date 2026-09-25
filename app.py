@@ -477,6 +477,31 @@ def get_client():
     return gspread.authorize(credenciais)
 
 
+@st.cache_data(ttl=300)
+def carregar_dados():
+
+    try:
+
+        gc = get_client()
+        planilha = gc.open_by_key(SHEET_ID)
+        aba_aplicacao = planilha.worksheet(ABA)
+        valores = aba_aplicacao.get_all_values()
+
+        horario_atualizacao = datetime.now(
+            ZoneInfo("America/Sao_Paulo")
+        ).strftime("%d/%m/%Y às %H:%M")
+
+        return valores, horario_atualizacao
+
+    except Exception as erro:
+
+        raise RuntimeError(
+            "Não foi possível carregar os dados da planilha. "
+            "Verifique a conexão com o Google Sheets, as permissões "
+            "da conta de serviço ou tente atualizar novamente."
+        ) from erro
+
+
 def gerar_hash_senha(senha, salt=None):
 
     if salt is None:
