@@ -664,7 +664,10 @@ if not st.session_state["usuario_logado"]:
                 st.session_state["nome_acesso"] = nome
                 st.session_state["supervisao_acesso"] = supervisao
 
-                registrar_acesso(usuario_digitado, perfil, nome)
+                try:
+                    registrar_acesso(usuario_digitado, perfil, nome)
+                except Exception:
+                    pass
 
                 st.rerun()
 
