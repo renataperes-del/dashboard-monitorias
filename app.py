@@ -1505,23 +1505,35 @@ st.html(
     """
 )
 
-col_header, col_update = st.columns([5, 1])
+col_header, col_update, col_sair = st.columns([5, 0.85, 0.65])
 with col_header:
     st.html(
         f"""<div class="topbar">
             <div>
                 <div class="eyebrow">Nube • Treinamento Comercial</div>
                 <div class="page-title">Dashboard de Monitorias</div>
-                <div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div><div class="header-date">Última atualização dos dados: {data_consulta}</div>
+                <div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div>
+                <div style="color:#4361EE;font-size:12px;font-weight:700;margin-top:9px;">Olá, {html.escape(primeiro_nome(NOME_ACESSO).title())}!</div>
+                <div class="header-date">Última atualização dos dados: {data_consulta}</div>
             </div>
         </div>"""
     )
+
 with col_update:
     st.write("")
     if st.button("↻ Atualizar", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
     st.html(f'<div class="update-info">Dados atualizados em {data_consulta}</div>')
+
+with col_sair:
+    st.write("")
+    if st.button("Sair", use_container_width=True):
+        st.session_state["usuario_logado"] = None
+        st.session_state["perfil_acesso"] = None
+        st.session_state["nome_acesso"] = None
+        st.session_state["supervisao_acesso"] = None
+        st.rerun()
 
 
 # =========================================================
