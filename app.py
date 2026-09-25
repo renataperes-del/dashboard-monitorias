@@ -1596,10 +1596,33 @@ st.html(
 
 col_filtro_praca, col_filtro_supervisao, col_filtro_status = st.columns(3)
 
-opcoes_praca = ["Todas"] + list(pracas.keys())
+if PERFIL_ACESSO == "supervisor":
+    pracas_supervisor = sorted(
+        {
+            str(praca).strip()
+            for praca in monitorias_google.loc[
+                monitorias_google["Supervisão"].astype(str).map(primeiro_nome)
+                == primeiro_nome(SUPERVISAO_ACESSO),
+                "Praça"
+            ].dropna()
+            if str(praca).strip()
+        }
+    )
+
+    if pracas_supervisor:
+        opcoes_praca = [pracas_supervisor[0]]
+    else:
+        opcoes_praca = ["Sem praça"]
+
+else:
+    opcoes_praca = ["Todas"] + list(pracas.keys())
 
 with col_filtro_praca:
-    praca_selecionada = st.selectbox("Praça", opcoes_praca)
+    praca_selecionada = st.selectbox(
+        "Praça",
+        opcoes_praca,
+        disabled=(PERFIL_ACESSO == "supervisor")
+    )
 
 if praca_selecionada == "Todas":
     supervisoes_disponiveis = sorted(
