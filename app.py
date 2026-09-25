@@ -623,6 +623,46 @@ def salvar_nova_senha(usuario, senha):
     return False
 
 
+def recuperar_senha(usuario):
+
+    gc = get_client()
+    planilha = gc.open_by_key(SHEET_ID)
+    aba_acessos = planilha.worksheet(ABA_ACESSOS)
+
+    valores = aba_acessos.get_all_values()
+
+    if not valores:
+        return False
+
+    cabecalhos = valores[0]
+
+    try:
+        idx_usuario = cabecalhos.index("Usuário")
+        idx_primeiro = cabecalhos.index("Primeiro acesso")
+        idx_hash = cabecalhos.index("Senha Hash")
+        idx_salt = cabecalhos.index("Salt")
+    except ValueError:
+        return False
+
+    for numero_linha, linha in enumerate(valores[1:], start=2):
+
+        usuario_planilha = (
+            str(linha[idx_usuario]).strip().casefold()
+            if len(linha) > idx_usuario
+            else ""
+        )
+
+        if usuario_planilha == usuario:
+
+            aba_acessos.update_cell(numero_linha, idx_hash + 1, "")
+            aba_acessos.update_cell(numero_linha, idx_salt + 1, "")
+            aba_acessos.update_cell(numero_linha, idx_primeiro + 1, "Sim")
+
+            return True
+
+    return False
+
+
 # =========================================================
 # CONTROLE DE ACESSO
 # =========================================================
@@ -670,6 +710,7 @@ if "usuario_logado" not in st.session_state:
     st.session_state["nome_acesso"] = None
     st.session_state["supervisao_acesso"] = None
     st.session_state["criando_senha"] = False
+    st.session_state["recuperando_senha"] = False
     st.session_state["usuario_novo"] = None
 
 if not st.session_state["usuario_logado"]:
@@ -695,7 +736,40 @@ if not st.session_state["usuario_logado"]:
 
     with col_login:
 
-        if st.session_state["criando_senha"]:
+        if st.session_state["recuperando_senha"]:
+
+            st.subheader("Recuperar senha")
+            st.caption("Informe seu usuário para redefinir o acesso.")
+
+            with st.form("form_recuperar_senha"):
+
+                usuario_recuperacao = st.text_input("Usuário").strip().casefold()
+                recuperar = st.form_submit_button(
+                    "Recuperar acesso",
+                    use_container_width=True
+                )
+
+            if recuperar:
+
+                if usuario_recuperacao == "treinamento":
+                    st.info("O acesso de Treinamento usa uma senha compartilhada definida nos Secrets. Procure a área de Treinamento para recuperar esse acesso.")
+
+                elif usuario_recuperacao in df_acessos["Usuário"].values:
+                    if recuperar_senha(usuario_recuperacao):
+                        st.success("Acesso redefinido! Use sua senha provisória para entrar e crie uma nova senha.")
+                        st.session_state["recuperando_senha"] = False
+                        st.rerun()
+                    else:
+                        st.error("Não foi possível redefinir o acesso.")
+
+                else:
+                    st.error("Usuário não encontrado.")
+
+            if st.button("Voltar para o login", use_container_width=True):
+                st.session_state["recuperando_senha"] = False
+                st.rerun()
+
+        elif st.session_state["criando_senha"]:
 
             st.subheader("Crie sua senha")
             st.caption("Defina uma senha pessoal para os próximos acessos.")
@@ -833,6 +907,10 @@ if not st.session_state["usuario_logado"]:
 
                 else:
                     st.error("Usuário ou senha inválidos.")
+
+            if st.button("Esqueci minha senha", use_container_width=True):
+                st.session_state["recuperando_senha"] = True
+                st.rerun()
 
     st.stop()
 
