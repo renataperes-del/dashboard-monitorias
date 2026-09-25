@@ -438,79 +438,79 @@ st.markdown(
        CARDS DE EQUIPE
        ===================================================== */
 
-    .team-grid {
+    .team-grid {{
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
         margin-top: 10px;
-    }
+    }}
 
-    .team-card {
+    .team-card {{
         background: #FFFFFF;
         border: 1px solid #E7EAF1;
         border-radius: 12px;
         padding: 13px 14px;
         box-shadow: 0 4px 14px rgba(31,41,55,.035);
-    }
+    }}
 
-    .team-card:hover {
+    .team-card:hover {{
         border-color: #D7DDF0;
         box-shadow: 0 7px 18px rgba(31,41,55,.055);
-    }
+    }}
 
-    .team-name {
+    .team-name {{
         color: #1F2937;
         font-size: 12px;
         font-weight: 800;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-    }
+    }}
 
-    .team-number {
+    .team-number {{
         color: #1F2937;
         font-size: 25px;
         line-height: 1;
         font-weight: 800;
         margin-top: 9px;
         letter-spacing: -.035em;
-    }
+    }}
 
-    .team-label {
+    .team-label {{
         color: #7B8494;
         font-size: 9px;
         margin-top: 4px;
-    }
+    }}
 
-    .team-progress {
+    .team-progress {{
         height: 5px;
         background: #EEF1F6;
         border-radius: 999px;
         overflow: hidden;
         margin-top: 12px;
-    }
+    }}
 
-    .team-progress-fill {
+    .team-progress-fill {{
         height: 100%;
         background: #4361EE;
         border-radius: 999px;
-    }
+    }}
 
-    .team-status {
+    .team-status {{
         display: flex;
         justify-content: space-between;
         gap: 8px;
         margin-top: 8px;
         font-size: 9px;
         font-weight: 700;
-    }
-
-    .team-realizada { color: #059669; }
-    .team-pendente { color: #D97706; }
-
-    @media (max-width: 700px) {{
-        .team-grid {{ grid-template-columns: 1fr; }}
     }}
+
+    .team-realizada {{ color: #059669; }}
+    .team-pendente {{ color: #D97706; }}
+
+    @media (max-width: 700px) {{{{
+        .team-grid {{{{ grid-template-columns: 1fr; }}}}
+    }}}}
 
     /* =====================================================
        RESPONSIVO
