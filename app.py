@@ -459,6 +459,114 @@ st.markdown(
 )
 
 # =========================================================
+# CONTROLE DE ACESSO
+# =========================================================
+
+# As senhas ficam nos Secrets do Streamlit, nunca no código/GitHub.
+# Estrutura esperada:
+#
+# [usuarios.supervisores]
+# julio = "senha-do-julio"
+# ...
+#
+# [usuarios.gerentes]
+# danielly = "senha-da-danielly"
+# ...
+
+USUARIOS_SUPERVISORES = {
+    "julio": "Júlio Castro",
+    "jean": "Jean Santos",
+    "wesley": "Wesley Martins",
+    "kelly": "Kelly Querido",
+    "murilo": "Murilo Henrique",
+    "alexssander": "Alexssander Silva",
+    "laila": "Laila Rodrigues",
+    "camila": "Camila Dias",
+    "maiara": "Maiara Bravo",
+    "leticia": "Leticia Santos",
+    "karine": "Karine Rodrigues",
+    "angelica": "Angélica Oliveira",
+}
+
+USUARIOS_GERENTES = {
+    "danielly": "Danielly Palaro",
+    "caio": "Caio Marques",
+    "darlene": "Darlene Carvalho",
+    "evelyn": "Evelyn Viegas",
+}
+
+usuarios_secrets = st.secrets.get("usuarios", {})
+senhas_supervisores = usuarios_secrets.get("supervisores", {})
+senhas_gerentes = usuarios_secrets.get("gerentes", {})
+
+if "usuario_logado" not in st.session_state:
+    st.session_state["usuario_logado"] = None
+    st.session_state["perfil_acesso"] = None
+    st.session_state["nome_acesso"] = None
+    st.session_state["supervisao_acesso"] = None
+
+if not st.session_state["usuario_logado"]:
+    st.markdown(
+        """
+        <div style="text-align:center; margin:70px auto 22px;">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.10em;color:#4361EE;text-transform:uppercase;">
+                Nube • Treinamento Comercial
+            </div>
+            <div style="font-size:30px;font-weight:800;color:#1F2937;margin-top:8px;">
+                Dashboard de Monitorias
+            </div>
+            <div style="font-size:12px;color:#6B7280;margin-top:7px;">
+                Acesso restrito
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    col_login_esq, col_login, col_login_dir = st.columns([1.3, 1, 1.3])
+
+    with col_login:
+        with st.form("form_login"):
+            usuario_digitado = st.text_input("Usuário").strip().casefold()
+            senha_digitada = st.text_input("Senha", type="password")
+            entrar = st.form_submit_button("Entrar", use_container_width=True)
+
+        if entrar:
+            perfil = None
+            nome = None
+            supervisao = None
+
+            if usuario_digitado in USUARIOS_SUPERVISORES:
+                senha_cadastrada = senhas_supervisores.get(usuario_digitado)
+                if senha_cadastrada and hmac.compare_digest(str(senha_digitada), str(senha_cadastrada)):
+                    perfil = "supervisor"
+                    nome = USUARIOS_SUPERVISORES[usuario_digitado]
+                    supervisao = usuario_digitado
+
+            elif usuario_digitado in USUARIOS_GERENTES:
+                senha_cadastrada = senhas_gerentes.get(usuario_digitado)
+                if senha_cadastrada and hmac.compare_digest(str(senha_digitada), str(senha_cadastrada)):
+                    perfil = "gerente"
+                    nome = USUARIOS_GERENTES[usuario_digitado]
+
+            if perfil:
+                st.session_state["usuario_logado"] = usuario_digitado
+                st.session_state["perfil_acesso"] = perfil
+                st.session_state["nome_acesso"] = nome
+                st.session_state["supervisao_acesso"] = supervisao
+                st.rerun()
+            else:
+                st.error("Usuário ou senha inválidos.")
+
+    st.stop()
+
+
+PERFIL_ACESSO = st.session_state["perfil_acesso"]
+NOME_ACESSO = st.session_state["nome_acesso"]
+SUPERVISAO_ACESSO = st.session_state["supervisao_acesso"]
+
+
+# =========================================================
 # GOOGLE SHEETS
 # =========================================================
 
@@ -641,6 +749,23 @@ monitorias_google["Supervisão"] = (
     .astype("string")
     .str.strip()
 )
+
+
+# Supervisor visualiza exclusivamente os registros da própria equipe.
+# O filtro é aplicado no dataframe base, antes dos indicadores, gráficos e tabelas.
+if PERFIL_ACESSO == "supervisor":
+    supervisao_alvo = normalizar_texto(SUPERVISAO_ACESSO)
+    monitorias_google = monitorias_google[
+        monitorias_google["Supervisão"].astype(str).map(primeiro_nome)
+        == supervisao_alvo
+    ].copy()
+
+    if monitorias_google.empty:
+        st.error(
+            f"Nenhum registro encontrado para a supervisão de {NOME_ACESSO}. "
+            "Verifique o nome da supervisão na aba 'Aplicação'."
+        )
+        st.stop()
 
 
 monitorias_google["Nome Normalizado"] = monitorias_google["Colaborador"].apply(normalizar_texto)
