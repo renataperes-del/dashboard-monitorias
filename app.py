@@ -508,9 +508,9 @@ st.markdown(
     .team-realizada { color: #059669; }
     .team-pendente { color: #D97706; }
 
-    @media (max-width: 700px) {
-        .team-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 700px) {{
+        .team-grid {{ grid-template-columns: 1fr; }}
+    }}
 
     /* =====================================================
        RESPONSIVO
