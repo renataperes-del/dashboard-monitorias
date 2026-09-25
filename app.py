@@ -1782,9 +1782,10 @@ elif status_selecionado == "Pendentes":
 else:
     df_lista = df_filtrado.copy()
 
-# O status selecionado passa a controlar toda a visão do dashboard.
-# Assim, indicadores, gráficos, cards e listas usam exatamente o mesmo recorte.
-df_ativo = df_lista.copy()
+# Mantém o universo completo para os indicadores e gráficos de acompanhamento.
+# O status selecionado é aplicado aos detalhamentos/listas abaixo.
+df_ativo = df_filtrado.copy()
+df_status = df_lista.copy()
 
 filtros_ativos = []
 if praca_selecionada != "Todas":
