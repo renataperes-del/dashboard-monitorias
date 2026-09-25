@@ -460,7 +460,6 @@ st.markdown(
 
 SHEET_ID = "1bSYqD9wLkpMxTIGN6kyFh6zuVTixM384oQr8cGskYcM"
 ABA = "Aplicação"
-ABA_ACESSOS = "Acessos"
 ABA_LOG = "Log_Acessos"
 
 
@@ -502,128 +501,6 @@ def carregar_dados():
         ) from erro
 
 
-def gerar_hash_senha(senha, salt=None):
-
-    if salt is None:
-        salt = secrets.token_hex(16)
-
-    hash_senha = hashlib.pbkdf2_hmac(
-        "sha256",
-        senha.encode("utf-8"),
-        salt.encode("utf-8"),
-        120000
-    ).hex()
-
-    return hash_senha, salt
-
-
-def verificar_senha(senha, hash_senha, salt):
-
-    hash_calculado, _ = gerar_hash_senha(senha, salt)
-
-    return hmac.compare_digest(hash_calculado, str(hash_senha))
-
-
-def carregar_acessos():
-
-    gc = get_client()
-    planilha = gc.open_by_key(SHEET_ID)
-    aba_acessos = planilha.worksheet(ABA_ACESSOS)
-
-    valores = aba_acessos.get_all_values()
-
-    if not valores:
-        return pd.DataFrame()
-
-    cabecalhos = [str(x).strip() for x in valores[0]]
-
-    for coluna in ["Senha Hash", "Salt"]:
-        if coluna not in cabecalhos:
-            cabecalhos.append(coluna)
-
-    if cabecalhos != [str(x).strip() for x in valores[0]]:
-        aba_acessos.update("A1", [cabecalhos])
-
-    linhas = []
-
-    for linha in valores[1:]:
-        linha = list(linha)
-        linha += [""] * (len(cabecalhos) - len(linha))
-        linhas.append(linha[:len(cabecalhos)])
-
-    if not linhas:
-        return pd.DataFrame(columns=cabecalhos)
-
-    df = pd.DataFrame(linhas, columns=cabecalhos)
-    df["Usuário"] = df["Usuário"].astype(str).str.strip().str.casefold()
-
-    return df
-
-
-def registrar_acesso(usuario, perfil, nome):
-
-    try:
-
-        gc = get_client()
-        planilha = gc.open_by_key(SHEET_ID)
-        aba_log = planilha.worksheet(ABA_LOG)
-
-        horario = datetime.now(
-            ZoneInfo("America/Sao_Paulo")
-        ).strftime("%d/%m/%Y %H:%M:%S")
-
-        aba_log.append_row(
-            [horario, usuario, perfil, nome],
-            value_input_option="USER_ENTERED"
-        )
-
-    except Exception:
-        pass
-
-
-def salvar_nova_senha(usuario, senha):
-
-    gc = get_client()
-    planilha = gc.open_by_key(SHEET_ID)
-    aba_acessos = planilha.worksheet(ABA_ACESSOS)
-
-    valores = aba_acessos.get_all_values()
-
-    if not valores:
-        return False
-
-    cabecalhos = valores[0]
-
-    try:
-        idx_usuario = cabecalhos.index("Usuário")
-        idx_primeiro = cabecalhos.index("Primeiro acesso")
-        idx_hash = cabecalhos.index("Senha Hash")
-        idx_salt = cabecalhos.index("Salt")
-    except ValueError:
-        return False
-
-    hash_senha, salt = gerar_hash_senha(senha)
-
-    for numero_linha, linha in enumerate(valores[1:], start=2):
-
-        usuario_planilha = (
-            str(linha[idx_usuario]).strip().casefold()
-            if len(linha) > idx_usuario
-            else ""
-        )
-
-        if usuario_planilha == usuario:
-
-            aba_acessos.update_cell(numero_linha, idx_hash + 1, hash_senha)
-            aba_acessos.update_cell(numero_linha, idx_salt + 1, salt)
-            aba_acessos.update_cell(numero_linha, idx_primeiro + 1, "Não")
-
-            return True
-
-    return False
-
-
-
 # =========================================================
 # CONTROLE DE ACESSO
 # =========================================================
@@ -655,23 +532,11 @@ senhas_supervisores = usuarios_secrets.get("supervisores", {})
 senhas_gerentes = usuarios_secrets.get("gerentes", {})
 senha_treinamento = usuarios_secrets.get("treinamento", "")
 
-try:
-    df_acessos = carregar_acessos()
-except Exception:
-    st.error(
-        "Não foi possível acessar a aba 'Acessos'. "
-        "Verifique se as abas Acessos e Log_Acessos existem "
-        "e se a conta de serviço está como Editor."
-    )
-    st.stop()
-
 if "usuario_logado" not in st.session_state:
     st.session_state["usuario_logado"] = None
     st.session_state["perfil_acesso"] = None
     st.session_state["nome_acesso"] = None
     st.session_state["supervisao_acesso"] = None
-    st.session_state["criando_senha"] = False
-    st.session_state["usuario_novo"] = None
 
 if not st.session_state["usuario_logado"]:
 
@@ -712,144 +577,76 @@ if not st.session_state["usuario_logado"]:
 
     with col_login:
 
-        if st.session_state["criando_senha"]:
+        with st.form("form_login"):
 
-            st.subheader("Crie sua senha")
-            st.caption("Defina uma senha pessoal para os próximos acessos.")
+            usuario_digitado = st.text_input("Usuário").strip().casefold()
+            senha_digitada = st.text_input("Senha", type="password")
 
-            with st.form("form_nova_senha"):
+            entrar = st.form_submit_button(
+                "Entrar",
+                use_container_width=True
+            )
 
-                nova_senha = st.text_input("Nova senha", type="password")
-                confirmar_senha = st.text_input("Confirmar nova senha", type="password")
+        if entrar:
 
-                salvar_senha = st.form_submit_button(
-                    "Salvar senha",
-                    use_container_width=True
+            perfil = None
+            nome = None
+            supervisao = None
+            senha_valida = False
+
+            if usuario_digitado == "treinamento" and senha_treinamento:
+
+                perfil = "treinamento"
+                nome = "Treinamento Comercial"
+                senha_valida = hmac.compare_digest(
+                    str(senha_digitada),
+                    str(senha_treinamento)
                 )
 
-            if salvar_senha:
+            elif usuario_digitado in USUARIOS_SUPERVISORES:
 
-                if len(nova_senha) < 8:
-                    st.error("A senha deve ter pelo menos 8 caracteres.")
+                perfil = "supervisor"
+                nome = USUARIOS_SUPERVISORES[usuario_digitado]
+                senha_provisoria = senhas_supervisores.get(usuario_digitado)
 
-                elif nova_senha != confirmar_senha:
-                    st.error("As senhas não coincidem.")
+                senha_valida = (
+                    senha_provisoria is not None
+                    and hmac.compare_digest(
+                        str(senha_digitada),
+                        str(senha_provisoria)
+                    )
+                )
 
-                elif salvar_nova_senha(
-                    st.session_state["usuario_novo"],
-                    nova_senha
-                ):
+            elif usuario_digitado in USUARIOS_GERENTES:
 
-                    st.session_state["criando_senha"] = False
-                    st.success("Senha criada com sucesso! Faça seu login novamente.")
-                    st.rerun()
+                perfil = "gerente"
+                nome = USUARIOS_GERENTES[usuario_digitado]
+                senha_provisoria = senhas_gerentes.get(usuario_digitado)
 
-                else:
-                    st.error("Não foi possível salvar sua senha.")
+                senha_valida = (
+                    senha_provisoria is not None
+                    and hmac.compare_digest(
+                        str(senha_digitada),
+                        str(senha_provisoria)
+                    )
+                )
 
-            if st.button("Voltar para o login", use_container_width=True):
-                st.session_state["criando_senha"] = False
+            if senha_valida and perfil in {"supervisor", "gerente", "treinamento"}:
+
+                if perfil == "supervisor":
+                    supervisao = usuario_digitado
+
+                st.session_state["usuario_logado"] = usuario_digitado
+                st.session_state["perfil_acesso"] = perfil
+                st.session_state["nome_acesso"] = nome
+                st.session_state["supervisao_acesso"] = supervisao
+
+                registrar_acesso(usuario_digitado, perfil, nome)
+
                 st.rerun()
 
-        else:
-
-            with st.form("form_login"):
-
-                usuario_digitado = st.text_input("Usuário").strip().casefold()
-                senha_digitada = st.text_input("Senha", type="password")
-
-                entrar = st.form_submit_button(
-                    "Entrar",
-                    use_container_width=True
-                )
-
-            if entrar:
-
-                registro = df_acessos[
-                    df_acessos["Usuário"] == usuario_digitado
-                ]
-
-                perfil = None
-                nome = None
-                supervisao = None
-                senha_valida = False
-                precisa_criar_senha = False
-
-                # Acesso exclusivo da área de Treinamento.
-                # A senha fica no Streamlit Secrets e não depende da aba "Acessos".
-                if usuario_digitado == "treinamento" and senha_treinamento:
-
-                    perfil = "treinamento"
-                    nome = "Treinamento Comercial"
-                    senha_valida = hmac.compare_digest(
-                        str(senha_digitada),
-                        str(senha_treinamento)
-                    )
-                    precisa_criar_senha = False
-
-                elif not registro.empty:
-
-                    linha = registro.iloc[0]
-
-                    perfil = str(linha.get("Perfil", "")).strip().casefold()
-                    nome = str(linha.get("Nome", "")).strip()
-
-                    hash_senha = str(linha.get("Senha Hash", "")).strip()
-                    salt = str(linha.get("Salt", "")).strip()
-
-                    primeiro_acesso = (
-                        str(linha.get("Primeiro acesso", "")).strip().casefold()
-                        == "sim"
-                    )
-
-                    if hash_senha and salt:
-
-                        senha_valida = verificar_senha(
-                            senha_digitada,
-                            hash_senha,
-                            salt
-                        )
-
-                    else:
-
-                        senha_provisoria = (
-                            senhas_supervisores.get(usuario_digitado)
-                            if perfil == "supervisor"
-                            else senhas_gerentes.get(usuario_digitado)
-                        )
-
-                        senha_valida = (
-                            senha_provisoria is not None
-                            and hmac.compare_digest(
-                                str(senha_digitada),
-                                str(senha_provisoria)
-                            )
-                        )
-
-                    precisa_criar_senha = primeiro_acesso or not hash_senha
-
-                if senha_valida and perfil in {"supervisor", "gerente", "treinamento"}:
-
-                    if precisa_criar_senha:
-
-                        st.session_state["usuario_novo"] = usuario_digitado
-                        st.session_state["criando_senha"] = True
-                        st.rerun()
-
-                    if perfil == "supervisor":
-                        supervisao = usuario_digitado
-
-                    st.session_state["usuario_logado"] = usuario_digitado
-                    st.session_state["perfil_acesso"] = perfil
-                    st.session_state["nome_acesso"] = nome
-                    st.session_state["supervisao_acesso"] = supervisao
-
-                    registrar_acesso(usuario_digitado, perfil, nome)
-
-                    st.rerun()
-
-                else:
-                    st.error("Usuário ou senha inválidos.")
+            else:
+                st.error("Usuário ou senha inválidos.")
 
     st.stop()
 
@@ -1779,9 +1576,7 @@ with col_sair:
         st.session_state["perfil_acesso"] = None
         st.session_state["nome_acesso"] = None
         st.session_state["supervisao_acesso"] = None
-        st.session_state["criando_senha"] = False
-        st.session_state["usuario_novo"] = None
-        st.rerun()
+                st.rerun()
 
 
 # =========================================================
