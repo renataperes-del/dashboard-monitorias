@@ -208,7 +208,7 @@ st.markdown(
 
     .eyebrow {{
         color: {PRIMARY};
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 800;
         letter-spacing: .10em;
         text-transform: uppercase;
@@ -216,7 +216,7 @@ st.markdown(
 
     .page-title {{
         color: {TEXT};
-        font-size: 30px;
+        font-size: 40px;
         line-height: 1.08;
         font-weight: 800;
         letter-spacing: -.045em;
@@ -225,13 +225,13 @@ st.markdown(
 
     .page-subtitle {{
         color: {SECONDARY};
-        font-size: 12px;
+        font-size: 15px;
         margin-top: 7px;
     }}
 
     .header-date {{
         color: #7B8494;
-        font-size: 10px;
+        font-size: 11px;
         margin-bottom: 12px;
     }}
 
@@ -1513,7 +1513,7 @@ with col_header:
                 <div class="eyebrow">Nube • Treinamento Comercial</div>
                 <div class="page-title">Dashboard de Monitorias</div>
                 <div class="page-subtitle">Acompanhamento das aplicações e evolução das equipes</div>
-                <div style="color:#4361EE;font-size:12px;font-weight:700;margin-top:9px;">Olá, {html.escape(primeiro_nome(NOME_ACESSO).title())}!</div>
+                <div style="color:#4361EE;font-size:14px;font-weight:700;margin-top:11px;">Olá, {html.escape(primeiro_nome(NOME_ACESSO).title())}!</div>
                 <div class="header-date">Última atualização dos dados: {data_consulta}</div>
             </div>
         </div>"""
