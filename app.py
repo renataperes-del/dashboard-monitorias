@@ -1640,7 +1640,7 @@ st.html(
         <div class="nav-label">Monitorias</div>
         <a class="nav-item active" href="#visao-geral"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-5h5v5"/></svg></span> Visão geral</a>
         <a class="nav-item" href="#indicadores"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span> Indicadores</a>
-        <a class="nav-item" href="#supervisores"><span class="nav-icon"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-3.5 3.1-5 7-5s6.2 1.5 7 5"/></svg></span> Supervisores</a>
+        <a class="nav-item" href="#supervisores"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-3.5 3.1-5 7-5s6.2 1.5 7 5"/></svg></span> Supervisores</a>
         <a class="nav-item" href="#pendencias"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12M6 12h12M6 17h8"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></span> Pendências</a>
         <div class="nav-label" style="margin-top:20px;">Acompanhamento</div>
         <a class="nav-item" href="#evolucao"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l5-5 4 3 7-8"/><path d="M16 7h4v4"/></svg></span> Evolução</a>
