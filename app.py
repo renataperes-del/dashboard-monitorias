@@ -627,6 +627,7 @@ USUARIOS_GERENTES = {
 usuarios_secrets = st.secrets.get("usuarios", {})
 senhas_supervisores = usuarios_secrets.get("supervisores", {})
 senhas_gerentes = usuarios_secrets.get("gerentes", {})
+senha_treinamento = usuarios_secrets.get("treinamento", "")
 
 try:
     df_acessos = carregar_acessos()
@@ -732,7 +733,19 @@ if not st.session_state["usuario_logado"]:
                 senha_valida = False
                 precisa_criar_senha = False
 
-                if not registro.empty:
+                # Acesso exclusivo da área de Treinamento.
+                # A senha fica no Streamlit Secrets e não depende da aba "Acessos".
+                if usuario_digitado == "treinamento" and senha_treinamento:
+
+                    perfil = "treinamento"
+                    nome = "Treinamento Comercial"
+                    senha_valida = hmac.compare_digest(
+                        str(senha_digitada),
+                        str(senha_treinamento)
+                    )
+                    precisa_criar_senha = False
+
+                elif not registro.empty:
 
                     linha = registro.iloc[0]
 
@@ -773,7 +786,7 @@ if not st.session_state["usuario_logado"]:
 
                     precisa_criar_senha = primeiro_acesso or not hash_senha
 
-                if senha_valida and perfil in {"supervisor", "gerente"}:
+                if senha_valida and perfil in {"supervisor", "gerente", "treinamento"}:
 
                     if precisa_criar_senha:
 
