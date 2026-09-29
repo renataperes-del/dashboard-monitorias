@@ -798,26 +798,21 @@ COLUNAS_ESPERADAS = [
     "Colaborador", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria",
     "Ligação 1", "Ligação 2", "Data Lado a Lado", "Quem Aplicou Lado a Lado",
     "Observação Lado a Lado", "Data Monitoria Offline", "Quem Aplicou Offline",
-    "Percentual Offline", "Observações Gerais", "Média das 2 ligações"
+    "Percentual Offline", "Observações Gerais"
 ]
 
 # A aba possui 3 linhas de cabeçalho. Os dados começam na linha 4.
-# A estrutura original usa posições fixas. A coluna "Média das 2 ligações"
-# foi adicionada ao final da estrutura, portanto preservamos as posições
-# das colunas existentes para não deslocar datas/campos.
+# Mantemos o mapeamento posicional para não confundir os cabeçalhos
+# de Monitoria, Lado a Lado e Monitoria Offline.
 linhas_dados = []
-
 for numero_planilha, linha in enumerate(dados_aplicacao[3:], start=4):
     linha = list(linha)
-
     if len(linha) < len(COLUNAS_ESPERADAS):
         linha = linha + [""] * (len(COLUNAS_ESPERADAS) - len(linha))
-
     registro = {
         coluna: linha[indice]
         for indice, coluna in enumerate(COLUNAS_ESPERADAS)
     }
-
     registro["_Linha Planilha"] = numero_planilha
     linhas_dados.append(registro)
 
@@ -954,7 +949,7 @@ for coluna in COLUNAS_DATA:
 
     convertida = pd.to_datetime(
         texto_original,
-        dayfirst=True,
+        format="%d/%m/%Y",
         errors="coerce"
     )
 
@@ -1198,75 +1193,9 @@ monitorias_google["Função"] = (
     .fillna("Não identificado")
 )
 
-# =========================================================
-# POPULAÇÃO OFICIAL DA MONITORIA
-# =========================================================
-# A análise considera exclusivamente Exec + Apoio ADM.
-# Apoio Comercial, Apoio de Treinamento Comercial, equipes fora do
-# programa e pessoas que não pertencem ao Nube ficam fora de todos
-# os indicadores, médias, pendências e rankings.
-
-NOMES_EXCLUIDOS_ABSOLUTAMENTE = {
-    normalizar_texto("Ana Julia Araújo Vilas Boas Almeida")
-}
-
-monitorias_google = monitorias_google[
-    monitorias_google["Função"].isin(["Exec", "Apoio ADM"])
-    & ~monitorias_google["Nome Normalizado"].isin(NOMES_EXCLUIDOS_ABSOLUTAMENTE)
-].copy()
-
-if monitorias_google.empty:
-    st.error("Nenhum colaborador elegível foi encontrado na população oficial.")
-    st.stop()
-
 
 # =========================================================
-# NOTAS OFICIAIS
-# =========================================================
-# A fonte oficial da média é a coluna "Média das 2 ligações" da planilha.
-# O dicionário antigo de notas foi removido da lógica do dashboard.
-
-def converter_media_oficial(valor):
-    if pd.isna(valor):
-        return None
-
-    texto = str(valor).strip()
-    if not texto:
-        return None
-
-    tinha_percentual = "%" in texto
-    texto = (
-        texto.replace("%", "")
-        .replace(" ", "")
-        .replace(",", ".")
-    )
-
-    try:
-        numero = float(texto)
-    except (TypeError, ValueError):
-        return None
-
-    # Se a planilha estiver armazenando 0,6133 em vez de 61,33,
-    # convertemos para a escala percentual. Valores já em 0-100 permanecem.
-    if not tinha_percentual and 0 <= numero <= 1:
-        numero *= 100
-
-    return numero
-
-
-monitorias_google["Média"] = (
-    monitorias_google["Média das 2 ligações"]
-    .apply(converter_media_oficial)
-)
-
-monitorias_google["Média"] = pd.to_numeric(
-    monitorias_google["Média"],
-    errors="coerce"
-)
-
-
-# =========================================================
-# STATUS OFICIAL
+# NOTAS
 # =========================================================
 
 notas_monitoria = {
@@ -1698,116 +1627,6 @@ def html_lista(titulo, dataframe, mostrar_nota=True):
 
 
 # =========================================================
-# ANÁLISE OFICIAL DE MÉDIAS
-# =========================================================
-
-def resumo_nivel(dataframe, coluna_nivel):
-    base = dataframe.copy()
-    base["Média"] = pd.to_numeric(base["Média"], errors="coerce")
-    base["_AvaliadoValido"] = base["Realizada"] & base["Média"].notna()
-
-    agrupado = (
-        base.groupby(coluna_nivel, dropna=False)
-        .agg(
-            Colaboradores=("Colaborador", "size"),
-            Avaliados=("_AvaliadoValido", "sum")
-        )
-        .reset_index()
-    )
-
-    medias = (
-        base.loc[base["_AvaliadoValido"]]
-        .groupby(coluna_nivel, dropna=False)["Média"]
-        .mean()
-        .rename("Média")
-        .reset_index()
-    )
-
-    agrupado = agrupado.merge(medias, on=coluna_nivel, how="left")
-
-    agrupado["Pendentes"] = agrupado["Colaboradores"] - agrupado["Avaliados"]
-    agrupado["Média"] = agrupado["Média"].round(2)
-
-    return agrupado
-
-
-def resumo_hierarquico(dataframe):
-    base = dataframe.copy()
-    base["Média"] = pd.to_numeric(base["Média"], errors="coerce")
-    base["_AvaliadoValido"] = base["Realizada"] & base["Média"].notna()
-
-    linhas = []
-
-    # Geral
-    avaliados_geral = int(base["_AvaliadoValido"].sum())
-    linhas.append({
-        "Nível": "Geral",
-        "Grupo": "Todos",
-        "Colaboradores": len(base),
-        "Avaliados": avaliados_geral,
-        "Pendentes": len(base) - avaliados_geral,
-        "Média": base.loc[base["_AvaliadoValido"], "Média"].mean()
-    })
-
-    # Praça → Supervisão → Colaborador
-    for praca, df_praca in base.groupby("Praça", dropna=False):
-        nome_praca = praca if pd.notna(praca) and str(praca).strip() else "Sem praça"
-        linhas.append({
-            "Nível": "Praça",
-            "Grupo": nome_praca,
-            "Colaboradores": len(df_praca),
-            "Avaliados": int(df_praca["Média"].notna().sum()),
-            "Pendentes": int(df_praca["Média"].isna().sum()),
-            "Média": df_praca.loc[
-                df_praca["Realizada"] & df_praca["Média"].notna(),
-                "Média"
-            ].mean()
-        })
-
-        for supervisao, df_supervisao in df_praca.groupby("Supervisão", dropna=False):
-            nome_supervisao = (
-                supervisao_canonica_por_primeiro_nome.get(
-                    primeiro_nome(supervisao),
-                    str(supervisao).strip() if pd.notna(supervisao) else "Sem supervisão"
-                )
-            )
-            linhas.append({
-                "Nível": "Supervisão",
-                "Grupo": nome_supervisao,
-                "Colaboradores": len(df_supervisao),
-                "Avaliados": int(df_supervisao["Média"].notna().sum()),
-                "Pendentes": int(df_supervisao["Média"].isna().sum()),
-                "Média": df_supervisao.loc[
-                    df_supervisao["Realizada"] & df_supervisao["Média"].notna(),
-                    "Média"
-                ].mean()
-            })
-
-            for _, pessoa in df_supervisao.iterrows():
-                linhas.append({
-                    "Nível": "Colaborador",
-                    "Grupo": pessoa["Colaborador"],
-                    "Colaboradores": 1,
-                    "Avaliados": int(bool(pessoa["Realizada"]) and pd.notna(pessoa["Média"])),
-                    "Pendentes": int(not (bool(pessoa["Realizada"]) and pd.notna(pessoa["Média"]))),
-                    "Média": pessoa["Média"] if bool(pessoa["Realizada"]) and pd.notna(pessoa["Média"]) else None
-                })
-
-    resultado = pd.DataFrame(linhas)
-    resultado["Média"] = pd.to_numeric(resultado["Média"], errors="coerce").round(2)
-    return resultado
-
-
-# Base oficial para médias: apenas pessoas elegíveis.
-df_analise = monitorias_google.copy()
-df_analise["Média"] = pd.to_numeric(df_analise["Média"], errors="coerce")
-
-# Resumos independentes dos filtros de status, para que "Pendentes" não
-# faça desaparecer a média oficial da equipe.
-resumo_geral = resumo_hierarquico(df_analise)
-
-
-# =========================================================
 # INTERFACE DA DASHBOARD
 # =========================================================
 
@@ -2014,10 +1833,7 @@ percentual_concluido = (
     total_realizadas / total_colaboradores * 100
     if total_colaboradores else 0
 )
-notas_validas = df_ativo.loc[
-    df_ativo["Realizada"] & df_ativo["Média"].notna(),
-    "Média"
-]
+notas_validas = df_ativo.loc[df_ativo["Média"].notna(), "Média"]
 media_geral = notas_validas.mean() if not notas_validas.empty else None
 
 col1, col2, col3, col4, col5 = st.columns(5)
@@ -2041,80 +1857,6 @@ for coluna, (titulo, valor, subtitulo) in zip([col1, col2, col3, col4, col5], me
             </div>
             """
         )
-
-
-# =========================================================
-# MÉDIAS • GERAL → PRAÇA → SUPERVISÃO → COLABORADOR
-# =========================================================
-
-st.write("")
-st.html(
-    """
-    <div class="panel-card">
-        <div class="panel-card-title">Médias oficiais das monitorias</div>
-        <div class="panel-card-subtitle">
-            A média individual vem diretamente da coluna "Média das 2 ligações".
-            Pendências não entram no cálculo da média.
-        </div>
-    </div>
-    """
-)
-
-# Mostra sempre a hierarquia completa para gerentes/treinamento.
-# Para supervisores, o dataframe já foi restrito à própria equipe.
-df_hierarquia = resumo_hierarquico(df_analise)
-
-col_hier_nivel, col_hier_grupo = st.columns([1, 2])
-
-with col_hier_nivel:
-    nivel_hierarquia = st.selectbox(
-        "Nível de análise",
-        ["Geral", "Praça", "Supervisão", "Colaborador"],
-        key="nivel_hierarquia"
-    )
-
-with col_hier_grupo:
-    grupos_hierarquia = ["Todos"]
-    if nivel_hierarquia != "Geral":
-        grupos_hierarquia += sorted(
-            df_hierarquia.loc[
-                df_hierarquia["Nível"] == nivel_hierarquia,
-                "Grupo"
-            ].dropna().astype(str).unique().tolist(),
-            key=normalizar_texto
-        )
-
-    grupo_hierarquia = st.selectbox(
-        "Detalhamento",
-        grupos_hierarquia,
-        key="grupo_hierarquia"
-    )
-
-df_exibicao_hierarquia = df_hierarquia[
-    df_hierarquia["Nível"] == nivel_hierarquia
-].copy()
-
-if grupo_hierarquia != "Todos":
-    df_exibicao_hierarquia = df_exibicao_hierarquia[
-        df_exibicao_hierarquia["Grupo"] == grupo_hierarquia
-    ].copy()
-
-if nivel_hierarquia == "Geral":
-    df_exibicao_hierarquia = df_hierarquia[
-        df_hierarquia["Nível"] == "Geral"
-    ].copy()
-
-df_exibicao_hierarquia["Média"] = df_exibicao_hierarquia["Média"].apply(
-    lambda x: f"{x:.2f}%" if pd.notna(x) else "—"
-)
-
-st.dataframe(
-    df_exibicao_hierarquia[
-        ["Nível", "Grupo", "Colaboradores", "Avaliados", "Pendentes", "Média"]
-    ],
-    use_container_width=True,
-    hide_index=True
-)
 
 
 MESES = [
