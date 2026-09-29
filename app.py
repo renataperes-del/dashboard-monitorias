@@ -802,48 +802,22 @@ COLUNAS_ESPERADAS = [
 ]
 
 # A aba possui 3 linhas de cabeçalho. Os dados começam na linha 4.
-# O mapeamento continua compatível com a estrutura atual, mas procura
-# os nomes dos cabeçalhos antes de usar a posição como fallback. Isso
-# evita quebrar o dashboard caso a coluna "Média das 2 ligações" seja
-# inserida em outra posição da planilha.
-def localizar_colunas_cabecalho(valores, colunas_esperadas):
-    mapa = {}
-    for indice_coluna in range(max((len(linha) for linha in valores[:3]), default=0)):
-        textos = []
-        for linha in valores[:3]:
-            valor = linha[indice_coluna] if indice_coluna < len(linha) else ""
-            textos.append(normalizar_texto(valor))
-        for coluna in colunas_esperadas:
-            alvo = normalizar_texto(coluna)
-            if alvo and alvo in textos and coluna not in mapa:
-                mapa[coluna] = indice_coluna
-    return mapa
-
-# A função de normalização é declarada logo abaixo. Para o cabeçalho,
-# usamos uma normalização local simples antes de redefini-la oficialmente.
-def _normalizar_cabecalho(valor):
-    texto = "" if valor is None else str(valor).strip()
-    texto = " ".join(texto.split())
-    texto = unicodedata.normalize("NFKD", texto)
-    return "".join(c for c in texto if not unicodedata.combining(c)).casefold()
-
-mapa_cabecalho = {}
-for indice_coluna in range(max((len(linha) for linha in dados_aplicacao[:3]), default=0)):
-    textos = []
-    for linha in dados_aplicacao[:3]:
-        valor = linha[indice_coluna] if indice_coluna < len(linha) else ""
-        textos.append(_normalizar_cabecalho(valor))
-    for coluna in COLUNAS_ESPERADAS:
-        if _normalizar_cabecalho(coluna) in textos and coluna not in mapa_cabecalho:
-            mapa_cabecalho[coluna] = indice_coluna
-
+# A estrutura original usa posições fixas. A coluna "Média das 2 ligações"
+# foi adicionada ao final da estrutura, portanto preservamos as posições
+# das colunas existentes para não deslocar datas/campos.
 linhas_dados = []
+
 for numero_planilha, linha in enumerate(dados_aplicacao[3:], start=4):
     linha = list(linha)
-    registro = {}
-    for indice, coluna in enumerate(COLUNAS_ESPERADAS):
-        posicao = mapa_cabecalho.get(coluna, indice)
-        registro[coluna] = linha[posicao] if posicao < len(linha) else ""
+
+    if len(linha) < len(COLUNAS_ESPERADAS):
+        linha = linha + [""] * (len(COLUNAS_ESPERADAS) - len(linha))
+
+    registro = {
+        coluna: linha[indice]
+        for indice, coluna in enumerate(COLUNAS_ESPERADAS)
+    }
+
     registro["_Linha Planilha"] = numero_planilha
     linhas_dados.append(registro)
 
@@ -980,7 +954,7 @@ for coluna in COLUNAS_DATA:
 
     convertida = pd.to_datetime(
         texto_original,
-        format="%d/%m/%Y",
+        dayfirst=True,
         errors="coerce"
     )
 
