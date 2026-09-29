@@ -1730,16 +1730,26 @@ def html_lista(titulo, dataframe, mostrar_nota=True):
 def resumo_nivel(dataframe, coluna_nivel):
     base = dataframe.copy()
     base["Média"] = pd.to_numeric(base["Média"], errors="coerce")
+    base["_AvaliadoValido"] = base["Realizada"] & base["Média"].notna()
 
     agrupado = (
         base.groupby(coluna_nivel, dropna=False)
         .agg(
             Colaboradores=("Colaborador", "size"),
-            Avaliados=("Média", lambda s: int(s.notna().sum())),
-            Média=("Média", "mean")
+            Avaliados=("_AvaliadoValido", "sum")
         )
         .reset_index()
     )
+
+    medias = (
+        base.loc[base["_AvaliadoValido"]]
+        .groupby(coluna_nivel, dropna=False)["Média"]
+        .mean()
+        .rename("Média")
+        .reset_index()
+    )
+
+    agrupado = agrupado.merge(medias, on=coluna_nivel, how="left")
 
     agrupado["Pendentes"] = agrupado["Colaboradores"] - agrupado["Avaliados"]
     agrupado["Média"] = agrupado["Média"].round(2)
@@ -1750,18 +1760,19 @@ def resumo_nivel(dataframe, coluna_nivel):
 def resumo_hierarquico(dataframe):
     base = dataframe.copy()
     base["Média"] = pd.to_numeric(base["Média"], errors="coerce")
+    base["_AvaliadoValido"] = base["Realizada"] & base["Média"].notna()
 
     linhas = []
 
     # Geral
-    avaliados_geral = int(base["Média"].notna().sum())
+    avaliados_geral = int(base["_AvaliadoValido"].sum())
     linhas.append({
         "Nível": "Geral",
         "Grupo": "Todos",
         "Colaboradores": len(base),
         "Avaliados": avaliados_geral,
         "Pendentes": len(base) - avaliados_geral,
-        "Média": base["Média"].mean()
+        "Média": base.loc[base["_AvaliadoValido"], "Média"].mean()
     })
 
     # Praça → Supervisão → Colaborador
@@ -1773,7 +1784,10 @@ def resumo_hierarquico(dataframe):
             "Colaboradores": len(df_praca),
             "Avaliados": int(df_praca["Média"].notna().sum()),
             "Pendentes": int(df_praca["Média"].isna().sum()),
-            "Média": df_praca["Média"].mean()
+            "Média": df_praca.loc[
+                df_praca["Realizada"] & df_praca["Média"].notna(),
+                "Média"
+            ].mean()
         })
 
         for supervisao, df_supervisao in df_praca.groupby("Supervisão", dropna=False):
@@ -1789,7 +1803,10 @@ def resumo_hierarquico(dataframe):
                 "Colaboradores": len(df_supervisao),
                 "Avaliados": int(df_supervisao["Média"].notna().sum()),
                 "Pendentes": int(df_supervisao["Média"].isna().sum()),
-                "Média": df_supervisao["Média"].mean()
+                "Média": df_supervisao.loc[
+                    df_supervisao["Realizada"] & df_supervisao["Média"].notna(),
+                    "Média"
+                ].mean()
             })
 
             for _, pessoa in df_supervisao.iterrows():
@@ -1797,9 +1814,9 @@ def resumo_hierarquico(dataframe):
                     "Nível": "Colaborador",
                     "Grupo": pessoa["Colaborador"],
                     "Colaboradores": 1,
-                    "Avaliados": int(pd.notna(pessoa["Média"])),
-                    "Pendentes": int(pd.isna(pessoa["Média"])),
-                    "Média": pessoa["Média"]
+                    "Avaliados": int(bool(pessoa["Realizada"]) and pd.notna(pessoa["Média"])),
+                    "Pendentes": int(not (bool(pessoa["Realizada"]) and pd.notna(pessoa["Média"]))),
+                    "Média": pessoa["Média"] if bool(pessoa["Realizada"]) and pd.notna(pessoa["Média"]) else None
                 })
 
     resultado = pd.DataFrame(linhas)
@@ -2023,7 +2040,10 @@ percentual_concluido = (
     total_realizadas / total_colaboradores * 100
     if total_colaboradores else 0
 )
-notas_validas = df_ativo.loc[df_ativo["Média"].notna(), "Média"]
+notas_validas = df_ativo.loc[
+    df_ativo["Realizada"] & df_ativo["Média"].notna(),
+    "Média"
+]
 media_geral = notas_validas.mean() if not notas_validas.empty else None
 
 col1, col2, col3, col4, col5 = st.columns(5)
