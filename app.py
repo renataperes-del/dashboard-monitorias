@@ -796,9 +796,10 @@ if len(dados_aplicacao) <= 3:
 
 COLUNAS_ESPERADAS = [
     "Colaborador", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria",
-    "Ligação 1", "Ligação 2", "Data Lado a Lado", "Quem Aplicou Lado a Lado",
-    "Observação Lado a Lado", "Data Monitoria Offline", "Quem Aplicou Offline",
-    "Percentual Offline", "Observações Gerais"
+    "Ligação 1", "Ligação 2", "Média das 2 ligações", "Data Lado a Lado",
+    "Quem Aplicou Lado a Lado", "Observação Lado a Lado",
+    "Data Monitoria Offline", "Quem Aplicou Offline", "Percentual Offline",
+    "Observações Gerais", "Status do colaborador"
 ]
 
 # A aba possui 3 linhas de cabeçalho. Os dados começam na linha 4.
@@ -905,7 +906,7 @@ if PERFIL_ACESSO == "supervisor":
     supervisao_alvo = normalizar_texto(SUPERVISAO_ACESSO)
     monitorias_google = monitorias_google[
         monitorias_google["Supervisão"].astype(str).map(primeiro_nome)
-        == supervisao_alvo
+        == primeiro_nome(SUPERVISAO_ACESSO)
     ].copy()
 
     if monitorias_google.empty:
@@ -917,6 +918,40 @@ if PERFIL_ACESSO == "supervisor":
 
 
 monitorias_google["Nome Normalizado"] = monitorias_google["Colaborador"].apply(normalizar_texto)
+
+# Colaboradores já desligados: mantemos os registros para consulta histórica,
+# mas eles não entram nos indicadores atuais de pessoas ativas.
+DESLIGADOS_CONHECIDOS = {
+    normalizar_texto(nome)
+    for nome in [
+        "Lorena da Silva Souza",
+        "Laura Marques da Silva",
+        "Maria Cibelly Jesus Silva",
+        "Bianca Leite Gomes da Silva",
+        "Caio Vinicius Figueiredo de Paula",
+        "Ana Julia Araújo Vilas Boas Almeida",
+        "Mylena Barroso Azevedo de Oliveira",
+        "Lays Basilio Silva",
+        "Eduarda Paes Leme Maldonado",
+        "Camila Alves Bender Azevedo",
+    ]
+}
+
+def classificar_status_colaborador(linha):
+    status_planilha = normalizar_texto(linha.get("Status do colaborador", ""))
+
+    if status_planilha in {"desligado", "desligada", "inativo", "inativa"}:
+        return "Desligado"
+    if status_planilha in {"ativo", "ativa"}:
+        return "Ativo"
+
+    if linha["Nome Normalizado"] in DESLIGADOS_CONHECIDOS:
+        return "Desligado"
+    return "Ativo"
+
+monitorias_google["Status do colaborador"] = monitorias_google.apply(
+    classificar_status_colaborador, axis=1
+)
 
 
 # =========================================================
@@ -947,9 +982,10 @@ for coluna in COLUNAS_DATA:
         (texto_original != "")
     )
 
+    # Aceita dd/mm/aaaa e outros formatos válidos retornados pelo Google Sheets.
     convertida = pd.to_datetime(
         texto_original,
-        format="%d/%m/%Y",
+        dayfirst=True,
         errors="coerce"
     )
 
@@ -1195,109 +1231,35 @@ monitorias_google["Função"] = (
 
 
 # =========================================================
-# NOTAS
+# MÉDIA DAS DUAS LIGAÇÕES (coluna G da aba Aplicação)
 # =========================================================
 
-notas_monitoria = {
-    "Pedro Llanos Iampietro": [75.26, 76.46],
-    "Matheus Lacerda Lima": [94.00, 77.66],
-    "Gabriel Soares Gonçalves": [80.73, 80.66],
-    "Laura Marques da Silva": [75.86, 81.93],
-    "Felipe Santos Nery": [77.66, 75.86],
-    "Evellyn Silva dos Santos": [86.20, 81.22],
-    "Maria Eduarda Rodrigues Gama": [60.00, 63.60],
-    "Isabella da Silva Neves": [50.00, 66.60],
-    "Douglas de Souza Oliveira": [67.40, 62.60],
-    "Keren Jamille Coutinho Albrechete": [82.60, 65.80],
-    "Jessica Carol Alves de Aguiar": [51.80, 60.20],
-    "Ana Beatriz de Queiroz": [57.20, 51.20],
-    "Amanda Ferreira da Silva": [73.46, 72.86],
-    "Eduarda Paes Leme Maldonado": [85.00, 49.20],
-    "Isabella Santana Felix dos Santos": [58.80, 54.80],
-    "Emanuele Maria Carvalho Silva": [61.20, 54.60],
-    "Angel Almeida Braga": [65.20, 62.60],
-    "Pedro Paulo Clemente Torres": [66.04, 75.50],
-    "Raquel Lima Santos": [58.56, 46.64],
-    "Cassiele Chare Roberto": [55.80, 56.40],
-    "Lorena da Silva Souza": [71.40, 61.20],
-    "Beatriz Fusari Martins Moreira": [74.60, 69.86],
-    "Sabrina Rodrigues da Silva": [68.52, 66.00],
-    "Sabrina Kahati Cardoso": [60.00, 68.60],
-    "Guilherme Tarragô Mendonça da Silva": [63.20, 51.20],
-    "Karine Kethely Soares": [67.40, 61.80],
-    "Ingrid Nunes da Cruz": [67.20, 51.20],
-    "Luanna Soares dos Santos Siqueira": [51.20, 52.02],
-    "Sérgio Vinícius Souza Silva da Hora": [71.60, 63.86],
-    "Emile Cristine Brito da Silva": [77.52, 52.63],
-    "Aline Trindade Moreira": [69.60, 39.80],
-    "Cauã Petrella de Sousa": [66.00, 57.52],
-    "Giulia Rodrigues Pimentel": [64.80, 42.80],
-    "Elissama Laís Cuscan Alves": [56.60, 65.00],
-    "Ana Luiza Cavalcante Silva": [69.26, 65.00],
-    "Ana Beatriz De Oliveira Jovino": [91.18, 83.40],
-    "Erik Xavier Gonçalves": [77.80, 51.20],
-    "Gabriella Farias de Melo": [63.00, 67.08],
-    "Lucas Rodrigues dos Santos Baltazar": [56.00, 63.60],
-    "Gabriely da Rocha Ferreira Silva": [57.48, 56.68],
-    "Henzo Silva Oliveira": [88.00],
-    "Stefany Miriam Marçal": [62.00, 41.00],
-    "Lucas Scalambrini Caetano": [82.00, 65.80],
-    "Juliette Mendes Lima": [58.80, 74.40],
-    "Isabela Cason": [61.20, 67.60],
-    "Mateus Custódio Dias da Conceição": [75.60, 69.60],
-    "Gabriela Salvi Sbardelotto": [56.00, 63.00],
-    "Juliana Santos de Freitas": [84.33, 76.46],
-    "Davi de Araujo Lima": [60.80, 54.20],
-    "Nataly Freitas Souza Santos": [73.46, 75.90],
-    "Gabriel Bulhões Vieira": [52.40, 65.00],
-    "Bruna Clementino Graça": [74.73, 83.80],
-    "Ian Monteiro Hernandez": [57.00, 53.80],
-    "Cristina de Deus Aguiar Stoski": [69.90, 95.20],
-    "Ana Beatriz Rodrigues Proença": [68.66, 91.00],
-    "Emilly Oliveira França": [77.06, 79.46],
-    "Mirella Pereira de Oliveira": [69.98, 77.52],
-    "Danilo Batista de Freitas Silva": [86.20, 74.40],
-    "Amanda Ribeiro Carvalho": [70.20, 65.20],
-    "Ana Carolina Gabriel Amador": [85.53, 87.40],
-    "Rebeca Beatriz Amaral Lopes": [79.20, 81.00],
-    "Monique de Souza Marques": [64.60, 74.40],
-    "Marcelly Paiva da Silva": [66.00, 69.00],
-    "Jefferson Amaral Silva Junior": [66.80, 73.00],
-    "Yasmim Francisca dos Santos": [62.00, 49.40],
-    "Eduarda de Araujo Rodrigues": [76.60, 58.40],
-    "Rayssa Sobral Araújo": [72.00, 70.00],
-    "Amanda Lima Pereira": [69.60, 71.80],
-    "Gustavo Bertholino Cardoso": [82.00, 74.80],
-    "Hosana de Souza Soares": [79.60, 75.40],
-    "Naiara Borcatt Porto": [70.20, 73.80],
-    "Matheus Marucci Hudzinski": [67.20, 70.20],
-    "Letícia Lima Souza": [70.80, 64.60],
-    "Robson Souto Campos da Silva": [87.40, 89.98]
-}
-
-
-notas_monitoria_normalizadas = {
-    normalizar_texto(nome): notas
-    for nome, notas in notas_monitoria.items()
-}
-
-
-def calcular_media_notas(nome):
-
-    notas = notas_monitoria_normalizadas.get(
-        normalizar_texto(nome),
-        []
-    )
-
-    if not notas:
+def converter_percentual(valor):
+    if pd.isna(valor):
         return None
 
-    return sum(notas) / len(notas)
+    texto = str(valor).strip()
+    if not texto:
+        return None
+
+    texto = texto.replace("%", "").replace(" ", "")
+    if "," in texto:
+        texto = texto.replace(".", "").replace(",", ".")
+
+    try:
+        numero = float(texto)
+        # A planilha armazena percentuais como fração (ex.: 0.70625 = 70.625%).
+        # Também aceitamos valores já expressos na escala de 0 a 100.
+        if 0 <= numero <= 1:
+            numero *= 100
+        return numero
+    except (TypeError, ValueError):
+        return None
 
 
 monitorias_google["Média"] = (
-    monitorias_google["Colaborador"]
-    .apply(calcular_media_notas)
+    monitorias_google["Média das 2 ligações"]
+    .apply(converter_percentual)
 )
 
 
@@ -1505,7 +1467,7 @@ def html_praca(nome, quantidade, responsavel):
     """
 
 
-def html_team(nome, total, realizadas, pendentes):
+def html_team(nome, total, realizadas, pendentes, media_equipe=None):
 
     nome = html.escape(str(nome))
 
@@ -1513,6 +1475,11 @@ def html_team(nome, total, realizadas, pendentes):
         realizadas / total * 100
         if total > 0
         else 0
+    )
+    media_texto = (
+        f"{media_equipe:.1f}%"
+        if media_equipe is not None and pd.notna(media_equipe)
+        else "—"
     )
 
     return f"""
@@ -1528,6 +1495,10 @@ def html_team(nome, total, realizadas, pendentes):
 
         <div class="team-label">
             colaboradores
+        </div>
+
+        <div class="team-label" style="margin-top:8px;font-size:11px;font-weight:700;color:#4361EE;">
+            Média da equipe: {media_texto}
         </div>
 
         <div class="team-progress">
@@ -1696,7 +1667,7 @@ st.html(
     """
 )
 
-col_filtro_praca, col_filtro_supervisao, col_filtro_status = st.columns(3)
+col_filtro_praca, col_filtro_supervisao, col_filtro_status, col_filtro_visao = st.columns(4)
 
 if PERFIL_ACESSO == "supervisor":
     pracas_supervisor = sorted(
@@ -1761,9 +1732,19 @@ with col_filtro_supervisao:
     supervisao_selecionada = st.selectbox("Supervisão", opcoes_supervisao)
 
 with col_filtro_status:
-    status_selecionado = st.selectbox("Status", ["Todos", "Realizadas", "Pendentes"])
+    status_selecionado = st.selectbox("Status da monitoria", ["Todos", "Realizadas", "Pendentes"])
+
+with col_filtro_visao:
+    visao_selecionada = st.selectbox(
+        "Base de colaboradores",
+        ["Ativos", "Histórico completo"],
+        help="Ativos exclui pessoas desligadas dos indicadores atuais. Histórico completo inclui todos os registros preservados."
+    )
 
 df_filtrado = monitorias_google.copy()
+
+if visao_selecionada == "Ativos":
+    df_filtrado = df_filtrado[df_filtrado["Status do colaborador"] == "Ativo"].copy()
 
 if praca_selecionada != "Todas":
     df_filtrado = df_filtrado[df_filtrado["Praça"] == praca_selecionada].copy()
@@ -1792,10 +1773,40 @@ if praca_selecionada != "Todas":
 if supervisao_selecionada != "Todas":
     filtros_ativos.append(f"<strong>Supervisão:</strong> {html.escape(supervisao_selecionada)}")
 if status_selecionado != "Todos":
-    filtros_ativos.append(f"<strong>Status:</strong> {html.escape(status_selecionado)}")
+    filtros_ativos.append(f"<strong>Status da monitoria:</strong> {html.escape(status_selecionado)}")
+filtros_ativos.append(f"<strong>Base:</strong> {html.escape(visao_selecionada)}")
 
 if filtros_ativos:
     st.html('<div class="filter-summary">' + " &nbsp; • &nbsp; ".join(filtros_ativos) + '</div>')
+
+
+# Exibe os nomes conforme o status selecionado, inclusive no acesso individual
+# da supervisão, sem exigir que uma supervisão seja escolhida no filtro.
+if status_selecionado in {"Realizadas", "Pendentes"}:
+    titulo_status = "Monitorias realizadas" if status_selecionado == "Realizadas" else "Monitorias pendentes"
+    st.html(
+        f"""
+        <div class="panel-card">
+            <div class="panel-card-title">{titulo_status}</div>
+            <div class="panel-card-subtitle">Colaboradores da base selecionada nos filtros</div>
+        </div>
+        """
+    )
+    colunas_lista = ["Colaborador", "Função", "Supervisão", "Praça", "Média"]
+    colunas_lista = [coluna for coluna in colunas_lista if coluna in df_lista.columns]
+    tabela_status = df_lista[colunas_lista].copy()
+    if "Média" in tabela_status.columns:
+        tabela_status["Média"] = tabela_status["Média"].apply(
+            lambda valor: f"{valor:.2f}%" if pd.notna(valor) else "—"
+        )
+    if tabela_status.empty:
+        st.info(f"Nenhum colaborador encontrado com o status '{status_selecionado}' para os filtros selecionados.")
+    else:
+        chaves_ordenacao = [coluna for coluna in ["Supervisão", "Colaborador"] if coluna in tabela_status.columns]
+        if chaves_ordenacao:
+            tabela_status = tabela_status.sort_values(chaves_ordenacao, na_position="last")
+        st.dataframe(tabela_status, use_container_width=True, hide_index=True)
+    st.write("")
 
 
 if status_selecionado == "Pendentes":
@@ -2035,7 +2046,8 @@ with col_supervisores:
         .groupby("SupervisaoExibicao", dropna=False)
         .agg(
             Total=("Colaborador", "size"),
-            Realizadas=("Realizada", "sum")
+            Realizadas=("Realizada", "sum"),
+            MediaEquipe=("Média", "mean")
         )
         .reset_index()
         .sort_values("Total", ascending=False)
@@ -2050,7 +2062,8 @@ with col_supervisores:
             row["SupervisaoExibicao"],
             total,
             realizadas,
-            pendentes
+            pendentes,
+            row["MediaEquipe"]
         )
 
     st.html(f'<div class="team-grid">{cards}</div>')
@@ -2093,8 +2106,12 @@ if supervisao_selecionada != "Todas":
         """
     )
 
-    df_detalhe = df_filtrado[["Colaborador", "Função", "Realizada", "Média"]].copy()
-    df_detalhe["Status"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
+    media_equipe_selecionada = df_filtrado["Média"].mean()
+    if pd.notna(media_equipe_selecionada):
+        st.caption(f"Média da equipe selecionada: {media_equipe_selecionada:.1f}%")
+
+    df_detalhe = df_filtrado[["Colaborador", "Função", "Status do colaborador", "Realizada", "Média"]].copy()
+    df_detalhe["Monitoria"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
     df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
-    df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
+    df_detalhe = df_detalhe[["Colaborador", "Função", "Status do colaborador", "Monitoria", "Média"]]
     st.dataframe(df_detalhe, use_container_width=True, hide_index=True)
