@@ -1475,6 +1475,11 @@ def html_team(nome, total, realizadas, pendentes, media_equipe=None):
         if total > 0
         else 0
     )
+    media_texto = (
+        f"{media_equipe:.1f}%"
+        if media_equipe is not None and pd.notna(media_equipe)
+        else "—"
+    )
 
     return f"""
     <div class="team-card">
@@ -1492,7 +1497,7 @@ def html_team(nome, total, realizadas, pendentes, media_equipe=None):
         </div>
 
         <div class="team-label" style="margin-top:8px;font-size:11px;font-weight:700;color:#4361EE;">
-            Média da equipe: {f"{media_equipe:.1f}%" if pd.notna(media_equipe) else "—"}
+            Média da equipe: {media_texto}
         </div>
 
         <div class="team-progress">
