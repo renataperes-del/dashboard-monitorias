@@ -916,7 +916,7 @@ SUPERVISAO_DESLIGADOS = {
 }
 
 for indice, linha in monitorias_google.iterrows():
-    supervisao_historica = SUPERVISAO_DESLIGADOS.get(linha["Nome Normalizado"])
+    supervisao_historica = SUPERVISAO_DESLIGADOS.get(normalizar_texto(linha["Colaborador"]))
     if supervisao_historica:
         monitorias_google.at[indice, "Supervisão"] = supervisao_historica
 
