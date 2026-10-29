@@ -982,12 +982,33 @@ for coluna in COLUNAS_DATA:
         (texto_original != "")
     )
 
-    # Aceita dd/mm/aaaa e outros formatos válidos retornados pelo Google Sheets.
-    convertida = pd.to_datetime(
-        texto_original,
-        dayfirst=True,
-        errors="coerce"
-    )
+    # Interpreta cada célula separadamente. Isso evita falhas quando o
+    # Google Sheets retorna formatos diferentes dentro da mesma coluna.
+    def interpretar_data(valor):
+        if pd.isna(valor):
+            return pd.NaT
+
+        texto = str(valor).strip()
+        if not texto:
+            return pd.NaT
+
+        # Prioriza o formato usado na planilha; depois aceita outros formatos
+        # válidos (por exemplo, datas ISO ou valores com horário).
+        data = pd.to_datetime(
+            texto,
+            format="%d/%m/%Y",
+            errors="coerce"
+        )
+        if pd.isna(data):
+            data = pd.to_datetime(
+                texto,
+                dayfirst=True,
+                errors="coerce"
+            )
+
+        return data
+
+    convertida = texto_original.map(interpretar_data)
 
     falhas = (
         preenchidas
@@ -1011,8 +1032,8 @@ if datas_invalidas:
 
     st.warning(
         f"⚠️ Foram encontradas {quantidade_datas_invalidas} "
-        "data(s) fora do formato esperado (dd/mm/aaaa). "
-        "Essas datas não foram consideradas como monitorias realizadas."
+        "valor(es) de data que não puderam ser interpretados. "
+        "Esses valores foram ignorados apenas nos indicadores da etapa correspondente."
     )
 
     with st.expander("Ver colaboradores com data inválida"):
