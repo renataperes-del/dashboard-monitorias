@@ -1784,19 +1784,24 @@ with col_filtro_supervisao:
     supervisao_selecionada = st.selectbox("Supervisão", opcoes_supervisao)
 
 with col_filtro_status:
-    status_selecionado = st.selectbox("Status da monitoria", ["Todos", "Realizadas", "Pendentes"])
-
-with col_filtro_visao:
-    visao_selecionada = st.selectbox(
-        "Base de colaboradores",
-        ["Ativos", "Histórico completo"],
-        help="Ativos exclui pessoas desligadas dos indicadores atuais. Histórico completo inclui os registros preservados."
+    status_selecionado = st.selectbox(
+        "Status",
+        ["Todos", "Realizadas", "Pendentes", "Desligados"],
+        help="Os desligados ficam separados dos colaboradores ativos e não entram nos indicadores gerais."
     )
 
 df_filtrado = monitorias_google.copy()
 
-if visao_selecionada == "Ativos":
-    df_filtrado = df_filtrado[df_filtrado["Status do colaborador"] == "Ativo"].copy()
+# "Desligados" é uma visão separada. Todas as demais opções consideram
+# apenas colaboradores ativos, mantendo os desligados fora das médias gerais.
+if status_selecionado == "Desligados":
+    df_filtrado = df_filtrado[
+        df_filtrado["Status do colaborador"] == "Desligado"
+    ].copy()
+else:
+    df_filtrado = df_filtrado[
+        df_filtrado["Status do colaborador"] == "Ativo"
+    ].copy()
 
 if praca_selecionada != "Todas":
     df_filtrado = df_filtrado[df_filtrado["Praça"] == praca_selecionada].copy()
@@ -1812,6 +1817,7 @@ if status_selecionado == "Realizadas":
 elif status_selecionado == "Pendentes":
     df_lista = df_filtrado[~df_filtrado["Realizada"]].copy()
 else:
+    # "Todos" mostra todos os ativos; "Desligados" mostra somente desligados.
     df_lista = df_filtrado.copy()
 
 # Mantém o universo completo para os indicadores e gráficos de acompanhamento.
