@@ -1312,8 +1312,46 @@ notas_monitoria_normalizadas = {
 }
 
 
-def calcular_media_notas(nome):
+def converter_percentual(valor):
+    """Converte valores como '70,63%' ou '70.63' para um percentual numérico."""
+    if pd.isna(valor):
+        return None
 
+    texto = str(valor).strip()
+    if not texto or texto.casefold() in {"-", "/", "—", "–", "n/a", "na"}:
+        return None
+
+    tem_percentual = "%" in texto
+    texto = texto.replace("%", "").replace(" ", "")
+
+    # Trata separadores decimais comuns do Google Sheets.
+    if "," in texto and "." in texto:
+        if texto.rfind(",") > texto.rfind("."):
+            texto = texto.replace(".", "").replace(",", ".")
+        else:
+            texto = texto.replace(",", "")
+    elif "," in texto:
+        texto = texto.replace(",", ".")
+
+    try:
+        numero = float(texto)
+    except (TypeError, ValueError):
+        return None
+
+    # Valores percentuais formatados como fração (ex.: 0.7063) viram 70.63.
+    if not tem_percentual and 0 <= numero <= 1:
+        numero *= 100
+
+    return numero
+
+
+def calcular_media_notas(nome, media_planilha):
+    # Prioriza a média registrada na coluna "Média das 2 ligações" da planilha.
+    media = converter_percentual(media_planilha)
+    if media is not None:
+        return media
+
+    # Mantém o cálculo antigo como alternativa quando a planilha estiver vazia.
     notas = notas_monitoria_normalizadas.get(
         normalizar_texto(nome),
         []
@@ -1325,9 +1363,12 @@ def calcular_media_notas(nome):
     return sum(notas) / len(notas)
 
 
-monitorias_google["Média"] = (
-    monitorias_google["Colaborador"]
-    .apply(calcular_media_notas)
+monitorias_google["Média"] = monitorias_google.apply(
+    lambda linha: calcular_media_notas(
+        linha["Colaborador"],
+        linha.get("Média das 2 ligações")
+    ),
+    axis=1
 )
 
 
