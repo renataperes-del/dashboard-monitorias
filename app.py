@@ -796,14 +796,15 @@ if len(dados_aplicacao) <= 3:
 
 COLUNAS_ESPERADAS = [
     "Colaborador", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria",
-    "Ligação 1", "Ligação 2", "Data Lado a Lado", "Quem Aplicou Lado a Lado",
+    "Ligação 1", "Ligação 2", "Média das 2 ligações",
+    "Data Lado a Lado", "Quem Aplicou Lado a Lado",
     "Observação Lado a Lado", "Data Monitoria Offline", "Quem Aplicou Offline",
     "Percentual Offline", "Observações Gerais"
 ]
 
 # A aba possui 3 linhas de cabeçalho. Os dados começam na linha 4.
-# Mantemos o mapeamento posicional para não confundir os cabeçalhos
-# de Monitoria, Lado a Lado e Monitoria Offline.
+# O mapeamento segue as 14 colunas reais da planilha, incluindo a média
+# das duas ligações na coluna G antes dos campos de Lado a Lado.
 linhas_dados = []
 for numero_planilha, linha in enumerate(dados_aplicacao[3:], start=4):
     linha = list(linha)
