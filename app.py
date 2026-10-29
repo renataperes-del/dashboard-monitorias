@@ -900,10 +900,30 @@ monitorias_google["Supervisão"] = (
 )
 
 
+# Corrige a supervisão dos desligados conforme a relação fornecida, para que
+# o histórico continue associado à equipe correta mesmo se a planilha estiver desatualizada.
+SUPERVISAO_DESLIGADOS = {
+    normalizar_texto("Lorena da Silva Souza"): "Camila",
+    normalizar_texto("Laura Marques da Silva"): "Wesley",
+    normalizar_texto("Maria Cibelly Jesus Silva"): "Kelly",
+    normalizar_texto("Bianca Leite Gomes da Silva"): "Maiara",
+    normalizar_texto("Caio Vinicius Figueiredo de Paula"): "Maiara",
+    normalizar_texto("Ana Julia Araújo Vilas Boas Almeida"): "Maiara",
+    normalizar_texto("Mylena Barroso Azevedo de Oliveira"): "Murilo",
+    normalizar_texto("Lays Basilio Silva"): "Jean",
+    normalizar_texto("Eduarda Paes Leme Maldonado"): "Leticia",
+    normalizar_texto("Camila Alves Bender Azevedo"): "Kelly",
+}
+
+for indice, linha in monitorias_google.iterrows():
+    supervisao_historica = SUPERVISAO_DESLIGADOS.get(linha["Nome Normalizado"])
+    if supervisao_historica:
+        monitorias_google.at[indice, "Supervisão"] = supervisao_historica
+
 # Supervisor visualiza exclusivamente os registros da própria equipe.
 # O filtro é aplicado no dataframe base, antes dos indicadores, gráficos e tabelas.
 if PERFIL_ACESSO == "supervisor":
-    supervisao_alvo = normalizar_texto(SUPERVISAO_ACESSO)
+    supervisao_alvo = primeiro_nome(SUPERVISAO_ACESSO)
     monitorias_google = monitorias_google[
         monitorias_google["Supervisão"].astype(str).map(primeiro_nome)
         == supervisao_alvo
