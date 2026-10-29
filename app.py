@@ -970,7 +970,7 @@ valores_suspeitos_colunas_data = {}
 
 # Marcadores usados na planilha para indicar ausência de informação.
 # Não são datas e, portanto, não devem gerar alertas de conversão.
-MARCADORES_SEM_DATA = {"-", "/", "—", "–", "n/a", "na", "null", "none", "#value!"}
+MARCADORES_SEM_DATA = {"-", "/", "—", "–", "n/a", "na", "null", "none"}
 
 
 def interpretar_data(valor):
