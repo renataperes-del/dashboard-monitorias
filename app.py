@@ -799,7 +799,7 @@ COLUNAS_ESPERADAS = [
     "Ligação 1", "Ligação 2", "Média das 2 ligações", "Data Lado a Lado",
     "Quem Aplicou Lado a Lado", "Observação Lado a Lado",
     "Data Monitoria Offline", "Quem Aplicou Offline", "Percentual Offline",
-    "Observações Gerais"
+    "Observações Gerais", "Status do colaborador"
 ]
 
 # A aba possui 3 linhas de cabeçalho. Os dados começam na linha 4.
@@ -918,6 +918,40 @@ if PERFIL_ACESSO == "supervisor":
 
 
 monitorias_google["Nome Normalizado"] = monitorias_google["Colaborador"].apply(normalizar_texto)
+
+# Colaboradores já desligados: mantemos os registros para consulta histórica,
+# mas eles não entram nos indicadores atuais de pessoas ativas.
+DESLIGADOS_CONHECIDOS = {
+    normalizar_texto(nome)
+    for nome in [
+        "Lorena da Silva Souza",
+        "Laura Marques da Silva",
+        "Maria Cibelly Jesus Silva",
+        "Bianca Leite Gomes da Silva",
+        "Caio Vinicius Figueiredo de Paula",
+        "Ana Julia Araújo Vilas Boas Almeida",
+        "Mylena Barroso Azevedo de Oliveira",
+        "Lays Basilio Silva",
+        "Eduarda Paes Leme Maldonado",
+        "Camila Alves Bender Azevedo",
+    ]
+}
+
+def classificar_status_colaborador(linha):
+    status_planilha = normalizar_texto(linha.get("Status do colaborador", ""))
+
+    if status_planilha in {"desligado", "desligada", "inativo", "inativa"}:
+        return "Desligado"
+    if status_planilha in {"ativo", "ativa"}:
+        return "Ativo"
+
+    if linha["Nome Normalizado"] in DESLIGADOS_CONHECIDOS:
+        return "Desligado"
+    return "Ativo"
+
+monitorias_google["Status do colaborador"] = monitorias_google.apply(
+    classificar_status_colaborador, axis=1
+)
 
 
 # =========================================================
@@ -1432,7 +1466,7 @@ def html_praca(nome, quantidade, responsavel):
     """
 
 
-def html_team(nome, total, realizadas, pendentes):
+def html_team(nome, total, realizadas, pendentes, media_equipe=None):
 
     nome = html.escape(str(nome))
 
@@ -1455,6 +1489,10 @@ def html_team(nome, total, realizadas, pendentes):
 
         <div class="team-label">
             colaboradores
+        </div>
+
+        <div class="team-label" style="margin-top:8px;font-size:11px;font-weight:700;color:#4361EE;">
+            Média da equipe: {f"{media_equipe:.1f}%" if pd.notna(media_equipe) else "—"}
         </div>
 
         <div class="team-progress">
@@ -1623,7 +1661,7 @@ st.html(
     """
 )
 
-col_filtro_praca, col_filtro_supervisao, col_filtro_status = st.columns(3)
+col_filtro_praca, col_filtro_supervisao, col_filtro_status, col_filtro_visao = st.columns(4)
 
 if PERFIL_ACESSO == "supervisor":
     pracas_supervisor = sorted(
@@ -1688,9 +1726,19 @@ with col_filtro_supervisao:
     supervisao_selecionada = st.selectbox("Supervisão", opcoes_supervisao)
 
 with col_filtro_status:
-    status_selecionado = st.selectbox("Status", ["Todos", "Realizadas", "Pendentes"])
+    status_selecionado = st.selectbox("Status da monitoria", ["Todos", "Realizadas", "Pendentes"])
+
+with col_filtro_visao:
+    visao_selecionada = st.selectbox(
+        "Base de colaboradores",
+        ["Ativos", "Histórico completo"],
+        help="Ativos exclui pessoas desligadas dos indicadores atuais. Histórico completo inclui todos os registros preservados."
+    )
 
 df_filtrado = monitorias_google.copy()
+
+if visao_selecionada == "Ativos":
+    df_filtrado = df_filtrado[df_filtrado["Status do colaborador"] == "Ativo"].copy()
 
 if praca_selecionada != "Todas":
     df_filtrado = df_filtrado[df_filtrado["Praça"] == praca_selecionada].copy()
@@ -1719,7 +1767,8 @@ if praca_selecionada != "Todas":
 if supervisao_selecionada != "Todas":
     filtros_ativos.append(f"<strong>Supervisão:</strong> {html.escape(supervisao_selecionada)}")
 if status_selecionado != "Todos":
-    filtros_ativos.append(f"<strong>Status:</strong> {html.escape(status_selecionado)}")
+    filtros_ativos.append(f"<strong>Status da monitoria:</strong> {html.escape(status_selecionado)}")
+filtros_ativos.append(f"<strong>Base:</strong> {html.escape(visao_selecionada)}")
 
 if filtros_ativos:
     st.html('<div class="filter-summary">' + " &nbsp; • &nbsp; ".join(filtros_ativos) + '</div>')
@@ -1962,7 +2011,8 @@ with col_supervisores:
         .groupby("SupervisaoExibicao", dropna=False)
         .agg(
             Total=("Colaborador", "size"),
-            Realizadas=("Realizada", "sum")
+            Realizadas=("Realizada", "sum"),
+            MediaEquipe=("Média", "mean")
         )
         .reset_index()
         .sort_values("Total", ascending=False)
@@ -1977,7 +2027,8 @@ with col_supervisores:
             row["SupervisaoExibicao"],
             total,
             realizadas,
-            pendentes
+            pendentes,
+            row["MediaEquipe"]
         )
 
     st.html(f'<div class="team-grid">{cards}</div>')
@@ -2020,8 +2071,12 @@ if supervisao_selecionada != "Todas":
         """
     )
 
-    df_detalhe = df_filtrado[["Colaborador", "Função", "Realizada", "Média"]].copy()
-    df_detalhe["Status"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
+    media_equipe_selecionada = df_filtrado["Média"].mean()
+    if pd.notna(media_equipe_selecionada):
+        st.caption(f"Média da equipe selecionada: {media_equipe_selecionada:.1f}%")
+
+    df_detalhe = df_filtrado[["Colaborador", "Função", "Status do colaborador", "Realizada", "Média"]].copy()
+    df_detalhe["Monitoria"] = df_detalhe["Realizada"].map({True: "Realizada", False: "Pendente"})
     df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
-    df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
+    df_detalhe = df_detalhe[["Colaborador", "Função", "Status do colaborador", "Monitoria", "Média"]]
     st.dataframe(df_detalhe, use_container_width=True, hide_index=True)
