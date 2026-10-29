@@ -929,62 +929,91 @@ COLUNAS_DATA = [
     "Data Monitoria Offline"
 ]
 
+# Valores usados na planilha para indicar que não há data registrada.
+MARCADORES_SEM_DATA = {"-", "/", "—", "–", "n/a", "na", "não se aplica"}
 
 datas_invalidas = {}
+valores_suspeitos_colunas_data = {}
+
+
+def interpretar_data(valor):
+    if pd.isna(valor):
+        return pd.NaT
+
+    texto = str(valor).strip()
+    if not texto or texto.casefold() in MARCADORES_SEM_DATA:
+        return pd.NaT
+
+    # Tenta primeiro o formato padrão e depois formatos comuns retornados
+    # pelo Google Sheets (ISO e data acompanhada de horário).
+    data = pd.to_datetime(texto, format="%d/%m/%Y", errors="coerce")
+    if pd.isna(data):
+        data = pd.to_datetime(texto, dayfirst=True, errors="coerce")
+    return data
 
 
 for coluna in COLUNAS_DATA:
+    texto_original = monitorias_google[coluna].astype("string").str.strip()
+    preenchidas = texto_original.notna() & (texto_original != "")
+    marcadores = texto_original.fillna("").str.casefold().isin(MARCADORES_SEM_DATA)
+    convertida = texto_original.map(interpretar_data)
 
-    texto_original = (
-        monitorias_google[coluna]
-        .astype("string")
-        .str.strip()
+    # Só considera inválidos os valores que têm aparência de data, mas falham
+    # na conversão. Marcadores de ausência e percentuais não são datas inválidas.
+    parece_data = texto_original.fillna("").str.match(
+        r"^\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}(?:\s+.*)?$|^\d{4}-\d{2}-\d{2}T.*$"
     )
-
-    preenchidas = (
-        texto_original.notna()
-        &
-        (texto_original != "")
-    )
-
-    convertida = pd.to_datetime(
-        texto_original,
-        format="%d/%m/%Y",
-        errors="coerce"
-    )
-
-    falhas = (
-        preenchidas
-        &
-        convertida.isna()
-    )
+    falhas = preenchidas & ~marcadores & parece_data & convertida.isna()
 
     if falhas.any():
+        datas_invalidas[coluna] = monitorias_google.loc[
+            falhas, ["Colaborador", coluna, "_Linha Planilha"]
+        ].copy()
 
-        datas_invalidas[coluna] = monitorias_google.loc[falhas, ["Colaborador", coluna, "_Linha Planilha"]].copy()
+    # Percentuais e erros de fórmula em uma coluna de data indicam possível
+    # divergência na estrutura dos dados recebidos do Google Sheets.
+    suspeitos = preenchidas & ~marcadores & ~parece_data & texto_original.str.contains(
+        r"%|#VALUE!|#REF!|#N/A", case=False, regex=True, na=False
+    )
+    if suspeitos.any():
+        valores_suspeitos_colunas_data[coluna] = monitorias_google.loc[
+            suspeitos, ["Colaborador", coluna, "_Linha Planilha"]
+        ].copy()
 
     monitorias_google[coluna] = convertida
 
 
 if datas_invalidas:
-
-    quantidade_datas_invalidas = sum(
-        len(linhas)
-        for linhas in datas_invalidas.values()
-    )
-
+    quantidade_datas_invalidas = sum(len(linhas) for linhas in datas_invalidas.values())
     st.warning(
-        f"⚠️ Foram encontradas {quantidade_datas_invalidas} "
-        "data(s) fora do formato esperado (dd/mm/aaaa). "
-        "Essas datas não foram consideradas como monitorias realizadas."
+        f"⚠️ Foram encontrados {quantidade_datas_invalidas} valor(es) com formato de data inválido. "
+        "Esses registros não entram nas contagens da etapa correspondente."
     )
-
-    with st.expander("Ver colaboradores com data inválida"):
-
+    with st.expander("Ver valores com formato de data inválido"):
         for coluna, linhas_invalidas in datas_invalidas.items():
             st.markdown(f"**{coluna}:**")
             for _, linha in linhas_invalidas.iterrows():
-                st.write(f"- Linha {int(linha['_Linha Planilha'])}: {linha['Colaborador']} | valor: {linha[coluna]}")
+                st.write(
+                    f"- Linha {int(linha['_Linha Planilha'])}: "
+                    f"{linha['Colaborador']} | valor: {linha[coluna]}"
+                )
+
+if valores_suspeitos_colunas_data:
+    colunas_suspeitas = ", ".join(valores_suspeitos_colunas_data.keys())
+    st.warning(
+        "⚠️ A planilha online retornou percentuais ou erros de fórmula em coluna(s) "
+        f"reservada(s) para datas: {colunas_suspeitas}. "
+        "Esses valores não foram considerados datas. Confira se a estrutura da aba "
+        "'Aplicação' no Google Sheets está igual à do arquivo de referência."
+    )
+    with st.expander("Ver valores inesperados nas colunas de data"):
+        for coluna, linhas_suspeitas in valores_suspeitos_colunas_data.items():
+            st.markdown(f"**{coluna}:**")
+            for _, linha in linhas_suspeitas.iterrows():
+                st.write(
+                    f"- Linha {int(linha['_Linha Planilha'])}: "
+                    f"{linha['Colaborador']} | valor: {linha[coluna]}"
+                )
 
 
 # =========================================================
