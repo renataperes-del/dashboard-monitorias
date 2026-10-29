@@ -906,7 +906,7 @@ if PERFIL_ACESSO == "supervisor":
     supervisao_alvo = normalizar_texto(SUPERVISAO_ACESSO)
     monitorias_google = monitorias_google[
         monitorias_google["Supervisão"].astype(str).map(primeiro_nome)
-        == supervisao_alvo
+        == primeiro_nome(SUPERVISAO_ACESSO)
     ].copy()
 
     if monitorias_google.empty:
@@ -982,9 +982,10 @@ for coluna in COLUNAS_DATA:
         (texto_original != "")
     )
 
+    # Aceita dd/mm/aaaa e outros formatos válidos retornados pelo Google Sheets.
     convertida = pd.to_datetime(
         texto_original,
-        format="%d/%m/%Y",
+        dayfirst=True,
         errors="coerce"
     )
 
@@ -1777,6 +1778,35 @@ filtros_ativos.append(f"<strong>Base:</strong> {html.escape(visao_selecionada)}"
 
 if filtros_ativos:
     st.html('<div class="filter-summary">' + " &nbsp; • &nbsp; ".join(filtros_ativos) + '</div>')
+
+
+# Exibe os nomes conforme o status selecionado, inclusive no acesso individual
+# da supervisão, sem exigir que uma supervisão seja escolhida no filtro.
+if status_selecionado in {"Realizadas", "Pendentes"}:
+    titulo_status = "Monitorias realizadas" if status_selecionado == "Realizadas" else "Monitorias pendentes"
+    st.html(
+        f"""
+        <div class="panel-card">
+            <div class="panel-card-title">{titulo_status}</div>
+            <div class="panel-card-subtitle">Colaboradores da base selecionada nos filtros</div>
+        </div>
+        """
+    )
+    colunas_lista = ["Colaborador", "Função", "Supervisão", "Praça", "Média"]
+    colunas_lista = [coluna for coluna in colunas_lista if coluna in df_lista.columns]
+    tabela_status = df_lista[colunas_lista].copy()
+    if "Média" in tabela_status.columns:
+        tabela_status["Média"] = tabela_status["Média"].apply(
+            lambda valor: f"{valor:.2f}%" if pd.notna(valor) else "—"
+        )
+    if tabela_status.empty:
+        st.info(f"Nenhum colaborador encontrado com o status '{status_selecionado}' para os filtros selecionados.")
+    else:
+        chaves_ordenacao = [coluna for coluna in ["Supervisão", "Colaborador"] if coluna in tabela_status.columns]
+        if chaves_ordenacao:
+            tabela_status = tabela_status.sort_values(chaves_ordenacao, na_position="last")
+        st.dataframe(tabela_status, use_container_width=True, hide_index=True)
+    st.write("")
 
 
 if status_selecionado == "Pendentes":
