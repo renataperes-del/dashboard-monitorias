@@ -799,7 +799,7 @@ COLUNAS_ESPERADAS = [
     "Ligação 1", "Ligação 2", "Média das 2 ligações",
     "Data Lado a Lado", "Quem Aplicou Lado a Lado",
     "Observação Lado a Lado", "Data Monitoria Offline", "Quem Aplicou Offline",
-    "Percentual Offline", "Observações Gerais"
+    "Percentual Offline", "Observações Gerais", "Status do colaborador"
 ]
 
 # A aba possui 3 linhas de cabeçalho. Os dados começam na linha 4.
@@ -918,6 +918,38 @@ if PERFIL_ACESSO == "supervisor":
 
 
 monitorias_google["Nome Normalizado"] = monitorias_google["Colaborador"].apply(normalizar_texto)
+
+# Mantém os desligados no histórico, mas fora dos indicadores atuais por padrão.
+# Se a coluna "Status do colaborador" (O) estiver preenchida, ela é a fonte principal.
+DESLIGADOS_CONHECIDOS = {
+    normalizar_texto(nome)
+    for nome in [
+        "Lorena da Silva Souza",
+        "Laura Marques da Silva",
+        "Maria Cibelly Jesus Silva",
+        "Bianca Leite Gomes da Silva",
+        "Caio Vinicius Figueiredo de Paula",
+        "Ana Julia Araújo Vilas Boas Almeida",
+        "Mylena Barroso Azevedo de Oliveira",
+        "Lays Basilio Silva",
+        "Eduarda Paes Leme Maldonado",
+        "Camila Alves Bender Azevedo",
+    ]
+}
+
+def classificar_status_colaborador(linha):
+    status_planilha = normalizar_texto(linha.get("Status do colaborador", ""))
+    if status_planilha in {"desligado", "desligada", "inativo", "inativa"}:
+        return "Desligado"
+    if status_planilha in {"ativo", "ativa"}:
+        return "Ativo"
+    if linha["Nome Normalizado"] in DESLIGADOS_CONHECIDOS:
+        return "Desligado"
+    return "Ativo"
+
+monitorias_google["Status do colaborador"] = monitorias_google.apply(
+    classificar_status_colaborador, axis=1
+)
 
 
 # =========================================================
@@ -1667,7 +1699,7 @@ st.html(
     """
 )
 
-col_filtro_praca, col_filtro_supervisao, col_filtro_status = st.columns(3)
+col_filtro_praca, col_filtro_supervisao, col_filtro_status, col_filtro_visao = st.columns(4)
 
 if PERFIL_ACESSO == "supervisor":
     pracas_supervisor = sorted(
@@ -1732,9 +1764,19 @@ with col_filtro_supervisao:
     supervisao_selecionada = st.selectbox("Supervisão", opcoes_supervisao)
 
 with col_filtro_status:
-    status_selecionado = st.selectbox("Status", ["Todos", "Realizadas", "Pendentes"])
+    status_selecionado = st.selectbox("Status da monitoria", ["Todos", "Realizadas", "Pendentes"])
+
+with col_filtro_visao:
+    visao_selecionada = st.selectbox(
+        "Base de colaboradores",
+        ["Ativos", "Histórico completo"],
+        help="Ativos exclui pessoas desligadas dos indicadores atuais. Histórico completo inclui os registros preservados."
+    )
 
 df_filtrado = monitorias_google.copy()
+
+if visao_selecionada == "Ativos":
+    df_filtrado = df_filtrado[df_filtrado["Status do colaborador"] == "Ativo"].copy()
 
 if praca_selecionada != "Todas":
     df_filtrado = df_filtrado[df_filtrado["Praça"] == praca_selecionada].copy()
