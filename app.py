@@ -1212,7 +1212,12 @@ def converter_percentual(valor):
         texto = texto.replace(".", "").replace(",", ".")
 
     try:
-        return float(texto)
+        numero = float(texto)
+        # A planilha armazena percentuais como fração (ex.: 0.70625 = 70.625%).
+        # Também aceitamos valores já expressos na escala de 0 a 100.
+        if 0 <= numero <= 1:
+            numero *= 100
+        return numero
     except (TypeError, ValueError):
         return None
 
