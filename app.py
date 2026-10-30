@@ -1934,60 +1934,64 @@ st.html('<div id="evolucao"></div>')
 # =========================================================
 
 st.write("")
-col_evolucao, col_status = st.columns([2.1, 1])
+if PERFIL_ACESSO == "supervisor":
+    col_status = st.container()
+else:
+    col_evolucao, col_status = st.columns([2.1, 1])
 
-with col_evolucao:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Evolução das monitorias</div>
-            <div class="panel-card-subtitle">Quantidade de monitorias realizadas por mês</div>
-        </div>
-        """
-    )
-
-    datas_validas = df_ativo.loc[df_ativo["Data Monitoria"].notna(), "Data Monitoria"]
-
-    if not datas_validas.empty:
-        primeiro_mes = datas_validas.min().to_period("M")
-        ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"))
-        meses = pd.period_range(primeiro_mes, ultimo_mes, freq="M")
-    else:
-        meses = pd.period_range(pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), freq="M")
-
-    nomes_meses = []
-    quantidades = []
-    for periodo in meses:
-        quantidade = df_ativo[
-            (df_ativo["Data Monitoria"] >= periodo.start_time)
-            & (df_ativo["Data Monitoria"] <= periodo.end_time)
-        ].shape[0]
-        nomes_meses.append(f"{MESES[periodo.month - 1]}/{str(periodo.year)[2:]}")
-        quantidades.append(quantidade)
-
-    fig_evolucao = go.Figure()
-    fig_evolucao.add_trace(
-        go.Scatter(
-            x=nomes_meses,
-            y=quantidades,
-            mode="lines+markers",
-            line=dict(color=PRIMARY, width=3),
-            marker=dict(color=PRIMARY, size=7),
-            hovertemplate="%{x}: %{y} monitorias<extra></extra>"
+if PERFIL_ACESSO != "supervisor":
+    with col_evolucao:
+        st.html(
+            """
+            <div class="panel-card">
+                <div class="panel-card-title">Evolução das monitorias</div>
+                <div class="panel-card-subtitle">Quantidade de monitorias realizadas por mês</div>
+            </div>
+            """
         )
-    )
-    fig_evolucao.update_layout(
-        height=270,
-        margin=dict(l=8, r=8, t=12, b=8),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=TEXT),
-        xaxis=dict(showgrid=False, title=None),
-        yaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-        showlegend=False
-    )
-    st.plotly_chart(fig_evolucao, use_container_width=True, config={"displayModeBar": False})
-
+    
+        datas_validas = df_ativo.loc[df_ativo["Data Monitoria"].notna(), "Data Monitoria"]
+    
+        if not datas_validas.empty:
+            primeiro_mes = datas_validas.min().to_period("M")
+            ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"))
+            meses = pd.period_range(primeiro_mes, ultimo_mes, freq="M")
+        else:
+            meses = pd.period_range(pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), freq="M")
+    
+        nomes_meses = []
+        quantidades = []
+        for periodo in meses:
+            quantidade = df_ativo[
+                (df_ativo["Data Monitoria"] >= periodo.start_time)
+                & (df_ativo["Data Monitoria"] <= periodo.end_time)
+            ].shape[0]
+            nomes_meses.append(f"{MESES[periodo.month - 1]}/{str(periodo.year)[2:]}")
+            quantidades.append(quantidade)
+    
+        fig_evolucao = go.Figure()
+        fig_evolucao.add_trace(
+            go.Scatter(
+                x=nomes_meses,
+                y=quantidades,
+                mode="lines+markers",
+                line=dict(color=PRIMARY, width=3),
+                marker=dict(color=PRIMARY, size=7),
+                hovertemplate="%{x}: %{y} monitorias<extra></extra>"
+            )
+        )
+        fig_evolucao.update_layout(
+            height=270,
+            margin=dict(l=8, r=8, t=12, b=8),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter, sans-serif", color=TEXT),
+            xaxis=dict(showgrid=False, title=None),
+            yaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
+            showlegend=False
+        )
+        st.plotly_chart(fig_evolucao, use_container_width=True, config={"displayModeBar": False})
+    
 with col_status:
     st.html(
         """
