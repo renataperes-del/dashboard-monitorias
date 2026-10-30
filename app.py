@@ -1249,7 +1249,7 @@ apoio_adm = [
     "Cristina de Deus Aguiar Stoski",
     "Ana Beatriz Rodrigues Proença",
     "Amanda Brito da Silva",
-    "Stella Angela da Silva"
+    "Stella Angela da Silva",
     "Lays Basilio Silva",
 ]
 
