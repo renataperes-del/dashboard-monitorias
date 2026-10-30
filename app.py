@@ -844,6 +844,68 @@ st.markdown(
         }}
     }}
 
+
+    /* Ajustes finais com foco na leitura e consistência */
+    .sidebar a,
+    .sidebar a:visited,
+    .sidebar a:hover {{
+        color: inherit !important;
+        text-decoration: none !important;
+    }}
+
+    .nav-item {{
+        text-decoration: none !important;
+    }}
+
+    [data-testid="stDataFrame"] {{
+        border: 1px solid #DCE3EF;
+        border-radius: 14px;
+        overflow: hidden;
+    }}
+
+    [data-testid="stDataFrame"] [role="columnheader"] {{
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        color: #344054 !important;
+        background: #F3F6FB !important;
+    }}
+
+    [data-testid="stDataFrame"] [role="gridcell"] {{
+        font-size: 13px !important;
+        color: #344054 !important;
+    }}
+
+    [data-testid="stDataFrame"] [role="row"] {{
+        min-height: 42px !important;
+    }}
+
+    [data-testid="stDataFrame"] canvas {{
+        font-size: 13px !important;
+    }}
+
+    .filter-panel {{
+        background: #FFFFFF;
+        border: 1px solid #E1E7F0;
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 5px 18px rgba(35, 55, 85, .045);
+    }}
+
+    .filter-summary {{
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-size: 12px;
+        margin-top: 10px;
+    }}
+
+    @media (max-width: 1100px) {{
+        [data-testid="stDataFrame"] [role="gridcell"],
+        [data-testid="stDataFrame"] [role="columnheader"] {{
+            font-size: 12px !important;
+        }}
+    }}
+
     </style>
     """,
     unsafe_allow_html=True
