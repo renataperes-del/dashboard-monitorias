@@ -546,7 +546,7 @@ st.markdown(
     @media (max-width: 700px) {{
         .team-grid {{ grid-template-columns: 1fr; }}
         .page-title {{ font-size: 30px; }}
-    }}}
+    }}
 
     /* =====================================================
        RESPONSIVO
