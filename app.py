@@ -871,16 +871,16 @@ st.markdown(
     }}
 
     [data-testid="stDataFrame"] [role="gridcell"] {{
-        font-size: 13px !important;
+        font-size: 14px !important;
         color: #344054 !important;
     }}
 
     [data-testid="stDataFrame"] [role="row"] {{
-        min-height: 42px !important;
+        min-height: 44px !important;
     }}
 
     [data-testid="stDataFrame"] canvas {{
-        font-size: 13px !important;
+        font-size: 14px !important;
     }}
 
     .filter-panel {{
@@ -900,7 +900,9 @@ st.markdown(
     }}
 
     @media (max-width: 1100px) {{
-        [data-testid="stDataFrame"] [role="gridcell"],
+        [data-testid="stDataFrame"] [role="gridcell"] {{
+            font-size: 13px !important;
+        }}
         [data-testid="stDataFrame"] [role="columnheader"] {{
             font-size: 12px !important;
         }}
