@@ -1778,10 +1778,17 @@ else:
         key=normalizar_texto
     )
 
-opcoes_supervisao = ["Todas"] + supervisoes_disponiveis
+if PERFIL_ACESSO == "supervisor":
+    opcoes_supervisao = [SUPERVISAO_ACESSO]
+else:
+    opcoes_supervisao = ["Todas"] + supervisoes_disponiveis
 
 with col_filtro_supervisao:
-    supervisao_selecionada = st.selectbox("Supervisão", opcoes_supervisao)
+    supervisao_selecionada = st.selectbox(
+        "Supervisão",
+        opcoes_supervisao,
+        disabled=(PERFIL_ACESSO == "supervisor")
+    )
 
 with col_filtro_status:
     status_selecionado = st.selectbox(
