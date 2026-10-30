@@ -359,9 +359,10 @@ st.markdown(
 
     .panel-card-subtitle {{
         color: {SECONDARY};
-        font-size: 10px;
-        margin-top: 4px;
-        margin-bottom: 4px;
+        font-size: 14px;
+        line-height: 1.5;
+        margin-top: 8px;
+        margin-bottom: 6px;
     }}
 
     .status-list {{
@@ -2282,7 +2283,7 @@ st.html(
     """
     <div class="panel-card">
         <div class="panel-card-title">Pontos de melhoria</div>
-        <div class="panel-card-subtitle">Principais oportunidades de desenvolvimento identificadas nas monitorias, consolidadas por equipe e praça.</div>
+        <div class="panel-card-subtitle">Principais oportunidades de desenvolvimento identificadas nas monitorias, considerando a visão geral da equipe.</div>
     </div>
     """
 )
