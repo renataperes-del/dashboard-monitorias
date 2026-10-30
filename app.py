@@ -599,7 +599,6 @@ def registrar_acesso(usuario, perfil, nome):
     except Exception:
         pass
 
-
 # =========================================================
 # CONTROLE DE ACESSO
 # =========================================================
@@ -1197,8 +1196,7 @@ execs = [
     "Juliene Dolores Ferreira da Silva",
     "Aline Maria dos Santos",
     "Rebeca Beatriz Amaral Lopes",
-    "João Victor Matias Belmiro",
-    "Bianca da Silva Marchon",
+    "João Victor Matias Belmiro",    "Bianca da Silva Marchon",
     "Vanessa Lisboa de Pontes",
     "Arison Pereira da Costa",
     "Carla Maria da Silva",
@@ -1669,6 +1667,7 @@ st.html(
         <div class="nav-label" style="margin-top:20px;">Acompanhamento</div>
         <a class="nav-item" href="#evolucao"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l5-5 4 3 7-8"/><path d="M16 7h4v4"/></svg></span> Evolução</a>
         <a class="nav-item" href="#etapas"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span> Etapas</a>
+        <a class="nav-item" href="#pontos-melhoria"><span class="nav-icon">✦</span> Pontos de melhoria</a>
         <div class="sidebar-note">
             Nube • Treinamento Comercial<br>
             Painel de acompanhamento das monitorias
@@ -1797,7 +1796,6 @@ with col_filtro_status:
         ["Todos", "Realizadas", "Pendentes", "Desligados"],
         help="Os desligados ficam separados dos colaboradores ativos e não entram nos indicadores gerais."
     )
-
 df_filtrado = monitorias_google.copy()
 
 # "Desligados" é uma visão separada. Todas as demais opções consideram
@@ -2169,3 +2167,182 @@ if supervisao_selecionada != "Todas" and status_selecionado == "Todos":
     df_detalhe["Média"] = df_detalhe["Média"].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "—")
     df_detalhe = df_detalhe[["Colaborador", "Função", "Status", "Média"]]
     st.dataframe(df_detalhe, use_container_width=True, hide_index=True)
+
+# =========================================================
+# PONTOS DE MELHORIA POR EQUIPE / PRAÇA
+# Levantamento qualitativo consolidado pelo Treinamento.
+# Não representa cálculo automático das notas da planilha.
+# =========================================================
+
+PONTOS_MELHORIA = {
+    "jean": [
+        ("Histórico compatível com a ligação", "Erros recorrentes de ortografia e concordância verbal, além de omissão de combinados e datas de retorno."),
+        ("Atualização cadastral", "Validação restrita aos celetistas, sem investigar estagiários e aprendizes de concorrentes ou endereços das unidades."),
+        ("Uso do Sistema Gestor", "Falta de incentivo e demonstração prática de funcionalidades como boletos, relatórios e abertura de vagas."),
+        ("Solicitação de indicações", "Não solicitar indicações de empresas parceiras ou fornecedores ao encerrar atendimentos positivos."),
+        ("Apresentação e contexto da ligação", "Apresentação sem sobrenome ou falta de clareza sobre o motivo do contato.")
+    ],
+    "murilo": [
+        ("Histórico compatível com a ligação", "Registros resumidos, com falta de pontuação e acentuação e erros de digitação."),
+        ("Apresentação e contexto da ligação", "Omissão do sobrenome na apresentação ou identificação pessoal realizada apenas no meio da chamada."),
+        ("Uso do Sistema Gestor", "Pouca exploração dos recursos de autonomia da plataforma durante contatos de relacionamento e apoio."),
+        ("Orientação sobre o Instituto Saber", "Não apresentar o canal direto de atendimento e suporte técnico do Saber às empresas com aprendizes ativos."),
+        ("Negociação de perfil e abertura de PD", "Deixar de negociar bolsa e benefícios em vagas com baixa atratividade e abrir PD de remarque quando cabia desclassificação.")
+    ],
+    "julio": [
+        ("Histórico compatível com a ligação", "Omissão de contextos importantes negociados durante a chamada e registros com erros de ortografia."),
+        ("Atualização cadastral", "Uso de perguntas fechadas, como 'mantém tudo igual?', em vez de validações abertas dos dados operacionais e de e-mail."),
+        ("Novas unidades e grupo de empresas", "Foco limitado ao endereço cadastrado, sem investigar filiais, novos endereços ou grupo econômico."),
+        ("Uso do Sistema Gestor", "Falta de orientação sobre consulta de documentos, como Relatórios Semestrais, Aditivos e CPs."),
+        ("Convênios e contratos pendentes", "Não alertar sobre Relatórios de Atividades pendentes de assinatura e regularização contratual.")
+    ],
+    "wesley": [
+        ("Histórico compatível com a ligação", "Uso excessivo de abreviações, falta de acentuação e ausência do nome do contato atendido."),
+        ("Apresentação e contexto da ligação", "Apresentação pessoal informando apenas o primeiro nome, sem sobrenome."),
+        ("Comunicação geral", "Uso recorrente de vícios de linguagem, como 'perfeito', 'pronto', 'né' e 'tá', além de construções em gerundismo."),
+        ("Novas unidades e grupo de empresas", "Pouca investigação sobre expansão da estrutura física e filiais em outras praças."),
+        ("Solicitação de indicações", "Omissão do pedido de indicações comerciais em ligações com feedbacks positivos.")
+    ],
+    "kelly": [
+        ("Atualização cadastral", "Atualização focada na quantidade de CLT, sem mapear aprendizes e estagiários contratados por concorrentes."),
+        ("Histórico compatível com a ligação", "Falta de detalhamento dos nomes de estagiários com pendência documental e omissão de acordos de pausa e retorno da divulgação."),
+        ("Solicitação de indicações", "Pouca frequência de pedidos de indicação para prospecção de novos clientes."),
+        ("Apresentação e contexto da ligação", "Apresentação sem sobrenome e uso de expressões inadequadas, como 'a Nube' em vez de 'o Nube'."),
+        ("Projeto Crescer e Turmas Abertas", "Não apresentar o projeto de treinamentos comportamentais gratuitos às empresas elegíveis, a partir de cinco estagiários.")
+    ],
+    "camila": [
+        ("Novas unidades e grupo de empresas", "Pouca investigação sobre filiais, unidades de negócio ou empresas do mesmo grupo."),
+        ("Histórico compatível com a ligação", "Registro de informações não confirmadas durante a chamada e falta de detalhamento."),
+        ("Solicitação de indicações", "Falta de solicitação de indicações de fornecedores ou empresas parceiras."),
+        ("Uso do Sistema Gestor", "Não abordar as facilidades de autonomia que a plataforma oferece para a rotina do cliente."),
+        ("Comunicação geral", "Repetição de vícios de linguagem, como 'né', 'tá', 'aí' e 'perfeito'.")
+    ],
+    "laila": [
+        ("Histórico compatível com a ligação", "Registros extremamente resumidos, com erros de digitação e omissão de tratativas de faltas."),
+        ("Uso do Sistema Gestor", "Não investigar a frequência de uso nem demonstrar os módulos do portal."),
+        ("Negociação de perfil e acompanhamento de vaga", "Falta de negociação de bolsa e benefícios em vagas com dificuldades de captação."),
+        ("Apresentação e contexto da ligação", "Uso de saudações fora do padrão comercial e apresentação sem sobrenome."),
+        ("Convênios, contratos e Turmas Abertas", "Omissão de lembretes sobre Relatórios Semestrais pendentes e de apresentação dos treinamentos do Turmas Abertas.")
+    ],
+    "alexssander": [
+        ("Histórico compatível com a ligação", "Omissão dos formatos de contratação alinhados, prazos de retorno e acordos de longo prazo."),
+        ("Apresentação e contexto da ligação", "Identificação inicial apenas pelo primeiro nome, sem sobrenome."),
+        ("Atualização cadastral", "Atualização do porte considerando apenas a modalidade atual, sem investigar profissionais PJ ou terceirizados."),
+        ("Novas unidades e grupo de empresas", "Falta de prospecção sobre filiais no litoral ou interior."),
+        ("Solicitação de indicações", "Omissão do pedido de indicação ao término de atendimentos positivos.")
+    ],
+    "leticia": [
+        ("Histórico compatível com a ligação", "Registro de informações e promessas não realizadas na gravação, como pedido de indicação não efetuado."),
+        ("Regularização do Convênio de Parceria", "Não informar que o link do Convênio de Parceria tem validade de 24 horas para assinatura."),
+        ("Atualização cadastral", "Não validar a quantidade atual de aprendizes e estagiários ativos."),
+        ("Orientação sobre o Instituto Saber", "Omissão da apresentação do canal de suporte do Instituto Saber."),
+        ("Novas unidades e grupo de empresas", "Não investigar filiais da empresa em outros estados ou regiões.")
+    ],
+    "maiara": [
+        ("Histórico compatível com a ligação", "Duplicidade de registros, falta de acentuação e omissão de queixas do cliente sobre o Saber."),
+        ("Apresentação e contexto da ligação", "Apresentação inicial sem o sobrenome do colaborador."),
+        ("Atualização cadastral", "Uso de perguntas fechadas e falta de confirmação dos endereços de todas as unidades."),
+        ("Projeto Crescer e Turmas Abertas", "Deixar de ofertar projetos de treinamento para empresas com volume elegível de estagiários."),
+        ("Solicitação de indicações", "Não explorar indicações comerciais em contatos com avaliações positivas do cliente.")
+    ],
+    "angelica": [
+        ("Orientação sobre o Instituto Saber", "Não apresentar a equipe de relacionamento do Instituto Saber para suporte com jovens aprendizes."),
+        ("Atualização cadastral", "Validação cadastral sem aprofundar a concorrência e a quantidade total de estudantes."),
+        ("Solicitação de indicações", "Não solicitar indicações de empresas parceiras ao final da chamada."),
+        ("Histórico compatível com a ligação", "Registros que afirmam a confirmação de dados que não foram perguntados ao cliente."),
+        ("Expansão do serviço e repasse", "Falta de sondagem sobre contratação de estágio para outras áreas e repasse de estagiários de concorrentes.")
+    ],
+    "karine": [
+        ("Histórico compatível com a ligação", "Salvar o atendimento duas vezes com o mesmo conteúdo, selecionar tipo de contato incorreto ou trocar o nome do cliente."),
+        ("Regularização do Convênio de Parceria", "Deixar de informar a validade de 24 horas do link do Convênio de Parceria."),
+        ("Atualização cadastral", "Validação superficial do porte, sem confirmar meio de contato e concorrência."),
+        ("Uso do Sistema Gestor", "Falta de investigação sobre dificuldades de acesso e utilização do Sistema Gestor."),
+        ("Orientação sobre o Instituto Saber", "Não reforçar o suporte oferecido pelo Instituto Saber.")
+    ]
+}
+
+NOMES_SUPERVISOES_MELHORIA = {
+    "jean": "Jean Santos",
+    "murilo": "Murilo Henrique",
+    "julio": "Julio Castro",
+    "wesley": "Wesley Martins",
+    "kelly": "Kelly Querido",
+    "camila": "Camila Dias",
+    "laila": "Laila Rodrigues",
+    "alexssander": "Alexssander Silva",
+    "leticia": "Letícia Santos",
+    "maiara": "Maiara Bravo",
+    "angelica": "Angélica Oliveira",
+    "karine": "Karine Rodrigues"
+}
+
+st.html('<div id="pontos-melhoria"></div>')
+st.write("")
+st.html(
+    """
+    <div class="panel-card">
+        <div class="panel-card-title">Pontos de melhoria</div>
+        <div class="panel-card-subtitle">Principais oportunidades de desenvolvimento identificadas nas monitorias, consolidadas por equipe e praça.</div>
+    </div>
+    """
+)
+
+if PERFIL_ACESSO == "supervisor":
+    chaves_equipes_exibidas = [primeiro_nome(SUPERVISAO_ACESSO)]
+    titulo_escopo_melhoria = f"Equipe de {NOME_ACESSO}"
+else:
+    if praca_selecionada == "Todas":
+        pracas_exibidas = list(pracas.keys())
+    else:
+        pracas_exibidas = [praca_selecionada]
+
+    if supervisao_selecionada != "Todas":
+        chaves_equipes_exibidas = [primeiro_nome(supervisao_selecionada)]
+        titulo_escopo_melhoria = f"Equipe de {supervisao_selecionada}"
+    else:
+        chaves_equipes_exibidas = [
+            primeiro_nome(supervisor)
+            for nome_praca in pracas_exibidas
+            for supervisor in pracas[nome_praca]["supervisores"]
+        ]
+        titulo_escopo_melhoria = (
+            "Consolidado de todas as praças"
+            if praca_selecionada == "Todas"
+            else f"Consolidado da praça {praca_selecionada}"
+        )
+
+equipes_com_dados = [
+    chave for chave in chaves_equipes_exibidas
+    if chave in PONTOS_MELHORIA
+]
+
+if not equipes_com_dados:
+    st.info("Não há levantamento de pontos de melhoria cadastrado para este filtro.")
+else:
+    st.caption(
+        f"{titulo_escopo_melhoria} • {len(equipes_com_dados)} equipe(s) • "
+        "cinco oportunidades levantadas por equipe"
+    )
+
+    for chave in equipes_com_dados:
+        nome_supervisao = NOMES_SUPERVISOES_MELHORIA.get(
+            chave, chave.title()
+        )
+        nome_praca = identificar_praca(nome_supervisao)
+
+        with st.expander(
+            f"{nome_supervisao} • {nome_praca or 'Praça não identificada'}",
+            expanded=(PERFIL_ACESSO == "supervisor" or len(equipes_com_dados) == 1)
+        ):
+            for numero, (criterio, descricao) in enumerate(
+                PONTOS_MELHORIA[chave], start=1
+            ):
+                st.markdown(f"**{numero}. {criterio}**")
+                st.write(descricao)
+                if numero < len(PONTOS_MELHORIA[chave]):
+                    st.divider()
+
+st.caption(
+    "Nota: este painel apresenta o levantamento qualitativo consolidado pelo Treinamento. "
+    "Os itens não são recalculados automaticamente a partir das médias gerais da planilha."
+)
