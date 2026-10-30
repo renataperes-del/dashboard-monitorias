@@ -71,6 +71,7 @@ st.markdown(
 
     html, body, [class*="css"] {{
         font-family: 'Inter', sans-serif;
+        font-size: 13px;
     }}
 
     .stApp {{
@@ -192,8 +193,8 @@ st.markdown(
         border-radius: 10px;
         background: rgba(255,255,255,.07);
         color: rgba(255,255,255,.68);
-        font-size: 10px;
-        line-height: 1.5;
+        font-size: 11px;
+        line-height: 1.55;
     }}
 
     /* =====================================================
@@ -218,8 +219,8 @@ st.markdown(
 
     .page-title {{
         color: {TEXT};
-        font-size: 44px;
-        line-height: 1.08;
+        font-size: 36px;
+        line-height: 1.15;
         font-weight: 800;
         letter-spacing: -.045em;
         margin-top: 6px;
@@ -227,7 +228,8 @@ st.markdown(
 
     .page-subtitle {{
         color: {SECONDARY};
-        font-size: 16px;
+        font-size: 14px;
+        line-height: 1.5;
         margin-top: 8px;
     }}
 
@@ -261,13 +263,14 @@ st.markdown(
 
     .panel-subtitle {{
         color: {SECONDARY};
-        font-size: 10px;
+        font-size: 12px;
+        line-height: 1.45;
         margin-bottom: 8px;
     }}
 
     label[data-testid="stWidgetLabel"] p {{
         color: #374151 !important;
-        font-size: 11px !important;
+        font-size: 12px !important;
         font-weight: 600 !important;
     }}
 
@@ -285,7 +288,7 @@ st.markdown(
     }}
 
     div[data-baseweb="select"] [data-baseweb="select-value"] {{
-        font-size: 12px;
+        font-size: 13px;
     }}
 
     .filter-summary {{
@@ -295,7 +298,7 @@ st.markdown(
         padding: 9px 12px;
         margin: 0 0 14px;
         color: {TEXT};
-        font-size: 10px;
+        font-size: 12px;
     }}
 
     /* =====================================================
@@ -314,15 +317,15 @@ st.markdown(
 
     .metric-label {{
         color: #697386;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
-        letter-spacing: .08em;
+        letter-spacing: .07em;
         text-transform: uppercase;
     }}
 
     .metric-value {{
         color: {TEXT};
-        font-size: 29px;
+        font-size: 28px;
         font-weight: 800;
         line-height: 1;
         margin-top: 12px;
@@ -332,7 +335,8 @@ st.markdown(
 
     .metric-foot {{
         color: #7B8494;
-        font-size: 10px;
+        font-size: 11px;
+        line-height: 1.4;
         margin-top: 8px;
     }}
 
@@ -395,7 +399,7 @@ st.markdown(
         align-items: center;
         padding: 9px 0;
         border-bottom: 1px solid {BORDER};
-        font-size: 11px;
+        font-size: 12px;
     }}
 
     .status-row:last-child {{
@@ -447,6 +451,16 @@ st.markdown(
         border: 1px solid {BORDER};
         border-radius: 12px;
         overflow: hidden;
+        background: {CARD};
+    }}
+
+    [data-testid="stDataFrame"] [role="columnheader"] {{
+        font-size: 12px !important;
+        font-weight: 700 !important;
+    }}
+
+    [data-testid="stDataFrame"] [role="gridcell"] {{
+        font-size: 12px !important;
     }}
 
     [data-testid="stExpander"] {{
@@ -481,7 +495,7 @@ st.markdown(
 
     .team-name {{
         color: #1F2937;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 800;
         white-space: nowrap;
         overflow: hidden;
@@ -499,8 +513,8 @@ st.markdown(
 
     .team-label {{
         color: #7B8494;
-        font-size: 9px;
-        margin-top: 4px;
+        font-size: 11px;
+        margin-top: 5px;
     }}
 
     .team-progress {{
@@ -522,16 +536,17 @@ st.markdown(
         justify-content: space-between;
         gap: 8px;
         margin-top: 8px;
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 700;
     }}
 
     .team-realizada {{ color: #059669; }}
     .team-pendente {{ color: #D97706; }}
 
-    @media (max-width: 700px) {{{{
-        .team-grid {{{{ grid-template-columns: 1fr; }}}}
-    }}}}
+    @media (max-width: 700px) {{
+        .team-grid {{ grid-template-columns: 1fr; }}
+        .page-title {{ font-size: 30px; }}
+    }}}
 
     /* =====================================================
        RESPONSIVO
