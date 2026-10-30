@@ -1250,6 +1250,7 @@ apoio_adm = [
     "Ana Beatriz Rodrigues Proença",
     "Amanda Brito da Silva",
     "Stella Angela da Silva"
+    "Lays Basilio Silva",
 ]
 
 
