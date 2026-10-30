@@ -2200,7 +2200,7 @@ PONTOS_MELHORIA = {
         ("Histórico compatível com a ligação", "Uso excessivo de abreviações, falta de acentuação e ausência do nome do contato atendido."),
         ("Apresentação e contexto da ligação", "Apresentação pessoal informando apenas o primeiro nome, sem sobrenome."),
         ("Comunicação geral", "Uso recorrente de vícios de linguagem, como 'perfeito', 'pronto', 'né' e 'tá', além de construções em gerundismo."),
-        ("Novas unidades e grupo de empresas", "Pouca investigação sobre expansão da estrutura física e filiais em outras praças."),
+        ("Novas unidades e grupo de empresas", "Pouca investigação sobre a expansão da estrutura física, novas unidades e filiais de outras empresas do grupo econômico."),
         ("Solicitação de indicações", "Omissão do pedido de indicações comerciais em ligações com feedbacks positivos.")
     ],
     "kelly": [
