@@ -2021,46 +2021,51 @@ st.html('<div id="supervisores"></div>')
 # =========================================================
 
 st.write("")
-col_pracas, col_supervisores = st.columns(2)
+if PERFIL_ACESSO == "supervisor":
+    col_pracas = None
+    col_supervisores = st.container()
+else:
+    col_pracas, col_supervisores = st.columns(2)
 
-with col_pracas:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Monitorias por praça</div>
-            <div class="panel-card-subtitle">Volume de colaboradores no acompanhamento</div>
-        </div>
-        """
-    )
-
-    dados_pracas = (
-        df_ativo.groupby("Praça", dropna=False)
-        .size().reset_index(name="Quantidade")
-    )
-    dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
-    dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
-
-    fig_pracas = go.Figure(go.Bar(
-        x=dados_pracas["Quantidade"],
-        y=dados_pracas["Praça"],
-        orientation="h",
-        marker_color=PRIMARY,
-        text=dados_pracas["Quantidade"],
-        textposition="outside",
-        hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
-    ))
-    fig_pracas.update_layout(
-        height=280,
-        margin=dict(l=8, r=30, t=12, b=8),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color=TEXT),
-        xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-        yaxis=dict(showgrid=False, title=None),
-        showlegend=False
-    )
-    st.plotly_chart(fig_pracas, use_container_width=True, config={"displayModeBar": False})
-
+if col_pracas is not None:
+    with col_pracas:
+        st.html(
+            """
+            <div class="panel-card">
+                <div class="panel-card-title">Monitorias por praça</div>
+                <div class="panel-card-subtitle">Volume de colaboradores no acompanhamento</div>
+            </div>
+            """
+        )
+    
+        dados_pracas = (
+            df_ativo.groupby("Praça", dropna=False)
+            .size().reset_index(name="Quantidade")
+        )
+        dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
+        dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
+    
+        fig_pracas = go.Figure(go.Bar(
+            x=dados_pracas["Quantidade"],
+            y=dados_pracas["Praça"],
+            orientation="h",
+            marker_color=PRIMARY,
+            text=dados_pracas["Quantidade"],
+            textposition="outside",
+            hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
+        ))
+        fig_pracas.update_layout(
+            height=280,
+            margin=dict(l=8, r=30, t=12, b=8),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter, sans-serif", color=TEXT),
+            xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
+            yaxis=dict(showgrid=False, title=None),
+            showlegend=False
+        )
+        st.plotly_chart(fig_pracas, use_container_width=True, config={"displayModeBar": False})
+    
 with col_supervisores:
     st.html(
         """
