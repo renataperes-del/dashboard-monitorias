@@ -2282,8 +2282,8 @@ st.write("")
 st.html(
     """
     <div class="panel-card">
-        <div class="panel-card-title">Pontos de melhoria</div>
-        <div class="panel-card-subtitle">Principais oportunidades de desenvolvimento identificadas nas monitorias, considerando a visão geral da equipe.</div>
+        <div class="panel-card-title">5 pontos que mais impactam a pontuação da equipe</div>
+        <div class="panel-card-subtitle">Principais critérios que mais reduziram a pontuação nas monitorias, indicando oportunidades de desenvolvimento para a equipe.</div>
     </div>
     """
 )
