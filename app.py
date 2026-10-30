@@ -1861,7 +1861,7 @@ if status_selecionado != "Todos":
         """
     )
     tabela_colaboradores = df_lista[
-        ["Colaborador", "Função", "Supervisão", "Data Monitoria", "Média"]
+        ["Colaborador", "Função", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria", "Média"]
     ].copy()
     tabela_colaboradores = tabela_colaboradores.sort_values(
         ["Supervisão", "Colaborador"], na_position="last"
@@ -1873,7 +1873,7 @@ if status_selecionado != "Todos":
         lambda valor: f"{valor:.2f}%" if pd.notna(valor) else "—"
     )
     tabela_colaboradores = tabela_colaboradores.rename(
-        columns={"Data Monitoria": "Data de aplicação"}
+        columns={"Data Monitoria": "Data de aplicação", "Quem Aplicou Monitoria": "Aplicada por"}
     )
     if tabela_colaboradores.empty:
         st.html('<div class="panel-card"><div class="pending-meta">Nenhum colaborador encontrado nos filtros selecionados.</div></div>')
