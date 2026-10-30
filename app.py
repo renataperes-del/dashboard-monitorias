@@ -845,6 +845,32 @@ st.markdown(
     }}
 
 
+    /* Filtros integrados em um único painel */
+    [data-testid="stVerticalBlockBorderWrapper"] {{
+        border: 1px solid #E1E7F0 !important;
+        border-radius: 16px !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 6px 20px rgba(35, 55, 85, .045);
+        padding: 16px 18px 12px !important;
+    }}
+
+    .filter-heading {{
+        margin-bottom: 10px;
+    }}
+
+    .filter-heading .panel-title {{
+        color: #253247;
+        font-size: 14px;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }}
+
+    .filter-heading .panel-subtitle {{
+        color: #778196;
+        font-size: 12px;
+        line-height: 1.5;
+    }}
+
     /* Ajustes finais com foco na leitura e consistência */
     .sidebar a,
     .sidebar a:visited,
@@ -2091,92 +2117,91 @@ with col_sair:
 # FILTROS
 # =========================================================
 
-st.html(
-    """
-    <div class="filter-panel">
-        <div class="panel-title">Filtros</div>
-        <div class="panel-subtitle">Use os filtros para atualizar todos os indicadores e gráficos.</div>
-    </div>
-    """
-)
-
-col_filtro_praca, col_filtro_supervisao, col_filtro_status, col_filtro_visao = st.columns(4)
-
-if PERFIL_ACESSO == "supervisor":
-    pracas_supervisor = sorted(
-        {
-            str(praca).strip()
-            for praca in monitorias_google.loc[
-                monitorias_google["Supervisão"].astype(str).map(primeiro_nome)
-                == primeiro_nome(SUPERVISAO_ACESSO),
-                "Praça"
-            ].dropna()
-            if str(praca).strip()
-        }
+with st.container(border=True):
+    st.html(
+        """
+        <div class="filter-heading">
+            <div class="panel-title">Filtros</div>
+            <div class="panel-subtitle">Use os filtros para atualizar os indicadores e detalhamentos.</div>
+        </div>
+        """
     )
-
-    if pracas_supervisor:
-        opcoes_praca = [pracas_supervisor[0]]
+    col_filtro_praca, col_filtro_supervisao, col_filtro_status, col_filtro_visao = st.columns(4)
+    if PERFIL_ACESSO == "supervisor":
+        pracas_supervisor = sorted(
+            {
+                str(praca).strip()
+                for praca in monitorias_google.loc[
+                    monitorias_google["Supervisão"].astype(str).map(primeiro_nome)
+                    == primeiro_nome(SUPERVISAO_ACESSO),
+                    "Praça"
+                ].dropna()
+                if str(praca).strip()
+            }
+        )
+    
+        if pracas_supervisor:
+            opcoes_praca = [pracas_supervisor[0]]
+        else:
+            opcoes_praca = ["Sem praça"]
+    
     else:
-        opcoes_praca = ["Sem praça"]
-
-else:
-    opcoes_praca = ["Todas"] + list(pracas.keys())
-
-with col_filtro_praca:
-    praca_selecionada = st.selectbox(
-        "Praça",
-        opcoes_praca,
-        disabled=(PERFIL_ACESSO == "supervisor")
-    )
-
-if praca_selecionada == "Todas":
-    supervisoes_disponiveis = sorted(
-        {
-            supervisao_canonica_por_primeiro_nome.get(
-                primeiro_nome(supervisao),
-                str(supervisao).strip().split()[0]
-            )
-            for supervisao in monitorias_google["Supervisão"].dropna().astype(str).tolist()
-            if primeiro_nome(supervisao)
-        },
-        key=normalizar_texto
-    )
-else:
-    supervisoes_da_praca = {
-        primeiro_nome(nome)
-        for nome in pracas[praca_selecionada]["supervisores"]
-    }
-    supervisoes_disponiveis = sorted(
-        {
-            supervisao_canonica_por_primeiro_nome.get(
-                primeiro_nome(supervisao),
-                str(supervisao).strip().split()[0]
-            )
-            for supervisao in monitorias_google["Supervisão"].dropna().astype(str).tolist()
-            if primeiro_nome(supervisao) in supervisoes_da_praca
-        },
-        key=normalizar_texto
-    )
-
-if PERFIL_ACESSO == "supervisor":
-    opcoes_supervisao = [SUPERVISAO_ACESSO]
-else:
-    opcoes_supervisao = ["Todas"] + supervisoes_disponiveis
-
-with col_filtro_supervisao:
-    supervisao_selecionada = st.selectbox(
-        "Supervisão",
-        opcoes_supervisao,
-        disabled=(PERFIL_ACESSO == "supervisor")
-    )
-
-with col_filtro_status:
-    status_selecionado = st.selectbox(
-        "Status",
-        ["Todos", "Realizadas", "Pendentes", "Desligados"],
-        help="Os desligados ficam separados dos colaboradores ativos e não entram nos indicadores gerais."
-    )
+        opcoes_praca = ["Todas"] + list(pracas.keys())
+    
+    with col_filtro_praca:
+        praca_selecionada = st.selectbox(
+            "Praça",
+            opcoes_praca,
+            disabled=(PERFIL_ACESSO == "supervisor")
+        )
+    
+    if praca_selecionada == "Todas":
+        supervisoes_disponiveis = sorted(
+            {
+                supervisao_canonica_por_primeiro_nome.get(
+                    primeiro_nome(supervisao),
+                    str(supervisao).strip().split()[0]
+                )
+                for supervisao in monitorias_google["Supervisão"].dropna().astype(str).tolist()
+                if primeiro_nome(supervisao)
+            },
+            key=normalizar_texto
+        )
+    else:
+        supervisoes_da_praca = {
+            primeiro_nome(nome)
+            for nome in pracas[praca_selecionada]["supervisores"]
+        }
+        supervisoes_disponiveis = sorted(
+            {
+                supervisao_canonica_por_primeiro_nome.get(
+                    primeiro_nome(supervisao),
+                    str(supervisao).strip().split()[0]
+                )
+                for supervisao in monitorias_google["Supervisão"].dropna().astype(str).tolist()
+                if primeiro_nome(supervisao) in supervisoes_da_praca
+            },
+            key=normalizar_texto
+        )
+    
+    if PERFIL_ACESSO == "supervisor":
+        opcoes_supervisao = [SUPERVISAO_ACESSO]
+    else:
+        opcoes_supervisao = ["Todas"] + supervisoes_disponiveis
+    
+    with col_filtro_supervisao:
+        supervisao_selecionada = st.selectbox(
+            "Supervisão",
+            opcoes_supervisao,
+            disabled=(PERFIL_ACESSO == "supervisor")
+        )
+    
+    with col_filtro_status:
+        status_selecionado = st.selectbox(
+            "Status",
+            ["Todos", "Realizadas", "Pendentes", "Desligados"],
+            help="Os desligados ficam separados dos colaboradores ativos e não entram nos indicadores gerais."
+        )
 df_filtrado = monitorias_google.copy()
 
 # "Desligados" é uma visão separada. Todas as demais opções consideram
