@@ -2129,7 +2129,7 @@ with col_etapas:
 # DETALHE DA SUPERVISÃO
 # =========================================================
 
-if supervisao_selecionada != "Todas":
+if supervisao_selecionada != "Todas" and status_selecionado == "Todos":
     st.html('<div id="detalhamento"></div>')
     st.write("")
     st.html(
