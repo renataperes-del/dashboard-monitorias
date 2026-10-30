@@ -563,6 +563,287 @@ st.markdown(
             display: none;
         }}
     }}
+
+    /* =====================================================
+       REFINAMENTO VISUAL — IDENTIDADE BI NUBE
+       ===================================================== */
+
+    .stApp {{
+        background: linear-gradient(180deg, #F1F4FA 0%, #F7F8FC 260px, #F7F8FC 100%);
+    }}
+
+    .block-container {{
+        padding-top: 34px;
+        padding-bottom: 64px;
+    }}
+
+    /* Navegação lateral mais sólida e com contraste */
+    .sidebar {{
+        background: linear-gradient(180deg, #294D7B 0%, #365F91 100%);
+        width: 238px;
+        padding: 28px 16px 22px;
+        box-shadow: 8px 0 28px rgba(26, 48, 79, .12);
+    }}
+
+    .sidebar-brand {{
+        padding-bottom: 32px;
+        border-bottom: 1px solid rgba(255,255,255,.14);
+        margin-bottom: 22px;
+    }}
+
+    .sidebar-logo {{
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: rgba(255,255,255,.18);
+        font-size: 16px;
+    }}
+
+    .sidebar-title {{
+        font-size: 11px;
+        letter-spacing: .12em;
+    }}
+
+    .nav-label {{
+        font-size: 9px;
+        letter-spacing: .15em;
+        margin: 18px 0 8px;
+    }}
+
+    .nav-item {{
+        min-height: 40px;
+        padding: 10px 12px;
+        margin: 4px 0;
+        border-radius: 10px;
+        font-size: 12px;
+    }}
+
+    .nav-item:hover {{
+        background: rgba(255,255,255,.14);
+        transform: translateX(2px);
+    }}
+
+    .nav-item.active {{
+        background: rgba(255,255,255,.20);
+        box-shadow: inset 3px 0 0 #FFFFFF, 0 4px 12px rgba(18,38,65,.10);
+    }}
+
+    .sidebar-note {{
+        background: rgba(255,255,255,.09);
+        border-color: rgba(255,255,255,.18);
+        border-radius: 12px;
+        font-size: 10px;
+    }}
+
+    /* Cabeçalho como área de abertura do painel */
+    .topbar {{
+        background: #FFFFFF;
+        border: 1px solid #E4E9F2;
+        border-radius: 18px;
+        padding: 24px 26px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 26px rgba(35, 55, 85, .055);
+        position: relative;
+        overflow: hidden;
+    }}
+
+    .topbar::before {{
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+        background: linear-gradient(180deg, #4361EE, #6F8BFF);
+    }}
+
+    .eyebrow {{
+        font-size: 10px;
+        letter-spacing: .15em;
+    }}
+
+    .page-title {{
+        font-size: 32px;
+        letter-spacing: -.04em;
+        margin-top: 8px;
+    }}
+
+    .page-subtitle {{
+        font-size: 13px;
+        margin-top: 6px;
+    }}
+
+    /* Filtros em um painel próprio, com mais presença */
+    .filter-panel {{
+        border-radius: 14px;
+        padding: 18px 20px 10px;
+        box-shadow: 0 5px 18px rgba(35, 55, 85, .04);
+        margin-bottom: 16px;
+    }}
+
+    .panel-title {{
+        font-size: 14px;
+    }}
+
+    .panel-subtitle {{
+        font-size: 12px;
+    }}
+
+    div[data-baseweb="select"] > div {{
+        border-radius: 10px;
+        min-height: 44px;
+    }}
+
+    /* Indicadores com hierarquia mais clara */
+    .metric-card {{
+        position: relative;
+        overflow: hidden;
+        min-height: 126px;
+        padding: 20px 20px 18px;
+        border: 1px solid #E2E8F2;
+        border-radius: 16px;
+        box-shadow: 0 7px 22px rgba(35, 55, 85, .055);
+        transition: transform .18s ease, box-shadow .18s ease;
+    }}
+
+    .metric-card::before {{
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4361EE, #8AA0FF);
+    }}
+
+    .metric-card:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 11px 26px rgba(35, 55, 85, .09);
+    }}
+
+    .metric-label {{
+        color: #667085;
+        font-size: 10px;
+        letter-spacing: .10em;
+    }}
+
+    .metric-value {{
+        font-size: 32px;
+        margin-top: 16px;
+    }}
+
+    .metric-foot {{
+        color: #7A8496;
+        font-size: 11px;
+        margin-top: 9px;
+    }}
+
+    /* Painéis e gráficos com acabamento consistente */
+    .panel-card {{
+        border: 1px solid #E2E8F2;
+        border-radius: 16px;
+        padding: 19px 20px 13px;
+        box-shadow: 0 7px 22px rgba(35, 55, 85, .045);
+    }}
+
+    .panel-card-title {{
+        font-size: 14px;
+        letter-spacing: -.015em;
+    }}
+
+    .panel-card-subtitle {{
+        font-size: 12px;
+        color: #778196;
+        margin-top: 7px;
+    }}
+
+    [data-testid="stExpander"] {{
+        border: 1px solid #E0E6F0;
+        border-radius: 13px;
+        box-shadow: 0 3px 12px rgba(35, 55, 85, .035);
+        overflow: hidden;
+    }}
+
+    [data-testid="stExpander"] summary {{
+        padding: 5px 8px;
+    }}
+
+    [data-testid="stDataFrame"] {{
+        border: 1px solid #E0E6F0;
+        border-radius: 13px;
+        box-shadow: 0 5px 16px rgba(35, 55, 85, .035);
+    }}
+
+    /* Cartões de supervisão mais definidos */
+    .team-grid {{
+        gap: 14px;
+        margin-top: 14px;
+    }}
+
+    .team-card {{
+        border: 1px solid #E1E7F0;
+        border-radius: 14px;
+        padding: 16px 17px;
+        box-shadow: 0 5px 16px rgba(35, 55, 85, .045);
+        transition: transform .18s ease, box-shadow .18s ease;
+    }}
+
+    .team-card:hover {{
+        transform: translateY(-2px);
+        border-color: #C9D5F2;
+        box-shadow: 0 10px 22px rgba(35, 55, 85, .075);
+    }}
+
+    .team-name {{
+        font-size: 13px;
+        color: #344054;
+    }}
+
+    .team-number {{
+        font-size: 28px;
+        color: #243B67;
+        margin-top: 12px;
+    }}
+
+    .team-progress {{
+        height: 7px;
+        background: #E9EDF5;
+        margin-top: 14px;
+    }}
+
+    .team-progress-fill {{
+        background: linear-gradient(90deg, #4361EE, #7892FF);
+    }}
+
+    .team-status {{
+        font-size: 11px;
+        margin-top: 10px;
+    }}
+
+    /* Botões com acabamento uniforme */
+    .stButton > button,
+    .stDownloadButton > button {{
+        border-radius: 10px;
+        min-height: 42px;
+        font-size: 12px;
+        font-weight: 700;
+    }}
+
+    .stButton > button[kind="primary"] {{
+        background: #4361EE;
+        border-color: #4361EE;
+        color: #FFFFFF;
+    }}
+
+    @media (max-width: 1100px) {{
+        .topbar {{
+            padding: 20px;
+        }}
+        .metric-card {{
+            min-height: 112px;
+        }}
+    }}
+
     </style>
     """,
     unsafe_allow_html=True
