@@ -2277,6 +2277,8 @@ percentual_concluido = (
 notas_validas = df_ativo.loc[df_ativo["Média"].notna(), "Média"]
 media_geral = notas_validas.mean() if not notas_validas.empty else None
 
+st.html('<div id="pendencias"></div>')
+
 col1, col2, col3, col4, col5 = st.columns(5)
 
 metricas = [
