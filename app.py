@@ -352,17 +352,37 @@ st.markdown(
 
     .panel-card-title {{
         color: {TEXT};
-        font-size: 13px;
+        font-size: 14px;
+        line-height: 1.35;
         font-weight: 800;
         letter-spacing: -.01em;
     }}
 
     .panel-card-subtitle {{
         color: {SECONDARY};
-        font-size: 14px;
+        font-size: 12px;
         line-height: 1.5;
-        margin-top: 8px;
+        margin-top: 6px;
         margin-bottom: 6px;
+    }}
+
+    /* Tipografia padronizada dos conteúdos */
+    [data-testid="stExpander"] summary p {{
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+        font-weight: 700 !important;
+    }}
+
+    [data-testid="stExpander"] [data-testid="stMarkdownContainer"] p {{
+        font-size: 13px !important;
+        line-height: 1.6 !important;
+        color: {TEXT};
+    }}
+
+    [data-testid="stCaptionContainer"] p {{
+        font-size: 11px !important;
+        line-height: 1.45 !important;
+        color: {SECONDARY};
     }}
 
     .status-list {{
