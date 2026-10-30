@@ -1861,13 +1861,19 @@ if status_selecionado != "Todos":
         """
     )
     tabela_colaboradores = df_lista[
-        ["Colaborador", "Função", "Supervisão", "Média"]
+        ["Colaborador", "Função", "Supervisão", "Data Monitoria", "Média"]
     ].copy()
     tabela_colaboradores = tabela_colaboradores.sort_values(
         ["Supervisão", "Colaborador"], na_position="last"
     )
+    tabela_colaboradores["Data Monitoria"] = tabela_colaboradores["Data Monitoria"].apply(
+        lambda data: data.strftime("%d/%m/%Y") if pd.notna(data) else "—"
+    )
     tabela_colaboradores["Média"] = tabela_colaboradores["Média"].apply(
         lambda valor: f"{valor:.2f}%" if pd.notna(valor) else "—"
+    )
+    tabela_colaboradores = tabela_colaboradores.rename(
+        columns={"Data Monitoria": "Data de aplicação"}
     )
     if tabela_colaboradores.empty:
         st.html('<div class="panel-card"><div class="pending-meta">Nenhum colaborador encontrado nos filtros selecionados.</div></div>')
