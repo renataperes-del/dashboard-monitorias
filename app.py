@@ -1176,15 +1176,15 @@ if len(dados_aplicacao) <= 3:
 
 COLUNAS_ESPERADAS = [
     "Colaborador", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria",
-    "Ligação 1", "Ligação 2", "Média das 2 ligações",
+    "Ligação 1", "Ligação 2", "Média das 2 ligações", "Tempo no Meet",
     "Data Lado a Lado", "Quem Aplicou Lado a Lado",
     "Observação Lado a Lado", "Data Monitoria Offline", "Quem Aplicou Offline",
     "Percentual Offline", "Observações Gerais", "Status do colaborador"
 ]
 
 # A aba possui 3 linhas de cabeçalho. Os dados começam na linha 4.
-# O mapeamento segue as 14 colunas reais da planilha, incluindo a média
-# das duas ligações na coluna G antes dos campos de Lado a Lado.
+# O mapeamento considera as 16 colunas atuais, incluindo "Tempo no Meet" na H
+# e mantendo a média das duas ligações na coluna G.
 linhas_dados = []
 for numero_planilha, linha in enumerate(dados_aplicacao[3:], start=4):
     linha = list(linha)
@@ -1320,7 +1320,7 @@ if PERFIL_ACESSO == "supervisor":
 monitorias_google["Nome Normalizado"] = monitorias_google["Colaborador"].apply(normalizar_texto)
 
 # Mantém os desligados no histórico, mas fora dos indicadores atuais por padrão.
-# Se a coluna "Status do colaborador" (O) estiver preenchida, ela é a fonte principal.
+# Se a coluna "Status do colaborador" (P) estiver preenchida, ela é a fonte principal.
 DESLIGADOS_CONHECIDOS = {
     normalizar_texto(nome)
     for nome in [
@@ -1593,7 +1593,9 @@ execs = [
     "Emile Cristine Brito da Silva",
     "Aline Trindade Moreira",
     "Erik Xavier Gonçalves",
-    "Keren Jamille Coutinho Albrechete"
+    "Keren Jamille Coutinho Albrechete",
+    "Ana Julia Araújo Vilas Boas Almeida",
+    "Mylena Barroso Azevedo de Oliveira"
 ]
 
 
@@ -1630,6 +1632,9 @@ apoio_adm = [
     "Amanda Brito da Silva",
     "Stella Angela da Silva",
     "Lays Basilio Silva",
+    "Maria Cibelly Jesus Silva",
+    "Bianca Leite Gomes da Silva",
+    "Caio Vinicius Figueiredo de Paula",
 ]
 
 
