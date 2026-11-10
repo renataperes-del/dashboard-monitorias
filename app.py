@@ -2265,6 +2265,12 @@ if status_selecionado != "Todos":
         ["Colaborador", "Função", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria", "Média"]
     ].copy()
 
+    # Exibe traço quando não há responsável informado para a Lidiane.
+    mascara_lidiane = tabela_colaboradores["Colaborador"].map(normalizar_texto).eq(
+        normalizar_texto("Lidiane Israel Domingos")
+    )
+    tabela_colaboradores.loc[mascara_lidiane, "Quem Aplicou Monitoria"] = "-"
+
     if status_selecionado == "Pendentes":
         motivos_pendencias = {
             normalizar_texto("Sarah Andressa de Araújo Antunes"):
