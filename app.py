@@ -1694,6 +1694,10 @@ def converter_percentual(valor):
     # Valores percentuais formatados como fração (ex.: 0.7063) viram 70.63.
     if not tem_percentual and 0 <= numero <= 1:
         numero *= 100
+    # O Google Sheets pode devolver 7840.00% quando a célula contém 78.4,
+    # mas está formatada como percentual. Nesse caso, desfaz a escala extra.
+    elif tem_percentual and numero > 100:
+        numero /= 100
 
     return numero
 
