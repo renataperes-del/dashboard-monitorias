@@ -2215,9 +2215,22 @@ else:
     # "Todos" mostra todos os ativos; "Desligados" mostra somente desligados.
     df_lista = df_filtrado.copy()
 
-# Mantém o universo completo para os indicadores e gráficos de acompanhamento.
-# O status selecionado é aplicado aos detalhamentos/listas abaixo.
-df_ativo = df_filtrado.copy()
+# Os indicadores gerais consideram sempre os colaboradores ativos,
+# independentemente do status selecionado na lista.
+df_ativo = monitorias_google[
+    monitorias_google["Status do colaborador"] == "Ativo"
+].copy()
+
+# Praça e supervisão continuam refletindo os filtros selecionados.
+if praca_selecionada != "Todas":
+    df_ativo = df_ativo[df_ativo["Praça"] == praca_selecionada].copy()
+
+if supervisao_selecionada != "Todas":
+    df_ativo = df_ativo[
+        df_ativo["Supervisão"].astype(str).map(primeiro_nome)
+        == primeiro_nome(supervisao_selecionada)
+    ].copy()
+
 df_status = df_lista.copy()
 
 filtros_ativos = []
