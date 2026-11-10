@@ -2264,6 +2264,23 @@ if status_selecionado != "Todos":
     tabela_colaboradores = df_lista[
         ["Colaborador", "Função", "Supervisão", "Data Monitoria", "Quem Aplicou Monitoria", "Média"]
     ].copy()
+
+    if status_selecionado == "Pendentes":
+        motivos_pendencias = {
+            normalizar_texto("Sarah Andressa de Araújo Antunes"):
+                "Afastada por licença-maternidade. Retorno previsto para dezembro.",
+            normalizar_texto("Amanda Lima Pereira"):
+                "Afastada por motivo de saúde. Retorno previsto para 14/10.",
+            normalizar_texto("Lidiane Israel Domingos"):
+                "Problema no Speech Analytics impedia a captura de contatos do AppChat da praça GMSP. O Suporte realizou o ajuste em 29/10, mas os dados anteriores não foram recuperados. A responsável está de férias.",
+            normalizar_texto("Yasmin da Fonseca Buffel Pantoja"):
+                "Afastada por motivo de saúde. Retorno previsto para 15/10."
+        }
+        tabela_colaboradores["Motivo da pendência"] = (
+            tabela_colaboradores["Colaborador"]
+            .map(lambda nome: motivos_pendencias.get(normalizar_texto(nome), "Motivo não informado."))
+        )
+
     tabela_colaboradores = tabela_colaboradores.sort_values(
         ["Supervisão", "Colaborador"], na_position="last"
     )
