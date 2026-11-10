@@ -420,7 +420,6 @@ st.markdown(
     #indicadores,
     #supervisores,
     #pendencias,
-    #evolucao,
     #etapas {{
         scroll-margin-top: 24px;
     }}
@@ -2046,7 +2045,6 @@ st.html(
         <a class="nav-item" href="#supervisores"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-3.5 3.1-5 7-5s6.2 1.5 7 5"/></svg></span> Supervisores</a>
         <a class="nav-item" href="#pendencias"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12M6 12h12M6 17h8"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></span> Pendências</a>
         <div class="nav-label" style="margin-top:20px;">Acompanhamento</div>
-        <a class="nav-item" href="#evolucao"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l5-5 4 3 7-8"/><path d="M16 7h4v4"/></svg></span> Evolução</a>
         <a class="nav-item" href="#etapas"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></span> Etapas</a>
         <a class="nav-item" href="#pontos-melhoria"><span class="nav-icon">✦</span> Pontos de melhoria</a>
         <div class="sidebar-note">
@@ -2311,116 +2309,10 @@ MESES = [
 st.html('<div id="visao-geral"></div>')
 st.html('<div id="evolucao"></div>')
 
-# =========================================================
-# GRÁFICOS PRINCIPAIS
-# =========================================================
-
-st.write("")
-if PERFIL_ACESSO == "supervisor":
-    col_status = st.container()
-else:
-    col_evolucao, col_status = st.columns([2.1, 1])
-
-if PERFIL_ACESSO != "supervisor":
-    with col_evolucao:
-        st.html(
-            """
-            <div class="panel-card">
-                <div class="panel-card-title">Evolução das monitorias</div>
-                <div class="panel-card-subtitle">Quantidade de monitorias realizadas por mês</div>
-            </div>
-            """
-        )
-    
-        datas_validas = df_ativo.loc[df_ativo["Data Monitoria"].notna(), "Data Monitoria"]
-    
-        if not datas_validas.empty:
-            primeiro_mes = datas_validas.min().to_period("M")
-            ultimo_mes = max(datas_validas.max().to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"))
-            meses = pd.period_range(primeiro_mes, ultimo_mes, freq="M")
-        else:
-            meses = pd.period_range(pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), pd.Timestamp.now(tz="America/Sao_Paulo").tz_localize(None).to_period("M"), freq="M")
-    
-        nomes_meses = []
-        quantidades = []
-        for periodo in meses:
-            quantidade = df_ativo[
-                (df_ativo["Data Monitoria"] >= periodo.start_time)
-                & (df_ativo["Data Monitoria"] <= periodo.end_time)
-            ].shape[0]
-            nomes_meses.append(f"{MESES[periodo.month - 1]}/{str(periodo.year)[2:]}")
-            quantidades.append(quantidade)
-    
-        fig_evolucao = go.Figure()
-        fig_evolucao.add_trace(
-            go.Scatter(
-                x=nomes_meses,
-                y=quantidades,
-                mode="lines+markers",
-                line=dict(color=PRIMARY, width=3),
-                marker=dict(color=PRIMARY, size=7),
-                hovertemplate="%{x}: %{y} monitorias<extra></extra>"
-            )
-        )
-        fig_evolucao.update_layout(
-            height=270,
-            margin=dict(l=8, r=8, t=12, b=8),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter, sans-serif", color=TEXT),
-            xaxis=dict(showgrid=False, title=None),
-            yaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-            showlegend=False
-        )
-        st.plotly_chart(fig_evolucao, use_container_width=True, config={"displayModeBar": False})
-    
-with col_status:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Status das monitorias</div>
-            <div class="panel-card-subtitle">Distribuição do acompanhamento atual</div>
-        </div>
-        """
-    )
-
-    fig_status = go.Figure(
-        go.Pie(
-            values=[total_realizadas, total_pendentes],
-            labels=["Realizadas", "Pendentes"],
-            hole=.70,
-            marker=dict(colors=[SUCCESS, WARNING]),
-            textinfo="none",
-            hovertemplate="%{label}: %{value}<extra></extra>"
-        )
-    )
-    fig_status.update_layout(
-        height=220,
-        margin=dict(l=8, r=8, t=8, b=0),
-        paper_bgcolor="rgba(0,0,0,0)",
-        showlegend=False,
-        annotations=[dict(text=f"<b>{percentual_concluido:.0f}%</b><br><span style='font-size:10px'>concluído</span>", x=.5, y=.5, showarrow=False, font=dict(size=22, color=TEXT))]
-    )
-    st.plotly_chart(fig_status, use_container_width=True, config={"displayModeBar": False})
-
-    st.html(
-        f"""
-        <div class="status-list">
-            <div class="status-row"><span class="status-name">Realizadas</span><span class="status-number">{total_realizadas}</span></div>
-            <div class="status-row"><span class="status-name">Pendentes</span><span class="status-number">{total_pendentes}</span></div>
-        </div>
-        """
-    )
+# ===================st.html('<div id="visao-geral"></div>')
 
 
-st.html('<div id="supervisores"></div>')
-
-# =========================================================
-# PRAÇAS E SUPERVISORES
-# =========================================================
-
-st.write("")
-if PERFIL_ACESSO == "supervisor":
+ERFIL_ACESSO == "supervisor":
     col_pracas = None
     col_supervisores = st.container()
 else:
