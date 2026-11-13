@@ -2273,6 +2273,12 @@ if status_selecionado != "Todos":
     tabela_colaboradores.loc[mascara_lidiane, "Quem Aplicou Monitoria"] = "-"
 
     if status_selecionado == "Pendentes":
+        # Não exibe média para Lidiane, pois os dados anteriores do AppChat não foram recuperados.
+        mascara_lidiane_media = tabela_colaboradores["Colaborador"].map(normalizar_texto).eq(
+            normalizar_texto("Lidiane Israel Domingos")
+        )
+        tabela_colaboradores.loc[mascara_lidiane_media, "Média"] = pd.NA
+
         motivos_pendencias = {
             normalizar_texto("Sarah Andressa de Araújo Antunes"):
                 "Afastada por licença-maternidade. Retorno previsto para dezembro.",
