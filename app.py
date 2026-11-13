@@ -1334,6 +1334,7 @@ DESLIGADOS_CONHECIDOS = {
         "Lays Basilio Silva",
         "Eduarda Paes Leme Maldonado",
         "Camila Alves Bender Azevedo",
+        "Pedro Paulo Clemente Torres",
     ]
 }
 
@@ -2653,7 +2654,7 @@ RANKING_PERDAS = {
     },
     "julio": {
         "praca": "São Paulo",
-        "colaboradores": 13,
+        "colaboradores": 12,
         "itens": [
             [
                 "Confirmou dados gerais para atualização do cadastro",
