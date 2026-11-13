@@ -1203,6 +1203,40 @@ if not linhas_dados:
 
 monitorias_google = pd.DataFrame(linhas_dados)
 
+# Converte os valores da coluna "Tempo no Meet" para segundos.
+# O Google Sheets pode retornar a duração como texto HH:MM:SS
+# ou como fração numérica de um dia.
+def converter_tempo_meet_segundos(valor):
+    if valor is None or pd.isna(valor):
+        return 0.0
+
+    if isinstance(valor, (int, float)) and not isinstance(valor, bool):
+        return max(float(valor) * 86400, 0.0)
+
+    if hasattr(valor, "hour") and hasattr(valor, "minute"):
+        segundos = (
+            int(valor.hour) * 3600
+            + int(valor.minute) * 60
+            + int(getattr(valor, "second", 0))
+        )
+        return max(float(segundos), 0.0)
+
+    texto = str(valor).strip()
+    if not texto:
+        return 0.0
+
+    try:
+        if ":" in texto:
+            return max(float(pd.to_timedelta(texto).total_seconds()), 0.0)
+        return max(float(texto.replace(",", ".")) * 86400, 0.0)
+    except (TypeError, ValueError, OverflowError):
+        return 0.0
+
+
+monitorias_google["Tempo Meet (segundos)"] = monitorias_google[
+    "Tempo no Meet"
+].apply(converter_tempo_meet_segundos)
+
 # =========================================================
 # FUNÇÃO DE NORMALIZAÇÃO
 # =========================================================
@@ -2346,6 +2380,64 @@ for coluna, (titulo, valor, subtitulo) in zip([col1, col2, col3, col4], metricas
                 <div class="metric-foot">{subtitulo}</div>
             </div>
             """
+        )
+
+
+# Gráfico geral de horas em Meet: disponível apenas para Gerentes e Treinamento.
+if PERFIL_ACESSO in {"gerente", "treinamento"}:
+    total_segundos_meet = int(df_ativo["Tempo Meet (segundos)"].sum())
+    total_horas_meet = total_segundos_meet // 3600
+    minutos_meet = (total_segundos_meet % 3600) // 60
+    rotulo_tempo_meet = f"{total_horas_meet}h {minutos_meet:02d}min"
+
+    col_meet_esq, col_meet_grafico, col_meet_dir = st.columns([1, 1.4, 1])
+    with col_meet_grafico:
+        st.html(
+            """
+            <div class="panel-card">
+                <div class="panel-card-title">Tempo total em Meet</div>
+                <div class="panel-card-subtitle">Duração das monitorias realizadas</div>
+            </div>
+            """
+        )
+
+        fig_tempo_meet = go.Figure(
+            data=[
+                go.Pie(
+                    labels=["Tempo em Meet"],
+                    values=[max(total_segundos_meet, 1)],
+                    hole=0.76,
+                    sort=False,
+                    marker=dict(colors=[PRIMARY]),
+                    textinfo="none",
+                    hovertemplate=f"Tempo total: {rotulo_tempo_meet}<extra></extra>"
+                )
+            ]
+        )
+        fig_tempo_meet.update_layout(
+            height=245,
+            margin=dict(l=5, r=5, t=5, b=5),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter, sans-serif", color=TEXT),
+            showlegend=False,
+            annotations=[
+                dict(
+                    text=(
+                        f"<b>{rotulo_tempo_meet}</b>"
+                        "<br><span style='font-size:11px;color:#778196'>TOTAL NO MEET</span>"
+                    ),
+                    x=0.5,
+                    y=0.5,
+                    showarrow=False,
+                    font=dict(size=20, color=TEXT)
+                )
+            ]
+        )
+        st.plotly_chart(
+            fig_tempo_meet,
+            use_container_width=True,
+            config={"displayModeBar": False}
         )
 
 
