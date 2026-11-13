@@ -2357,11 +2357,7 @@ st.html('<div id="supervisores"></div>')
 
 st.write("")
 if PERFIL_ACESSO != "supervisor":
-    if PERFIL_ACESSO == "supervisor":
-        col_pracas = None
-        col_supervisores = st.container()
-    else:
-        col_pracas, col_supervisores = st.columns(2)
+    col_pracas, col_supervisores = st.columns(2)
     
     if col_pracas is not None:
         with col_pracas:
