@@ -1226,6 +1226,15 @@ def converter_tempo_meet_segundos(valor):
         return 0.0
 
     try:
+        # Trata duração acumulada como 167:15:04 sem limitar as horas a 24.
+        partes = texto.split(":")
+        if len(partes) == 3:
+            horas = int(partes[0])
+            minutos = int(partes[1])
+            segundos = float(partes[2].replace(",", "."))
+            if horas >= 0 and 0 <= minutos < 60 and 0 <= segundos < 60:
+                return float(horas * 3600 + minutos * 60 + segundos)
+
         if ":" in texto:
             return max(float(pd.to_timedelta(texto).total_seconds()), 0.0)
         return max(float(texto.replace(",", ".")) * 86400, 0.0)
@@ -2393,7 +2402,9 @@ st.write("")
 if PERFIL_ACESSO != "supervisor":
     col_pracas, col_supervisores, col_meet_grafico = st.columns([1, 1, 0.9])
 
-    total_segundos_meet = int(df_ativo["Tempo Meet (segundos)"].sum())
+    # O total de Meet considera todos os registros da planilha, inclusive desligados,
+    # para corresponder ao acumulado geral informado na aba Aplicação.
+    total_segundos_meet = int(monitorias_google["Tempo Meet (segundos)"].sum())
     total_horas_meet = total_segundos_meet // 3600
     minutos_meet = (total_segundos_meet % 3600) // 60
     rotulo_tempo_meet = f"{total_horas_meet}h {minutos_meet:02d}min"
