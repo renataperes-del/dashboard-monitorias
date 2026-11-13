@@ -2356,92 +2356,93 @@ st.html('<div id="supervisores"></div>')
 # =========================================================
 
 st.write("")
-if PERFIL_ACESSO == "supervisor":
-    col_pracas = None
-    col_supervisores = st.container()
-else:
-    col_pracas, col_supervisores = st.columns(2)
-
-if col_pracas is not None:
-    with col_pracas:
+if PERFIL_ACESSO != "supervisor":
+    if PERFIL_ACESSO == "supervisor":
+        col_pracas = None
+        col_supervisores = st.container()
+    else:
+        col_pracas, col_supervisores = st.columns(2)
+    
+    if col_pracas is not None:
+        with col_pracas:
+            st.html(
+                """
+                <div class="panel-card">
+                    <div class="panel-card-title">Monitorias por praça</div>
+                    <div class="panel-card-subtitle">Volume de colaboradores no acompanhamento</div>
+                </div>
+                """
+            )
+        
+            dados_pracas = (
+                df_ativo.groupby("Praça", dropna=False)
+                .size().reset_index(name="Quantidade")
+            )
+            dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
+            dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
+        
+            fig_pracas = go.Figure(go.Bar(
+                x=dados_pracas["Quantidade"],
+                y=dados_pracas["Praça"],
+                orientation="h",
+                marker_color=PRIMARY,
+                text=dados_pracas["Quantidade"],
+                textposition="outside",
+                hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
+            ))
+            fig_pracas.update_layout(
+                height=280,
+                margin=dict(l=8, r=30, t=12, b=8),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(family="Inter, sans-serif", color=TEXT),
+                xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
+                yaxis=dict(showgrid=False, title=None),
+                showlegend=False
+            )
+            st.plotly_chart(fig_pracas, use_container_width=True, config={"displayModeBar": False})
+        
+    with col_supervisores:
         st.html(
             """
             <div class="panel-card">
-                <div class="panel-card-title">Monitorias por praça</div>
-                <div class="panel-card-subtitle">Volume de colaboradores no acompanhamento</div>
+                <div class="panel-card-title">Monitorias por supervisão</div>
+                <div class="panel-card-subtitle">Progresso das equipes no acompanhamento</div>
             </div>
             """
         )
     
-        dados_pracas = (
-            df_ativo.groupby("Praça", dropna=False)
-            .size().reset_index(name="Quantidade")
-        )
-        dados_pracas["Praça"] = dados_pracas["Praça"].fillna("Sem praça")
-        dados_pracas = dados_pracas.sort_values("Quantidade", ascending=True)
-    
-        fig_pracas = go.Figure(go.Bar(
-            x=dados_pracas["Quantidade"],
-            y=dados_pracas["Praça"],
-            orientation="h",
-            marker_color=PRIMARY,
-            text=dados_pracas["Quantidade"],
-            textposition="outside",
-            hovertemplate="%{y}: %{x} colaboradores<extra></extra>"
-        ))
-        fig_pracas.update_layout(
-            height=280,
-            margin=dict(l=8, r=30, t=12, b=8),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter, sans-serif", color=TEXT),
-            xaxis=dict(showgrid=True, gridcolor=BORDER, zeroline=False, title=None),
-            yaxis=dict(showgrid=False, title=None),
-            showlegend=False
-        )
-        st.plotly_chart(fig_pracas, use_container_width=True, config={"displayModeBar": False})
-    
-with col_supervisores:
-    st.html(
-        """
-        <div class="panel-card">
-            <div class="panel-card-title">Monitorias por supervisão</div>
-            <div class="panel-card-subtitle">Progresso das equipes no acompanhamento</div>
-        </div>
-        """
-    )
-
-    dados_supervisores = (
-        df_ativo.assign(
-            SupervisaoExibicao=df_ativo["Supervisão"].astype(str).map(
-                lambda x: supervisao_canonica_por_primeiro_nome.get(
-                    primeiro_nome(x),
-                    x.strip().split()[0] if x.strip() else ""
+        dados_supervisores = (
+            df_ativo.assign(
+                SupervisaoExibicao=df_ativo["Supervisão"].astype(str).map(
+                    lambda x: supervisao_canonica_por_primeiro_nome.get(
+                        primeiro_nome(x),
+                        x.strip().split()[0] if x.strip() else ""
+                    )
                 )
             )
+            .groupby("SupervisaoExibicao", dropna=False)
+            .agg(
+                Total=("Colaborador", "size"),
+                Realizadas=("Realizada", "sum")
+            )
+            .reset_index()
+            .sort_values("Total", ascending=False)
         )
-        .groupby("SupervisaoExibicao", dropna=False)
-        .agg(
-            Total=("Colaborador", "size"),
-            Realizadas=("Realizada", "sum")
-        )
-        .reset_index()
-        .sort_values("Total", ascending=False)
-    )
-
-    cards = ""
-    for _, row in dados_supervisores.iterrows():
-        total = int(row["Total"])
-        realizadas = int(row["Realizadas"])
-        pendentes = total - realizadas
-        cards += html_team(
-            row["SupervisaoExibicao"],
-            total,
-            realizadas,
-            pendentes
-        )
-
-    st.html(f'<div class="team-grid">{cards}</div>')
+    
+        cards = ""
+        for _, row in dados_supervisores.iterrows():
+            total = int(row["Total"])
+            realizadas = int(row["Realizadas"])
+            pendentes = total - realizadas
+            cards += html_team(
+                row["SupervisaoExibicao"],
+                total,
+                realizadas,
+                pendentes
+            )
+    
+        st.html(f'<div class="team-grid">{cards}</div>')
     
     
     
