@@ -2383,64 +2383,6 @@ for coluna, (titulo, valor, subtitulo) in zip([col1, col2, col3, col4], metricas
         )
 
 
-# Gráfico geral de horas em Meet: disponível apenas para Gerentes e Treinamento.
-if PERFIL_ACESSO in {"gerente", "treinamento"}:
-    total_segundos_meet = int(df_ativo["Tempo Meet (segundos)"].sum())
-    total_horas_meet = total_segundos_meet // 3600
-    minutos_meet = (total_segundos_meet % 3600) // 60
-    rotulo_tempo_meet = f"{total_horas_meet}h {minutos_meet:02d}min"
-
-    col_meet_esq, col_meet_grafico, col_meet_dir = st.columns([1, 1.4, 1])
-    with col_meet_grafico:
-        st.html(
-            """
-            <div class="panel-card">
-                <div class="panel-card-title">Tempo total em Meet</div>
-                <div class="panel-card-subtitle">Duração das monitorias realizadas</div>
-            </div>
-            """
-        )
-
-        fig_tempo_meet = go.Figure(
-            data=[
-                go.Pie(
-                    labels=["Tempo em Meet"],
-                    values=[max(total_segundos_meet, 1)],
-                    hole=0.76,
-                    sort=False,
-                    marker=dict(colors=[PRIMARY]),
-                    textinfo="none",
-                    hovertemplate=f"Tempo total: {rotulo_tempo_meet}<extra></extra>"
-                )
-            ]
-        )
-        fig_tempo_meet.update_layout(
-            height=245,
-            margin=dict(l=5, r=5, t=5, b=5),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(family="Inter, sans-serif", color=TEXT),
-            showlegend=False,
-            annotations=[
-                dict(
-                    text=(
-                        f"<b>{rotulo_tempo_meet}</b>"
-                        "<br><span style='font-size:11px;color:#778196'>TOTAL NO MEET</span>"
-                    ),
-                    x=0.5,
-                    y=0.5,
-                    showarrow=False,
-                    font=dict(size=20, color=TEXT)
-                )
-            ]
-        )
-        st.plotly_chart(
-            fig_tempo_meet,
-            use_container_width=True,
-            config={"displayModeBar": False}
-        )
-
-
 st.html('<div id="supervisores"></div>')
 
 # =========================================================
@@ -2449,7 +2391,12 @@ st.html('<div id="supervisores"></div>')
 
 st.write("")
 if PERFIL_ACESSO != "supervisor":
-    col_pracas, col_supervisores = st.columns(2)
+    col_pracas, col_supervisores, col_meet_grafico = st.columns([1, 1, 0.9])
+
+    total_segundos_meet = int(df_ativo["Tempo Meet (segundos)"].sum())
+    total_horas_meet = total_segundos_meet // 3600
+    minutos_meet = (total_segundos_meet % 3600) // 60
+    rotulo_tempo_meet = f"{total_horas_meet}h {minutos_meet:02d}min"
     
     if col_pracas is not None:
         with col_pracas:
@@ -2531,6 +2478,55 @@ if PERFIL_ACESSO != "supervisor":
             )
     
         st.html(f'<div class="team-grid">{cards}</div>')
+
+    with col_meet_grafico:
+        st.html(
+            """
+            <div class="panel-card">
+                <div class="panel-card-title">Tempo total em Meet</div>
+                <div class="panel-card-subtitle">Duração das monitorias realizadas</div>
+            </div>
+            """
+        )
+
+        fig_tempo_meet = go.Figure(
+            data=[
+                go.Pie(
+                    labels=["Tempo em Meet"],
+                    values=[max(total_segundos_meet, 1)],
+                    hole=0.76,
+                    sort=False,
+                    marker=dict(colors=[PRIMARY]),
+                    textinfo="none",
+                    hovertemplate=f"Tempo total: {rotulo_tempo_meet}<extra></extra>"
+                )
+            ]
+        )
+        fig_tempo_meet.update_layout(
+            height=280,
+            margin=dict(l=4, r=4, t=8, b=8),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Inter, sans-serif", color=TEXT),
+            showlegend=False,
+            annotations=[
+                dict(
+                    text=(
+                        f"<b>{rotulo_tempo_meet}</b>"
+                        "<br><span style='font-size:10px;color:#778196'>TOTAL NO MEET</span>"
+                    ),
+                    x=0.5,
+                    y=0.5,
+                    showarrow=False,
+                    font=dict(size=17, color=TEXT)
+                )
+            ]
+        )
+        st.plotly_chart(
+            fig_tempo_meet,
+            use_container_width=True,
+            config={"displayModeBar": False}
+        )
     
     
     
