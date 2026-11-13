@@ -2481,111 +2481,519 @@ if supervisao_selecionada != "Todas" and status_selecionado == "Todos":
     st.dataframe(df_detalhe, use_container_width=True, hide_index=True)
 
 # =========================================================
-# PONTOS DE MELHORIA POR EQUIPE / PRAÇA
-# Levantamento qualitativo consolidado pelo Treinamento.
-# Não representa cálculo automático das notas da planilha.
+# RANKING DE CRITÉRIOS COM MAIOR PERDA POR SUPERVISÃO
+# Base consolidada pelo Treinamento Comercial.
+# Perda = avaliação parcial + não atingida.
 # =========================================================
 
-PONTOS_MELHORIA = {
-    "jean": [
-        ("Histórico compatível com a ligação", "Erros recorrentes de ortografia e concordância verbal, além de omissão de combinados e datas de retorno."),
-        ("Atualização cadastral", "Validação restrita aos celetistas, sem investigar estagiários e aprendizes de concorrentes ou endereços das unidades."),
-        ("Uso do Sistema Gestor", "Falta de incentivo e demonstração prática de funcionalidades como boletos, relatórios e abertura de vagas."),
-        ("Solicitação de indicações", "Não solicitar indicações de empresas parceiras ou fornecedores ao encerrar atendimentos positivos."),
-        ("Apresentação e contexto da ligação", "Apresentação sem sobrenome ou falta de clareza sobre o motivo do contato.")
-    ],
-    "murilo": [
-        ("Histórico compatível com a ligação", "Registros resumidos, com falta de pontuação e acentuação e erros de digitação."),
-        ("Apresentação e contexto da ligação", "Omissão do sobrenome na apresentação ou identificação pessoal realizada apenas no meio da chamada."),
-        ("Uso do Sistema Gestor", "Pouca exploração dos recursos de autonomia da plataforma durante contatos de relacionamento e apoio."),
-        ("Orientação sobre o Instituto Saber", "Não apresentar o canal direto de atendimento e suporte técnico do Saber às empresas com aprendizes ativos."),
-        ("Negociação de perfil e abertura de PD", "Deixar de negociar bolsa e benefícios em vagas com baixa atratividade e abrir PD de remarque quando cabia desclassificação.")
-    ],
-    "julio": [
-        ("Histórico compatível com a ligação", "Omissão de contextos importantes negociados durante a chamada e registros com erros de ortografia."),
-        ("Atualização cadastral", "Uso de perguntas fechadas, como 'mantém tudo igual?', em vez de validações abertas dos dados operacionais e de e-mail."),
-        ("Novas unidades e grupo de empresas", "Foco limitado ao endereço cadastrado, sem investigar filiais, novos endereços ou grupo econômico."),
-        ("Uso do Sistema Gestor", "Falta de orientação sobre consulta de documentos, como Relatórios Semestrais, Aditivos e CPs."),
-        ("Convênios e contratos pendentes", "Não alertar sobre Relatórios de Atividades pendentes de assinatura e regularização contratual.")
-    ],
-    "wesley": [
-        ("Histórico compatível com a ligação", "Uso excessivo de abreviações, falta de acentuação e ausência do nome do contato atendido."),
-        ("Apresentação e contexto da ligação", "Apresentação pessoal informando apenas o primeiro nome, sem sobrenome."),
-        ("Comunicação geral", "Uso recorrente de vícios de linguagem, como 'perfeito', 'pronto', 'né' e 'tá', além de construções em gerundismo."),
-        ("Novas unidades e grupo de empresas", "Pouca investigação sobre a expansão da estrutura física, novas unidades e filiais de outras empresas do grupo econômico."),
-        ("Solicitação de indicações", "Omissão do pedido de indicações comerciais em ligações com feedbacks positivos.")
-    ],
-    "kelly": [
-        ("Atualização cadastral", "Atualização focada na quantidade de CLT, sem mapear aprendizes e estagiários contratados por concorrentes."),
-        ("Histórico compatível com a ligação", "Falta de detalhamento dos nomes de estagiários com pendência documental e omissão de acordos de pausa e retorno da divulgação."),
-        ("Solicitação de indicações", "Pouca frequência de pedidos de indicação para prospecção de novos clientes."),
-        ("Apresentação e contexto da ligação", "Apresentação sem sobrenome e uso de expressões inadequadas, como 'a Nube' em vez de 'o Nube'."),
-        ("Projeto Crescer e Turmas Abertas", "Não apresentar o projeto de treinamentos comportamentais gratuitos às empresas elegíveis, a partir de cinco estagiários.")
-    ],
-    "camila": [
-        ("Novas unidades e grupo de empresas", "Pouca investigação sobre filiais, unidades de negócio ou empresas do mesmo grupo."),
-        ("Histórico compatível com a ligação", "Registro de informações não confirmadas durante a chamada e falta de detalhamento."),
-        ("Solicitação de indicações", "Falta de solicitação de indicações de fornecedores ou empresas parceiras."),
-        ("Uso do Sistema Gestor", "Não abordar as facilidades de autonomia que a plataforma oferece para a rotina do cliente."),
-        ("Comunicação geral", "Repetição de vícios de linguagem, como 'né', 'tá', 'aí' e 'perfeito'.")
-    ],
-    "laila": [
-        ("Histórico compatível com a ligação", "Registros extremamente resumidos, com erros de digitação e omissão de tratativas de faltas."),
-        ("Uso do Sistema Gestor", "Não investigar a frequência de uso nem demonstrar os módulos do portal."),
-        ("Negociação de perfil e acompanhamento de vaga", "Falta de negociação de bolsa e benefícios em vagas com dificuldades de captação."),
-        ("Apresentação e contexto da ligação", "Uso de saudações fora do padrão comercial e apresentação sem sobrenome."),
-        ("Convênios, contratos e Turmas Abertas", "Omissão de lembretes sobre Relatórios Semestrais pendentes e de apresentação dos treinamentos do Turmas Abertas.")
-    ],
-    "alexssander": [
-        ("Histórico compatível com a ligação", "Omissão dos formatos de contratação alinhados, prazos de retorno e acordos de longo prazo."),
-        ("Apresentação e contexto da ligação", "Identificação inicial apenas pelo primeiro nome, sem sobrenome."),
-        ("Atualização cadastral", "Atualização do porte considerando apenas a modalidade atual, sem investigar profissionais PJ ou terceirizados."),
-        ("Novas unidades e grupo de empresas", "Falta de prospecção sobre filiais no litoral ou interior."),
-        ("Solicitação de indicações", "Omissão do pedido de indicação ao término de atendimentos positivos.")
-    ],
-    "leticia": [
-        ("Histórico compatível com a ligação", "Registro de informações e promessas não realizadas na gravação, como pedido de indicação não efetuado."),
-        ("Regularização do Convênio de Parceria", "Não informar que o link do Convênio de Parceria tem validade de 24 horas para assinatura."),
-        ("Atualização cadastral", "Não validar a quantidade atual de aprendizes e estagiários ativos."),
-        ("Orientação sobre o Instituto Saber", "Omissão da apresentação do canal de suporte do Instituto Saber."),
-        ("Novas unidades e grupo de empresas", "Não investigar filiais da empresa em outros estados ou regiões.")
-    ],
-    "maiara": [
-        ("Histórico compatível com a ligação", "Duplicidade de registros, falta de acentuação e omissão de queixas do cliente sobre o Saber."),
-        ("Apresentação e contexto da ligação", "Apresentação inicial sem o sobrenome do colaborador."),
-        ("Atualização cadastral", "Uso de perguntas fechadas e falta de confirmação dos endereços de todas as unidades."),
-        ("Projeto Crescer e Turmas Abertas", "Deixar de ofertar projetos de treinamento para empresas com volume elegível de estagiários."),
-        ("Solicitação de indicações", "Não explorar indicações comerciais em contatos com avaliações positivas do cliente.")
-    ],
-    "angelica": [
-        ("Orientação sobre o Instituto Saber", "Não apresentar a equipe de relacionamento do Instituto Saber para suporte com jovens aprendizes."),
-        ("Atualização cadastral", "Validação cadastral sem aprofundar a concorrência e a quantidade total de estudantes."),
-        ("Solicitação de indicações", "Não solicitar indicações de empresas parceiras ao final da chamada."),
-        ("Histórico compatível com a ligação", "Registros que afirmam a confirmação de dados que não foram perguntados ao cliente."),
-        ("Expansão do serviço e repasse", "Falta de sondagem sobre contratação de estágio para outras áreas e repasse de estagiários de concorrentes.")
-    ],
-    "karine": [
-        ("Histórico compatível com a ligação", "Salvar o atendimento duas vezes com o mesmo conteúdo, selecionar tipo de contato incorreto ou trocar o nome do cliente."),
-        ("Regularização do Convênio de Parceria", "Deixar de informar a validade de 24 horas do link do Convênio de Parceria."),
-        ("Atualização cadastral", "Validação superficial do porte, sem confirmar meio de contato e concorrência."),
-        ("Uso do Sistema Gestor", "Falta de investigação sobre dificuldades de acesso e utilização do Sistema Gestor."),
-        ("Orientação sobre o Instituto Saber", "Não reforçar o suporte oferecido pelo Instituto Saber.")
-    ]
+RANKING_PERDAS = {
+    "alexssander": {
+        "praca": "GMSP",
+        "colaboradores": 6,
+        "itens": [
+            [
+                "Histórico compatível com a ligação",
+                0,
+                8,
+                8,
+                12
+            ],
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                2,
+                5,
+                7,
+                8
+            ],
+            [
+                "Se apresentou e deu contexto da ligação",
+                0,
+                6,
+                6,
+                10
+            ],
+            [
+                "Sugeriu novos negócios",
+                4,
+                1,
+                5,
+                5
+            ],
+            [
+                "Explorou novas unidades, endereços ou grupo de empresas",
+                5,
+                0,
+                5,
+                6
+            ]
+        ]
+    },
+    "angelica": {
+        "praca": "Conne-Sul",
+        "colaboradores": 8,
+        "itens": [
+            [
+                "Perguntou se há indicação",
+                8,
+                1,
+                9,
+                10
+            ],
+            [
+                "Sugeriu expansão do serviço atual",
+                2,
+                6,
+                8,
+                10
+            ],
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                1,
+                7,
+                8,
+                14
+            ],
+            [
+                "Comunicação geral (gíria, gerundismo, vícios)",
+                0,
+                6,
+                6,
+                16
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                3,
+                2,
+                5,
+                10
+            ]
+        ]
+    },
+    "camila": {
+        "praca": "GMSP",
+        "colaboradores": 8,
+        "itens": [
+            [
+                "Comunicação geral",
+                0,
+                12,
+                12,
+                16
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                9,
+                0,
+                9,
+                9
+            ],
+            [
+                "Perguntou se há indicação",
+                9,
+                0,
+                9,
+                9
+            ],
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                2,
+                7,
+                9,
+                14
+            ],
+            [
+                "Histórico compatível com a ligação",
+                0,
+                9,
+                9,
+                16
+            ]
+        ]
+    },
+    "jean": {
+        "praca": "São Paulo",
+        "colaboradores": 15,
+        "itens": [
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                5,
+                15,
+                20,
+                22
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                13,
+                0,
+                13,
+                13
+            ],
+            [
+                "Comunicação geral",
+                0,
+                12,
+                12,
+                30
+            ],
+            [
+                "Histórico compatível com a ligação",
+                1,
+                11,
+                12,
+                30
+            ],
+            [
+                "Sugeriu novos negócios",
+                9,
+                2,
+                11,
+                12
+            ]
+        ]
+    },
+    "julio": {
+        "praca": "São Paulo",
+        "colaboradores": 13,
+        "itens": [
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                6,
+                10,
+                16,
+                20
+            ],
+            [
+                "Comunicação geral",
+                0,
+                15,
+                15,
+                26
+            ],
+            [
+                "Perguntou se há indicação",
+                13,
+                1,
+                14,
+                14
+            ],
+            [
+                "Se apresentou e deu contexto da ligação",
+                0,
+                14,
+                14,
+                20
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                12,
+                1,
+                13,
+                14
+            ]
+        ]
+    },
+    "karine": {
+        "praca": "Conne-Sul",
+        "colaboradores": 4,
+        "itens": [
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                0,
+                5,
+                5,
+                7
+            ],
+            [
+                "Sugeriu novos negócios",
+                0,
+                4,
+                4,
+                4
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                4,
+                0,
+                4,
+                5
+            ],
+            [
+                "Sugeriu expansão do serviço atual",
+                3,
+                1,
+                4,
+                5
+            ],
+            [
+                "Histórico compatível com a ligação",
+                1,
+                3,
+                4,
+                8
+            ]
+        ]
+    },
+    "kelly": {
+        "praca": "São Paulo",
+        "colaboradores": 17,
+        "itens": [
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                9,
+                13,
+                22,
+                22
+            ],
+            [
+                "Comunicação geral",
+                0,
+                18,
+                18,
+                34
+            ],
+            [
+                "Se apresentou e deu contexto da ligação",
+                1,
+                13,
+                14,
+                24
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                9,
+                4,
+                13,
+                13
+            ],
+            [
+                "Incentivou uso do Sistema Gestor (apoios)",
+                9,
+                3,
+                12,
+                12
+            ]
+        ]
+    },
+    "laila": {
+        "praca": "GMSP",
+        "colaboradores": 10,
+        "itens": [
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                5,
+                3,
+                8,
+                12
+            ],
+            [
+                "Histórico compatível com a ligação",
+                0,
+                8,
+                8,
+                16
+            ],
+            [
+                "Se apresentou e deu contexto da ligação",
+                0,
+                7,
+                7,
+                10
+            ],
+            [
+                "Comunicação geral",
+                0,
+                7,
+                7,
+                16
+            ],
+            [
+                "Mencionou o Sistema Gestor (receptivo)",
+                6,
+                0,
+                6,
+                6
+            ]
+        ]
+    },
+    "leticia": {
+        "praca": "Sudeste",
+        "colaboradores": 9,
+        "itens": [
+            [
+                "Sugeriu expansão do serviço atual",
+                4,
+                6,
+                10,
+                10
+            ],
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                2,
+                8,
+                10,
+                14
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                9,
+                0,
+                9,
+                10
+            ],
+            [
+                "Se apresentou e deu contexto da ligação",
+                0,
+                8,
+                8,
+                14
+            ],
+            [
+                "Perguntou se há indicação",
+                7,
+                0,
+                7,
+                10
+            ]
+        ]
+    },
+    "maiara": {
+        "praca": "Sudeste",
+        "colaboradores": 16,
+        "itens": [
+            [
+                "Comunicação geral",
+                0,
+                17,
+                17,
+                32
+            ],
+            [
+                "Se apresentou e deu contexto da ligação",
+                0,
+                16,
+                16,
+                25
+            ],
+            [
+                "Perguntou se há indicação",
+                11,
+                0,
+                11,
+                12
+            ],
+            [
+                "Incentivou uso do Sistema Gestor (apoios)",
+                7,
+                3,
+                10,
+                12
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                7,
+                3,
+                10,
+                13
+            ]
+        ]
+    },
+    "murilo": {
+        "praca": "São Paulo",
+        "colaboradores": 13,
+        "itens": [
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                2,
+                12,
+                14,
+                18
+            ],
+            [
+                "Se apresentou e deu contexto da ligação",
+                0,
+                13,
+                13,
+                18
+            ],
+            [
+                "Histórico compatível com a ligação",
+                0,
+                12,
+                12,
+                26
+            ],
+            [
+                "Sugeriu expansão do serviço atual",
+                2,
+                7,
+                9,
+                10
+            ],
+            [
+                "Incentivou uso do Sistema Gestor (apoios)",
+                8,
+                0,
+                8,
+                8
+            ]
+        ]
+    },
+    "wesley": {
+        "praca": "São Paulo",
+        "colaboradores": 14,
+        "itens": [
+            [
+                "Confirmou dados gerais para atualização do cadastro",
+                7,
+                10,
+                17,
+                20
+            ],
+            [
+                "Comunicação geral",
+                0,
+                15,
+                15,
+                28
+            ],
+            [
+                "Explorou novas unidades ou grupo de empresas",
+                14,
+                0,
+                14,
+                14
+            ],
+            [
+                "Verificou e orientou sobre o acesso ao Sistema Gestor",
+                12,
+                1,
+                13,
+                14
+            ],
+            [
+                "Histórico compatível com a ligação",
+                0,
+                13,
+                13,
+                28
+            ]
+        ]
+    }
 }
 
-NOMES_SUPERVISOES_MELHORIA = {
-    "jean": "Jean Santos",
-    "murilo": "Murilo Henrique",
-    "julio": "Julio Castro",
-    "wesley": "Wesley Martins",
-    "kelly": "Kelly Querido",
-    "camila": "Camila Dias",
-    "laila": "Laila Rodrigues",
+NOMES_SUPERVISOES_RANKING = {
     "alexssander": "Alexssander Silva",
-    "leticia": "Letícia Santos",
+    "angelica": "Angelica Oliveira",
+    "camila": "Camila Dias",
+    "jean": "Jean Santos",
+    "julio": "Julio Castro",
+    "karine": "Karine Rodrigues",
+    "kelly": "Kelly Querido",
+    "laila": "Laila Rodrigues",
+    "leticia": "Leticia Santos",
     "maiara": "Maiara Bravo",
-    "angelica": "Angélica Oliveira",
-    "karine": "Karine Rodrigues"
+    "murilo": "Murilo Henrique",
+    "wesley": "Wesley Martins"
 }
 
 st.html('<div id="pontos-melhoria"></div>')
@@ -2593,68 +3001,86 @@ st.write("")
 st.html(
     """
     <div class="panel-card">
-        <div class="panel-card-title">5 pontos que mais impactam a pontuação da equipe</div>
-        <div class="panel-card-subtitle">Principais critérios que mais reduziram a pontuação nas monitorias, indicando oportunidades de desenvolvimento para a equipe.</div>
+        <div class="panel-card-title">5 critérios com maior perda de pontos por supervisão</div>
+        <div class="panel-card-subtitle">Ranking baseado na soma de avaliações parcialmente atingidas e não atingidas. A taxa mostra a proporção de perdas sobre o total de avaliações de cada critério.</div>
     </div>
     """
 )
 
 if PERFIL_ACESSO == "supervisor":
     chaves_equipes_exibidas = [primeiro_nome(SUPERVISAO_ACESSO)]
-    titulo_escopo_melhoria = f"Equipe de {NOME_ACESSO}"
+    titulo_escopo_ranking = f"Equipe de {NOME_ACESSO}"
 else:
-    if praca_selecionada == "Todas":
-        pracas_exibidas = list(pracas.keys())
-    else:
-        pracas_exibidas = [praca_selecionada]
-
     if supervisao_selecionada != "Todas":
         chaves_equipes_exibidas = [primeiro_nome(supervisao_selecionada)]
-        titulo_escopo_melhoria = f"Equipe de {supervisao_selecionada}"
+        titulo_escopo_ranking = f"Equipe de {supervisao_selecionada}"
     else:
+        pracas_exibidas = list(pracas.keys()) if praca_selecionada == "Todas" else [praca_selecionada]
         chaves_equipes_exibidas = [
             primeiro_nome(supervisor)
             for nome_praca in pracas_exibidas
             for supervisor in pracas[nome_praca]["supervisores"]
         ]
-        titulo_escopo_melhoria = (
+        titulo_escopo_ranking = (
             "Consolidado de todas as praças"
             if praca_selecionada == "Todas"
             else f"Consolidado da praça {praca_selecionada}"
         )
 
-equipes_com_dados = [
+equipes_com_ranking = [
     chave for chave in chaves_equipes_exibidas
-    if chave in PONTOS_MELHORIA
+    if chave in RANKING_PERDAS
 ]
 
-if not equipes_com_dados:
-    st.info("Não há levantamento de pontos de melhoria cadastrado para este filtro.")
+if not equipes_com_ranking:
+    st.info("Não há ranking de perdas cadastrado para este filtro.")
 else:
     st.caption(
-        f"{titulo_escopo_melhoria} • {len(equipes_com_dados)} equipe(s) • "
-        "cinco oportunidades levantadas por equipe"
+        f"{titulo_escopo_ranking} • {len(equipes_com_ranking)} supervisão(ões) "
+        "• ranking ordenado pela quantidade de perdas"
     )
 
-    for chave in equipes_com_dados:
-        nome_supervisao = NOMES_SUPERVISOES_MELHORIA.get(
-            chave, chave.title()
-        )
-        nome_praca = identificar_praca(nome_supervisao)
+    for chave in equipes_com_ranking:
+        equipe = RANKING_PERDAS[chave]
+        nome_supervisao = NOMES_SUPERVISOES_RANKING.get(chave, chave.title())
+        nome_praca = equipe["praca"]
+        total_colaboradores_equipe = equipe["colaboradores"]
 
         with st.expander(
-            f"{nome_supervisao} • {nome_praca or 'Praça não identificada'}",
-            expanded=(PERFIL_ACESSO == "supervisor" or len(equipes_com_dados) == 1)
+            f"{nome_supervisao} • {nome_praca} • {total_colaboradores_equipe} colaboradores",
+            expanded=(PERFIL_ACESSO == "supervisor" or len(equipes_com_ranking) == 1)
         ):
-            for numero, (criterio, descricao) in enumerate(
-                PONTOS_MELHORIA[chave], start=1
-            ):
-                st.markdown(f"**{numero}. {criterio}**")
-                st.write(descricao)
-                if numero < len(PONTOS_MELHORIA[chave]):
-                    st.divider()
+            linhas_ranking = []
+            for posicao, item in enumerate(equipe["itens"], start=1):
+                criterio, nao_atingido, parcial, perdas, avaliadas = item
+                taxa = (perdas / avaliadas * 100) if avaliadas else 0
+                linhas_ranking.append({
+                    "Posição": posicao,
+                    "Critério": criterio,
+                    "Não atingido": nao_atingido,
+                    "Parcial": parcial,
+                    "Perdas": f"{perdas}/{avaliadas}",
+                    "Taxa de perda": f"{taxa:.1f}%".replace(".", ",")
+                })
+
+            df_ranking_equipe = pd.DataFrame(linhas_ranking)
+            st.dataframe(
+                df_ranking_equipe,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Posição": st.column_config.NumberColumn("Pos.", width="small"),
+                    "Critério": st.column_config.TextColumn("Critério", width="large"),
+                    "Não atingido": st.column_config.NumberColumn("Não atingido", width="small"),
+                    "Parcial": st.column_config.NumberColumn("Parcial", width="small"),
+                    "Perdas": st.column_config.TextColumn("Perdas / avaliações", width="medium"),
+                    "Taxa de perda": st.column_config.TextColumn("Taxa de perda", width="medium")
+                }
+            )
 
 st.caption(
-    "Nota: este painel apresenta o levantamento qualitativo consolidado pelo Treinamento. "
-    "Os itens não são recalculados automaticamente a partir das médias gerais da planilha."
+    "Leitura: o ranking está ordenado pelo volume de perdas (não atingido + parcial), "
+    "conforme o levantamento consolidado. A taxa é calculada individualmente sobre as "
+    "avaliações válidas de cada critério. Como os denominadores variam, as taxas não devem "
+    "ser somadas entre critérios. Os dados representam o levantamento fornecido pelo Treinamento."
 )
