@@ -1588,8 +1588,7 @@ execs = [
     "Bruna Ribeiro da Silva",
     "Camila Costa Gaspar",
     "Thiago Martins de Almeida",
-    "Thayna de Jesus Santos",
-    "Ana Beatriz De Oliveira Jovino",
+        "Ana Beatriz De Oliveira Jovino",
     "Sabrina Rodrigues da Silva",
     "Emile Cristine Brito da Silva",
     "Aline Trindade Moreira",
@@ -1601,6 +1600,7 @@ execs = [
 
 
 apoio_adm = [
+    "Thayna de Jesus Santos",
     "Felipe Santos Nery",
     "Pedro Llanos Iampietro",
     "Matheus Lacerda Lima",
