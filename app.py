@@ -3001,8 +3001,8 @@ st.write("")
 st.html(
     """
     <div class="panel-card">
-        <div class="panel-card-title">5 critérios com maior perda de pontos por supervisão</div>
-        <div class="panel-card-subtitle">Ranking baseado na soma de avaliações parcialmente atingidas e não atingidas. A taxa mostra a proporção de perdas sobre o total de avaliações de cada critério.</div>
+        <div class="panel-card-title">Onde a equipe mais perde pontos</div>
+        <div class="panel-card-subtitle">Critérios com maior número de avaliações não atingidas ou parcialmente atingidas.</div>
     </div>
     """
 )
@@ -3036,8 +3036,7 @@ if not equipes_com_ranking:
     st.info("Não há ranking de perdas cadastrado para este filtro.")
 else:
     st.caption(
-        f"{titulo_escopo_ranking} • {len(equipes_com_ranking)} supervisão(ões) "
-        "• ranking ordenado pela quantidade de perdas"
+        f"{titulo_escopo_ranking} • {len(equipes_com_ranking)} supervisão(ões)"
     )
 
     for chave in equipes_com_ranking:
@@ -3051,16 +3050,13 @@ else:
             expanded=(PERFIL_ACESSO == "supervisor" or len(equipes_com_ranking) == 1)
         ):
             linhas_ranking = []
-            for posicao, item in enumerate(equipe["itens"], start=1):
+            for item in equipe["itens"]:
                 criterio, nao_atingido, parcial, perdas, avaliadas = item
-                taxa = (perdas / avaliadas * 100) if avaliadas else 0
                 linhas_ranking.append({
-                    "Posição": posicao,
                     "Critério": criterio,
-                    "Não atingido": nao_atingido,
+                    "Não atingiu": nao_atingido,
                     "Parcial": parcial,
-                    "Perdas": f"{perdas}/{avaliadas}",
-                    "Taxa de perda": f"{taxa:.1f}%".replace(".", ",")
+                    "Total de perdas": perdas
                 })
 
             df_ranking_equipe = pd.DataFrame(linhas_ranking)
@@ -3069,18 +3065,15 @@ else:
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "Posição": st.column_config.NumberColumn("Pos.", width="small"),
                     "Critério": st.column_config.TextColumn("Critério", width="large"),
-                    "Não atingido": st.column_config.NumberColumn("Não atingido", width="small"),
+                    "Não atingiu": st.column_config.NumberColumn("Não atingiu", width="small"),
                     "Parcial": st.column_config.NumberColumn("Parcial", width="small"),
-                    "Perdas": st.column_config.TextColumn("Perdas / avaliações", width="medium"),
-                    "Taxa de perda": st.column_config.TextColumn("Taxa de perda", width="medium")
+                    "Total de perdas": st.column_config.NumberColumn("Total de perdas", width="small")
                 }
             )
 
 st.caption(
-    "Leitura: o ranking está ordenado pelo volume de perdas (não atingido + parcial), "
-    "conforme o levantamento consolidado. A taxa é calculada individualmente sobre as "
-    "avaliações válidas de cada critério. Como os denominadores variam, as taxas não devem "
-    "ser somadas entre critérios. Os dados representam o levantamento fornecido pelo Treinamento."
+    "O total de perdas corresponde à soma das avaliações em que o critério não foi atingido "
+    "ou foi atendido parcialmente. O ranking está ordenado da maior para a menor quantidade "
+    "de perdas, conforme o levantamento consolidado pelo Treinamento Comercial."
 )
